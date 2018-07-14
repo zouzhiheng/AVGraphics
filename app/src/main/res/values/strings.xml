@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">AVGraphics</string>
+    <string name="iv_default_desc">Default Description</string>
+
+    <!-- MainActivity(main) -->
+    <string name="main_btn_draw_image">使用3种不同的API绘制图片</string>
+    <string name="main_btn_audio">音频数据的采集和播放</string>
+    <string name="main_btn_hwcodec">硬编解码</string>
+
+    <!-- DrawImageActivity(draw_image) -->
+    <string name="draw_image_tv_image_view">ImageView: </string>
+    <string name="draw_image_tv_surface_view">SurfaceView: </string>
+    <string name="draw_image_tv_custom_view">Custom View: </string>
+
+    <!-- AudioActivity(audio) -->
+    <string name="audio_btn_start_record">开始录制</string>
+    <string name="audio_btn_stop_record">停止录制</string>
+    <string name="audio_btn_start_play">开始播放</string>
+    <string name="audio_btn_stop_play">停止播放</string>
+
+    <!-- HWCodecActivity(hwcodec) -->
+    <string name="hwcodec_btn_record">录制视频</string>
+    <string name="hwcodec_btn_decode">视频解码</string>
+    <string name="hwcodec_btn_transcode">视频转码</string>
+
+    <!-- HWRecordActivity(hwrecord) -->
+    <string name="hwrecord_btn_start">开始录制</string>
+    <string name="hwrecord_btn_stop">结束录制</string>
+
+</resources>

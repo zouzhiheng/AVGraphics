@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.steven.avgraphics.ui.DrawImageActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:text="@string/draw_image_tv_image_view" />
+
+        <ImageView
+            android:id="@+id/draw_image_iv_image_view"
+            android:layout_width="@dimen/image_width_normal"
+            android:layout_height="@dimen/image_height_normal"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_small"
+            android:contentDescription="@string/iv_default_desc"
+            android:src="@mipmap/draw_image_iv" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:text="@string/draw_image_tv_surface_view" />
+
+        <com.steven.avgraphics.view.DrawableSurfaceView
+            android:id="@+id/draw_image_iv_surface"
+            android:layout_width="@dimen/image_width_normal"
+            android:layout_height="@dimen/image_height_normal"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_small"
+            app:src="@mipmap/draw_image_surface" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
+            android:text="@string/draw_image_tv_custom_view" />
+
+        <com.steven.avgraphics.view.DrawableView
+            android:id="@+id/draw_image_iv_custom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:contentDescription="@string/iv_default_desc"
+            android:padding="20dp"
+            app:src="@mipmap/draw_image_custom" />
+    </LinearLayout>
+</ScrollView>

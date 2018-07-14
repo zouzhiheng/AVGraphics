@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="src" format="reference"/>
+
+    <declare-styleable name="DrawableView">
+        <attr name="src"/>
+    </declare-styleable>
+
+    <declare-styleable name="DrawableSurfaceView">
+        <attr name="src"/>
+    </declare-styleable>
+
+</resources>

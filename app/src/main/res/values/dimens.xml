@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_normal">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_xlarge">32dp</dimen>
+
+    <dimen name="image_width_small">80dp</dimen>
+    <dimen name="image_width_normal">160dp</dimen>
+    <dimen name="image_width_large">240dp</dimen>
+
+    <dimen name="image_height_small">80dp</dimen>
+    <dimen name="image_height_normal">160dp</dimen>
+    <dimen name="image_height_large">240dp</dimen>
+
+</resources>

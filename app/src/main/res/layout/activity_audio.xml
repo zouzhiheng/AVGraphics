@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.steven.avgraphics.ui.AudioActivity">
+
+    <Button
+        android:id="@+id/audio_btn_start_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xlarge"
+        android:text="@string/audio_btn_start_record" />
+
+    <Button
+        android:id="@+id/audio_btn_stop_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_small"
+        android:enabled="false"
+        android:text="@string/audio_btn_stop_record" />
+
+    <Button
+        android:id="@+id/audio_btn_start_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xlarge"
+        android:text="@string/audio_btn_start_play" />
+
+    <Button
+        android:id="@+id/audio_btn_stop_play"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_small"
+        android:enabled="false"
+        android:text="@string/audio_btn_stop_play" />
+
+</LinearLayout>
