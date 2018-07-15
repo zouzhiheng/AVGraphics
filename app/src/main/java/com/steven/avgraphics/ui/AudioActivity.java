@@ -202,12 +202,14 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener 
             Log.d(TAG, "writeAudioData started");
 
             while (mIsRecording || !mAudioDataQueue.isEmpty()) {
-                try {
-                    byte[] audioData = mAudioDataQueue.poll(500, TimeUnit.MILLISECONDS);
-                    dos.write(audioData);
-                } catch (InterruptedException | IOException e) {
-                    e.printStackTrace();
-                    break;
+                if (!mAudioDataQueue.isEmpty()) {
+                    try {
+                        byte[] audioData = mAudioDataQueue.poll(500, TimeUnit.MILLISECONDS);
+                        dos.write(audioData);
+                    } catch (InterruptedException | IOException e) {
+                        e.printStackTrace();
+                        break;
+                    }
                 }
             }
 

@@ -1,6 +1,7 @@
 package com.steven.avgraphics.view;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -11,6 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.Window;
 
 import com.steven.avgraphics.R;
 
@@ -19,7 +22,7 @@ public class DrawableSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 
     private static final String TAG = "DrawableSurfaceView";
 
-    private final Object DRAW_LOCK = new Object();
+    private final Object mDrawLock = new Object();
     private Bitmap mBitmap;
 
     public DrawableSurfaceView(Context context) {
@@ -61,16 +64,14 @@ public class DrawableSurfaceView extends SurfaceView implements SurfaceHolder.Ca
     public void surfaceCreated(SurfaceHolder holder) {
         Canvas canvas = null;
         try {
-            long start = System.currentTimeMillis();
             canvas = holder.lockCanvas();
-            synchronized (DRAW_LOCK) {
-                onDraw(canvas);
-            }
+            onDraw(canvas);
         } finally {
             if (canvas != null) {
                 holder.unlockCanvasAndPost(canvas);
             }
         }
+        Activity activity;
     }
 
     @Override

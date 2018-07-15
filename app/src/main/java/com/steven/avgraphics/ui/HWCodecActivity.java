@@ -40,8 +40,7 @@ public class HWCodecActivity extends BaseActivity {
     private void setListener() {
         mBtnRecord.setOnClickListener(v -> startActivity(HWRecordActivity.class));
         mBtnDecode.setOnClickListener(v -> decode());
-        mBtnTranscode.setOnClickListener(v -> HWCodec.transcode(Utils.getHWRecordOutput(),
-                Utils.getHWTranscodeOutput()));
+        mBtnTranscode.setOnClickListener(v -> transcode());
     }
 
     private void decode() {
@@ -61,8 +60,8 @@ public class HWCodecActivity extends BaseActivity {
             ToastHelper.show("无视频，请先进行录制");
             return;
         }
-        HWCodec.transcode(Utils.getHWRecordOutput(), Utils.getHWTranscodeOutput());
+        Executors.newSingleThreadExecutor().execute(() ->
+                HWCodec.transcode(Utils.getHWRecordOutput(), Utils.getHWTranscodeOutput()));
     }
-
 
 }
