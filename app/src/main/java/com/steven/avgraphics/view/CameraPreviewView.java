@@ -41,6 +41,7 @@ public class CameraPreviewView extends FrameLayout {
     private int mIndicatorHeight = LayoutParams.WRAP_CONTENT;
 
     private Camera mCamera;
+    private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private CameraSurfaceView mSurfaceView;
 
     public CameraPreviewView(@NonNull Context context) {
@@ -101,10 +102,21 @@ public class CameraPreviewView extends FrameLayout {
         return mCamera;
     }
 
+    public void switchCamera() {
+        if (mSurfaceView != null) {
+            removeView(mSurfaceView);
+        }
+        mCameraId = 1 - mCameraId;
+        mSurfaceView = new CameraSurfaceView(getContext(), mCameraId);
+        addView(mSurfaceView);
+    }
+
     private class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         private float mClickX;
         private float mClickY;
+
+        private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
 
         public CameraSurfaceView(Context context) {
             super(context);
@@ -113,6 +125,12 @@ public class CameraPreviewView extends FrameLayout {
 
         public CameraSurfaceView(Context context, AttributeSet attrs) {
             super(context, attrs);
+            getHolder().addCallback(this);
+        }
+
+        public CameraSurfaceView(Context context, int cameraId) {
+            super(context);
+            mCameraId = cameraId;
             getHolder().addCallback(this);
         }
 
@@ -137,7 +155,7 @@ public class CameraPreviewView extends FrameLayout {
             if (mCamera != null) {
                 return;
             }
-            mCamera = CameraHelper.openCamera();
+            mCamera = CameraHelper.openCamera(mCameraId);
             if (mCamera == null) {
                 return;
             }
