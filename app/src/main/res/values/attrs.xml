@@ -11,4 +11,11 @@
         <attr name="src"/>
     </declare-styleable>
 
+    <declare-styleable name="CameraPreviewView">
+        <attr name="focus_width" format="dimension"/>
+        <attr name="focus_height" format="dimension"/>
+        <attr name="indicator_width" format="dimension"/>
+        <attr name="indicator_height" format="dimension"/>
+    </declare-styleable>
+
 </resources>
