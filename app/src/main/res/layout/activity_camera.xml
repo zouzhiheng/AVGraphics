@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.steven.avgraphics.ui.CameraActivity">
+
+    <com.steven.avgraphics.view.CameraPreviewView
+        android:id="@+id/camera_cpv_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:focus_height="200dp"
+        app:focus_width="200dp"
+        app:indicator_height="200dp"
+        app:indicator_width="200dp" />
+
+    <Button
+        android:id="@+id/camera_btn_switch_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal" />
+
+</FrameLayout>

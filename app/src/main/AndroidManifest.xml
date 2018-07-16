@@ -25,7 +25,8 @@
         <activity android:name=".ui.DrawImageActivity" />
         <activity android:name=".ui.AudioActivity" />
         <activity android:name=".ui.HWRecordActivity" />
-        <activity android:name=".ui.HWCodecActivity"></activity>
+        <activity android:name=".ui.HWCodecActivity" />
+        <activity android:name=".ui.CameraActivity" />
     </application>
 
 </manifest>

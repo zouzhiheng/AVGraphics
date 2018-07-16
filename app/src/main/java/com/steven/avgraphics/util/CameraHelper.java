@@ -46,6 +46,15 @@ public class CameraHelper {
         return BaseApplication.getContext().getPackageManager().hasSystemFeature(name);
     }
 
+    public static void setFocusMode(Camera camera, String focusMode) {
+        Camera.Parameters parameters = camera.getParameters();
+        List<String> focusModes = parameters.getSupportedFocusModes();
+        if (focusModes.contains(focusMode)) {
+            parameters.setFocusMode(focusMode);
+        }
+        camera.setParameters(parameters);
+    }
+
     public static Camera.Size chooseCameraSize(List<Camera.Size> options, int width, int height) {
         List<Camera.Size> bigEnough = new ArrayList<>();
         List<Camera.Size> equalRatio = new ArrayList<>();

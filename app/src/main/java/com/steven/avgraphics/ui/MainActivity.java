@@ -1,16 +1,11 @@
 package com.steven.avgraphics.ui;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.view.View;
 import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
@@ -26,6 +21,7 @@ public class MainActivity extends BaseActivity {
     private static final int RC_PERMISSION = 1;
 
     private Button mBtnToDrawImage;
+    private Button mBtnCamera;
     private Button mBtnToAudio;
     private Button mBtnHWCodec;
 
@@ -43,12 +39,14 @@ public class MainActivity extends BaseActivity {
 
     private void findView() {
         mBtnToDrawImage = findViewById(R.id.main_btn_draw_image);
+        mBtnCamera = findViewById(R.id.main_btn_camera);
         mBtnToAudio = findViewById(R.id.main_btn_audio);
         mBtnHWCodec = findViewById(R.id.main_btn_hwcodec);
     }
 
     private void setListener() {
         mBtnToDrawImage.setOnClickListener(v -> startActivity(DrawImageActivity.class));
+        mBtnCamera.setOnClickListener(v -> startActivity(CameraActivity.class));
         mBtnToAudio.setOnClickListener(v -> startActivity(AudioActivity.class));
         mBtnHWCodec.setOnClickListener(v -> startActivity(HWCodecActivity.class));
     }

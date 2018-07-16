@@ -4,6 +4,7 @@
 
     <!-- MainActivity(main) -->
     <string name="main_btn_draw_image">使用3种不同的API绘制图片</string>
+    <string name="main_btn_camera">相机预览获取 NV21 数据</string>
     <string name="main_btn_audio">音频数据的采集和播放</string>
     <string name="main_btn_hwcodec">硬编解码</string>
 
