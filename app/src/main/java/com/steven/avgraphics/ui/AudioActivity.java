@@ -252,11 +252,11 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener 
 
         private void start() {
             if (!mPcmFile.exists()) {
-                ToastHelper.show("无音频文件，请先进行录制");
+                ToastHelper.show(R.string.audio_msg_no_audio_file);
                 return;
             }
             if (mIsPlaying) {
-                ToastHelper.show("当前正在播放中");
+                ToastHelper.show(R.string.audio_msg_playing_now);
                 return;
             }
             releaseAudioTrack();

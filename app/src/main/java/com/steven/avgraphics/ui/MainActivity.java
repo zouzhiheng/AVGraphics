@@ -86,7 +86,7 @@ public class MainActivity extends BaseActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         for (int result : grantResults) {
             if (result != PackageManager.PERMISSION_GRANTED) {
-                ToastHelper.show("权限不足，无法运行");
+                ToastHelper.show(R.string.main_msg_no_permission);
                 finish();
             }
         }

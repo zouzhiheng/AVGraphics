@@ -90,7 +90,7 @@ public class HWRecordActivity extends BaseActivity implements View.OnClickListen
             new Thread(new AudioRecordRunnable()).start();
             mIsRecording = true;
         } else {
-            ToastHelper.show("无法创建硬件编码器");
+            ToastHelper.show(R.string.hwrecord_msg_create_codec_failed);
         }
     }
 
@@ -102,7 +102,7 @@ public class HWRecordActivity extends BaseActivity implements View.OnClickListen
             mBtnStartRecord.setEnabled(true);
             mBtnStopRecord.setEnabled(false);
             mRecorder.release();
-            ToastHelper.show("视频正在处理中，请稍后...");
+            ToastHelper.show(R.string.hwrecord_msg_video_is_processing);
         }
     }
 
@@ -143,7 +143,7 @@ public class HWRecordActivity extends BaseActivity implements View.OnClickListen
             mCamera.startPreview();
         } catch (IOException e) {
             Log.e(TAG, "openCamera preview failed: " + e.getLocalizedMessage());
-            ToastHelper.show("相机预览开启失败！");
+            ToastHelper.show(R.string.hwrecord_msg_preview_failed);
             releaseCamera();
             finish();
         }

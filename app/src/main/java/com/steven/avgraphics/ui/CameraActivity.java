@@ -98,7 +98,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             mFileOutputStream = new FileOutputStream(Utils.getCameraOutput());
         } catch (FileNotFoundException e) {
             Log.e(TAG, "new FileOutputStream failed: " + e.getMessage());
-            ToastHelper.show("无法打开输出文件!");
+            ToastHelper.show(R.string.camera_msg_open_file_failed);
             finish();
         }
         camera.setPreviewCallback(this);
@@ -111,7 +111,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onPreviewFailed() {
-        ToastHelper.show("开启相机预览失败！");
+        ToastHelper.show(R.string.camera_msg_preview_failed);
         finish();
     }
 

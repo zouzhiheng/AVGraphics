@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical"
     android:orientation="vertical"
     tools:context="com.steven.avgraphics.ui.HWCodecActivity">
 
@@ -11,6 +10,7 @@
         android:id="@+id/hwcodec_btn_record"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:text="@string/hwcodec_btn_record" />
