@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">AVGraphics</string>
-    <string name="iv_default_desc">Default Description</string>
 
     <!-- MainActivity(main) -->
     <string name="main_btn_draw_image">使用3种不同的API绘制图片</string>
@@ -8,10 +7,24 @@
     <string name="main_btn_audio">音频数据的采集和播放</string>
     <string name="main_btn_hwcodec">硬编解码</string>
 
+    <string name="main_msg_no_permission">权限不足，无法运行</string>
+
+
     <!-- DrawImageActivity(draw_image) -->
     <string name="draw_image_tv_image_view">ImageView: </string>
     <string name="draw_image_tv_surface_view">SurfaceView: </string>
     <string name="draw_image_tv_custom_view">Custom View: </string>
+    <string name="draw_image_iv_image_view">Draw With ImageView</string>
+
+
+    <!-- CameraActivity(camera) -->
+    <string name="camera_btn_switch">切换相机</string>
+    <string name="camera_btn_start_get_data">开始获取 NV21 数据</string>
+    <string name="camera_btn_stop">结束</string>
+
+    <string name="camera_msg_open_file_failed">无法打开输出文件!</string>
+    <string name="camera_msg_preview_failed">开启相机预览失败!</string>
+
 
     <!-- AudioActivity(audio) -->
     <string name="audio_btn_start_record">开始录制</string>
@@ -19,13 +32,24 @@
     <string name="audio_btn_start_play">开始播放</string>
     <string name="audio_btn_stop_play">停止播放</string>
 
+    <string name="audio_msg_no_audio_file">无音频文件，请先进行录制</string>
+    <string name="audio_msg_playing_now">当前正在播放中</string>
+
+
     <!-- HWCodecActivity(hwcodec) -->
     <string name="hwcodec_btn_record">录制视频</string>
     <string name="hwcodec_btn_decode">视频解码</string>
     <string name="hwcodec_btn_transcode">视频转码</string>
 
+    <string name="hwcodec_msg_no_video">无视频，请先进行录制</string>
+    <string name="hwcodec_msg_record_complete">视频录制已完成!</string>
+
     <!-- HWRecordActivity(hwrecord) -->
     <string name="hwrecord_btn_start">开始录制</string>
     <string name="hwrecord_btn_stop">结束录制</string>
+
+    <string name="hwrecord_msg_create_codec_failed">创建硬件编码器失败!</string>
+    <string name="hwrecord_msg_video_is_processing">视频正在处理中，请稍后…</string>
+    <string name="hwrecord_msg_preview_failed">开启相机预览失败!</string>
 
 </resources>

@@ -28,7 +28,7 @@
             android:layout_marginEnd="@dimen/margin_normal"
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_small"
-            android:contentDescription="@string/iv_default_desc"
+            android:contentDescription="@string/draw_image_iv_image_view"
             android:src="@mipmap/draw_image_iv" />
 
         <TextView
@@ -66,7 +66,6 @@
             android:layout_marginStart="@dimen/margin_normal"
             android:layout_marginTop="@dimen/margin_small"
             android:layout_marginBottom="@dimen/margin_normal"
-            android:contentDescription="@string/iv_default_desc"
             android:padding="20dp"
             app:src="@mipmap/draw_image_custom" />
     </LinearLayout>

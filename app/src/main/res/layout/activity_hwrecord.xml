@@ -7,8 +7,8 @@
     android:orientation="vertical"
     tools:context=".ui.HWRecordActivity">
 
-    <SurfaceView
-        android:id="@+id/hwrecord_sv_preview"
+    <com.steven.avgraphics.view.CameraPreviewView
+        android:id="@+id/hwrecord_cpv_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

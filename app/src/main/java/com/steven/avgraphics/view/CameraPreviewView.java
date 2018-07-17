@@ -22,13 +22,13 @@ import android.widget.ImageView;
 
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.CameraHelper;
-import com.steven.avgraphics.util.ToastHelper;
 
 import java.io.IOException;
 
 public class CameraPreviewView extends FrameLayout {
 
     private static final String TAG = "CameraPreviewView";
+    private static final float[] ASPECT_RATIO_ARRAY = {9.0f / 16, 3.0f / 4};
 
     private ImageView mIvFocus;
     private ImageView mIvIndicator;
@@ -43,6 +43,8 @@ public class CameraPreviewView extends FrameLayout {
     private Camera mCamera;
     private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private CameraSurfaceView mSurfaceView;
+    private PreviewCallback mPreviewCallback;
+    public float mAspectRatio = ASPECT_RATIO_ARRAY[0];
 
     public CameraPreviewView(@NonNull Context context) {
         super(context);
@@ -74,6 +76,15 @@ public class CameraPreviewView extends FrameLayout {
         addView(context);
     }
 
+    private void initAnimation(Context context) {
+        mFocusAnimation = AnimationUtils.loadAnimation(context, R.anim.cpv_focus);
+        mIndicatorAnimation = AnimationUtils.loadAnimation(context, R.anim.cpv_indicator);
+        mFocusAnimation.setAnimationListener((AnimationEndListener) animation ->
+                mIvFocus.setVisibility(INVISIBLE));
+        mIndicatorAnimation.setAnimationListener((AnimationEndListener) animation ->
+                mIvIndicator.setVisibility(INVISIBLE));
+    }
+
     private void addView(Context context) {
         addView(new View(context), new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -89,17 +100,8 @@ public class CameraPreviewView extends FrameLayout {
         addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
-    private void initAnimation(Context context) {
-        mFocusAnimation = AnimationUtils.loadAnimation(context, R.anim.cpv_focus);
-        mIndicatorAnimation = AnimationUtils.loadAnimation(context, R.anim.cpv_indicator);
-        mFocusAnimation.setAnimationListener((AnimationEndListener) animation ->
-                mIvFocus.setVisibility(INVISIBLE));
-        mIndicatorAnimation.setAnimationListener((AnimationEndListener) animation ->
-                mIvIndicator.setVisibility(INVISIBLE));
-    }
-
-    public Camera getCamera() {
-        return mCamera;
+    public void setPreviewCallback(PreviewCallback previewCallback) {
+        mPreviewCallback = previewCallback;
     }
 
     public void switchCamera() {
@@ -108,7 +110,30 @@ public class CameraPreviewView extends FrameLayout {
         }
         mCameraId = 1 - mCameraId;
         mSurfaceView = new CameraSurfaceView(getContext(), mCameraId);
-        addView(mSurfaceView);
+        addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int height = (int) (width / ASPECT_RATIO_ARRAY[0]);
+        for (float ratio : ASPECT_RATIO_ARRAY) {
+            height = (int) (width / ratio);
+            if (height <= maxHeight) {
+                mAspectRatio = ratio;
+                break;
+            }
+        }
+        int wms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+        int hms = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+        super.onMeasure(wms, hms);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mPreviewCallback = null;
     }
 
     private class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
@@ -149,8 +174,12 @@ public class CameraPreviewView extends FrameLayout {
             mFocusAnimation.cancel();
             mIndicatorAnimation.cancel();
             releaseCamera();
+            if (mPreviewCallback != null) {
+                mPreviewCallback.onPreviewStopped();
+            }
         }
 
+        @SuppressWarnings("SuspiciousNameCombination")
         private void openCamera(SurfaceHolder holder, int width, int height) {
             if (mCamera != null) {
                 return;
@@ -160,23 +189,28 @@ public class CameraPreviewView extends FrameLayout {
                 return;
             }
 
-            Camera.Parameters parameters = mCamera.getParameters();
-            Camera.Size size = CameraHelper.chooseCameraSize(parameters.getSupportedPreviewSizes(), width, height);
-            parameters.setPreviewSize(size.width, size.height);
-            mCamera.setParameters(parameters);
+            CameraHelper.setOptimalSize(mCamera, mAspectRatio, height, width);
             mCamera.setDisplayOrientation(90);
             try {
-                mCamera.setPreviewDisplay(holder);
-                mCamera.startPreview();
-                mIndicatorAnimation.cancel();
-                mIvIndicator.startAnimation(mIndicatorAnimation);
-                cameraFocus(CameraPreviewView.this.getWidth() / 2.0f, CameraPreviewView.this.getHeight() / 2.0f);
+                startPreview(holder);
             } catch (IOException e) {
                 Log.e(TAG, "openCamera preview failed: " + e.getLocalizedMessage());
-                ToastHelper.show("相机预览开启失败！");
                 releaseCamera();
+                if (mPreviewCallback != null) {
+                    mPreviewCallback.onPreviewFailed();
+                }
             }
-            Log.i(TAG, "--- openCamera");
+        }
+
+        private void startPreview(SurfaceHolder holder) throws IOException {
+            mCamera.setPreviewDisplay(holder);
+            mCamera.startPreview();
+            mIndicatorAnimation.cancel();
+            mIvIndicator.startAnimation(mIndicatorAnimation);
+            cameraFocus(CameraPreviewView.this.getWidth() / 2.0f, CameraPreviewView.this.getHeight() / 2.0f);
+            if (mPreviewCallback != null) {
+                mPreviewCallback.onPreviewStarted(mCamera);
+            }
         }
 
         private void cameraFocus(final float x, final float y) {
@@ -225,6 +259,14 @@ public class CameraPreviewView extends FrameLayout {
             return true;
         }
 
+    }
+
+    public interface PreviewCallback {
+        void onPreviewStarted(Camera camera);
+
+        void onPreviewStopped();
+
+        void onPreviewFailed();
     }
 
     private interface AnimationEndListener extends Animation.AnimationListener {

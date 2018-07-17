@@ -45,7 +45,7 @@ public class HWCodecActivity extends BaseActivity {
 
     private void decode() {
         if (!new File(Utils.getHWRecordOutput()).exists()) {
-            ToastHelper.show("无视频，请先进行录制");
+            ToastHelper.show(R.string.hwcodec_msg_no_video);
             return;
         }
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -57,7 +57,7 @@ public class HWCodecActivity extends BaseActivity {
 
     private void transcode() {
         if (!new File(Utils.getHWRecordOutput()).exists()) {
-            ToastHelper.show("无视频，请先进行录制");
+            ToastHelper.show(R.string.hwcodec_msg_no_video);
             return;
         }
         Executors.newSingleThreadExecutor().execute(() ->
