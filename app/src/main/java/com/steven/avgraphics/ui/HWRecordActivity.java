@@ -6,8 +6,6 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -15,26 +13,23 @@ import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
-import com.steven.avgraphics.util.CameraHelper;
 import com.steven.avgraphics.util.HWCodec;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
-
-import java.io.IOException;
+import com.steven.avgraphics.view.CameraPreviewView;
 
 public class HWRecordActivity extends BaseActivity implements View.OnClickListener,
-        Camera.PreviewCallback, SurfaceHolder.Callback {
+        Camera.PreviewCallback, CameraPreviewView.PreviewCallback {
 
     private static final String TAG = "HWRecordActivity";
 
     private static final int DEFAULT_BITRATE = 10 * 1000 * 1000;
 
-    private SurfaceView mSurfaceView;
     private Button mBtnStartRecord;
     private Button mBtnStopRecord;
 
     private HWCodec.RecorderWrapper mRecorder = new HWCodec.RecorderWrapper();
-    private Camera mCamera;
+    private CameraPreviewView mCameraPreviewView;
     private Camera.Size mPreviewSize;
     private int mPrevieweFormat;
     private int mChannels = 1;
@@ -58,15 +53,15 @@ public class HWRecordActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void findView() {
-        mSurfaceView = findViewById(R.id.hwrecord_sv_preview);
+        mCameraPreviewView = findViewById(R.id.hwrecord_cpv_preview);
         mBtnStartRecord = findViewById(R.id.hwrecord_btn_start_record);
         mBtnStopRecord = findViewById(R.id.hwrecord_btn_stop_record);
     }
 
     private void setListener() {
+        mCameraPreviewView.setPreviewCallback(this);
         mBtnStartRecord.setOnClickListener(this);
         mBtnStopRecord.setOnClickListener(this);
-        mSurfaceView.getHolder().addCallback(this);
     }
 
     @Override
@@ -107,55 +102,20 @@ public class HWRecordActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    public void onPreviewStarted(Camera camera) {
+        mPreviewSize = camera.getParameters().getPreviewSize();
+        mPrevieweFormat = camera.getParameters().getPreviewFormat();
+        camera.setPreviewCallback(this);
+    }
+
+    @Override
+    public void onPreviewStopped() {
 
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        openCamera(holder, width, height);
-    }
+    public void onPreviewFailed() {
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        stopRecord();
-        releaseCamera();
-    }
-
-    private void openCamera(SurfaceHolder holder, int width, int height) {
-        if (mCamera != null) {
-            return;
-        }
-        mCamera = CameraHelper.openCamera();
-        if (mCamera == null) {
-            finish();
-        }
-
-        Camera.Parameters parameters = mCamera.getParameters();
-        mPreviewSize = CameraHelper.chooseCameraSize(parameters.getSupportedPreviewSizes(), width, height);
-        parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
-        mPrevieweFormat = parameters.getPreviewFormat();
-        mCamera.setParameters(parameters);
-        mCamera.setDisplayOrientation(90);
-        mCamera.setPreviewCallback(this);
-        try {
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
-        } catch (IOException e) {
-            Log.e(TAG, "openCamera preview failed: " + e.getLocalizedMessage());
-            ToastHelper.show(R.string.hwrecord_msg_preview_failed);
-            releaseCamera();
-            finish();
-        }
-    }
-
-    private void releaseCamera() {
-        if (mCamera != null) {
-            mCamera.setPreviewCallback(null);
-            mCamera.stopPreview();
-            mCamera.release();
-            mCamera = null;
-        }
     }
 
     @Override

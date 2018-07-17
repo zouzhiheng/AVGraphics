@@ -28,6 +28,7 @@ import java.io.IOException;
 public class CameraPreviewView extends FrameLayout {
 
     private static final String TAG = "CameraPreviewView";
+    private static final float[] ASPECT_RATIO_ARRAY = {9.0f / 16, 3.0f / 4};
 
     private ImageView mIvFocus;
     private ImageView mIvIndicator;
@@ -43,6 +44,7 @@ public class CameraPreviewView extends FrameLayout {
     private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private CameraSurfaceView mSurfaceView;
     private PreviewCallback mPreviewCallback;
+    public float mAspectRatio = ASPECT_RATIO_ARRAY[0];
 
     public CameraPreviewView(@NonNull Context context) {
         super(context);
@@ -102,10 +104,6 @@ public class CameraPreviewView extends FrameLayout {
         mPreviewCallback = previewCallback;
     }
 
-    public Camera getCamera() {
-        return mCamera;
-    }
-
     public void switchCamera() {
         if (mSurfaceView != null) {
             removeView(mSurfaceView);
@@ -113,6 +111,29 @@ public class CameraPreviewView extends FrameLayout {
         mCameraId = 1 - mCameraId;
         mSurfaceView = new CameraSurfaceView(getContext(), mCameraId);
         addView(mSurfaceView);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int height = (int) (width / ASPECT_RATIO_ARRAY[0]);
+        for (float ratio : ASPECT_RATIO_ARRAY) {
+            height = (int) (width / ratio);
+            if (height < maxHeight) {
+                mAspectRatio = ratio;
+                break;
+            }
+        }
+        int wms = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+        int hms = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+        super.onMeasure(wms, hms);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mPreviewCallback = null;
     }
 
     private class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
@@ -158,6 +179,7 @@ public class CameraPreviewView extends FrameLayout {
             }
         }
 
+        @SuppressWarnings("SuspiciousNameCombination")
         private void openCamera(SurfaceHolder holder, int width, int height) {
             if (mCamera != null) {
                 return;
@@ -167,10 +189,7 @@ public class CameraPreviewView extends FrameLayout {
                 return;
             }
 
-            Camera.Parameters parameters = mCamera.getParameters();
-            Camera.Size size = CameraHelper.chooseCameraSize(parameters.getSupportedPreviewSizes(), width, height);
-            parameters.setPreviewSize(size.width, size.height);
-            mCamera.setParameters(parameters);
+            CameraHelper.setOptimalSize(mCamera, mAspectRatio, height, width);
             mCamera.setDisplayOrientation(90);
             try {
                 startPreview(holder);
@@ -190,7 +209,7 @@ public class CameraPreviewView extends FrameLayout {
             mIvIndicator.startAnimation(mIndicatorAnimation);
             cameraFocus(CameraPreviewView.this.getWidth() / 2.0f, CameraPreviewView.this.getHeight() / 2.0f);
             if (mPreviewCallback != null) {
-                mPreviewCallback.onPreviewStarted();
+                mPreviewCallback.onPreviewStarted(mCamera);
             }
         }
 
@@ -243,7 +262,7 @@ public class CameraPreviewView extends FrameLayout {
     }
 
     public interface PreviewCallback {
-        void onPreviewStarted();
+        void onPreviewStarted(Camera camera);
 
         void onPreviewStopped();
 

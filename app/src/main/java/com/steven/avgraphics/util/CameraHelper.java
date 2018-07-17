@@ -55,26 +55,30 @@ public class CameraHelper {
         camera.setParameters(parameters);
     }
 
-    public static Camera.Size chooseCameraSize(List<Camera.Size> options, int width, int height) {
-        List<Camera.Size> bigEnough = new ArrayList<>();
-        List<Camera.Size> equalRatio = new ArrayList<>();
+    public static void setOptimalSize(Camera camera, float aspectRatio, int maxWidth, int maxHeight) {
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size size = CameraHelper.chooseOptimalSize(parameters.getSupportedPreviewSizes(),
+                aspectRatio, maxWidth, maxHeight);
+        Log.i(TAG, "size: (" + size.width + ", " + size.height + ")");
+        parameters.setPreviewSize(size.width, size.height);
+        camera.setParameters(parameters);
+    }
+
+    public static Camera.Size chooseOptimalSize(List<Camera.Size> options, float aspectRatio,
+                                                int maxWidth, int maxHeight) {
+        List<Camera.Size> alternative = new ArrayList<>();
         for (Camera.Size option : options) {
-            if (option.height == option.width * height / width) {
-                equalRatio.add(option);
-                if (option.width >= width && option.height >= height) {
-                    bigEnough.add(option);
-                }
+            if (option.height == option.width * aspectRatio && option.width <= maxWidth
+                    && option.height <= maxHeight) {
+                alternative.add(option);
             }
         }
 
-        if (bigEnough.size() > 0) {
-            return Collections.min(bigEnough, new CompareSizesByArea());
-        } else if (equalRatio.size() > 0) {
-            return Collections.max(equalRatio, new CompareSizesByArea());
-        } else {
-            Log.w(TAG, "Couldn't find any suitable preview size for: (" + width + ", " + height + ")");
-            return options.get(0);
+        if (alternative.size() > 0) {
+            return Collections.max(alternative, new CompareSizesByArea());
         }
+
+        return options.get(0);
     }
 
     private static class CompareSizesByArea implements Comparator<Camera.Size> {

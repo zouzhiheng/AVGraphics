@@ -92,8 +92,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void onPreviewStarted() {
-        Camera camera = mCameraPreviewView.getCamera();
+    public void onPreviewStarted(Camera camera) {
         try {
             mFileOutputStream = new FileOutputStream(Utils.getCameraOutput());
         } catch (FileNotFoundException e) {
