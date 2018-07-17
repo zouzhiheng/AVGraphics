@@ -59,7 +59,6 @@ public class CameraHelper {
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size size = CameraHelper.chooseOptimalSize(parameters.getSupportedPreviewSizes(),
                 aspectRatio, maxWidth, maxHeight);
-        Log.i(TAG, "size: (" + size.width + ", " + size.height + ")");
         parameters.setPreviewSize(size.width, size.height);
         camera.setParameters(parameters);
     }

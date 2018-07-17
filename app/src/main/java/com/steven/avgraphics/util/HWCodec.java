@@ -12,6 +12,8 @@ import android.os.Build;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import com.steven.avgraphics.R;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -260,8 +262,8 @@ public class HWCodec {
 
         private static final long MAX_TIMEOUT = 3000;
 
-        private ExecutorService mVExecutor = Executors.newSingleThreadExecutor();
-        private ExecutorService mAExecutor = Executors.newSingleThreadExecutor();
+        private ExecutorService mVExecutor;
+        private ExecutorService mAExecutor;
         private Recorder mRecorder = new Recorder();
 
         private int mImageFormat;
@@ -283,6 +285,10 @@ public class HWCodec {
                 e.printStackTrace();
                 return false;
             }
+
+            mVExecutor = Executors.newSingleThreadExecutor();
+            mAExecutor = Executors.newSingleThreadExecutor();
+
             return true;
         }
 
@@ -335,15 +341,15 @@ public class HWCodec {
             });
         }
 
-        public void release() {
+        public void stop() {
             Executors.newSingleThreadExecutor().execute(() -> {
                 try {
                     mVExecutor.shutdown();
                     mVExecutor.awaitTermination(MAX_TIMEOUT, TimeUnit.MILLISECONDS);
                     mAExecutor.shutdown();
                     mAExecutor.awaitTermination(MAX_TIMEOUT, TimeUnit.MICROSECONDS);
-                    mRecorder.release();
-                    ToastHelper.showOnUiThread("视频录制已完成");
+                    mRecorder.stop();
+                    ToastHelper.showOnUiThread(R.string.hwcodec_msg_record_complete);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -532,7 +538,19 @@ public class HWCodec {
             return trackIndex;
         }
 
-        public void release() {
+        public void stop() {
+            try {
+                release();
+            } catch (Exception e) {
+                Log.e(TAG, "stop exception occur: " + e.getLocalizedMessage());
+            }
+            if (mIsInitialized) {
+                Log.i(TAG, "Recorder released");
+            }
+            mIsInitialized = false;
+        }
+        
+        private void release() throws Exception {
             if (mVideoEncoder != null) {
                 mVideoEncoder.stop();
                 mVideoEncoder.release();
@@ -550,11 +568,6 @@ public class HWCodec {
                 mMuxer.release();
                 mMuxer = null;
             }
-
-            if (mIsInitialized) {
-                Log.i(TAG, "Recorder released");
-            }
-            mIsInitialized = false;
         }
 
     }

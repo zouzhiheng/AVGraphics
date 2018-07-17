@@ -12,7 +12,7 @@ import com.steven.avgraphics.BaseApplication;
 @SuppressWarnings("ALL")
 public class ToastHelper {
 
-    private static Handler mHandler = new Handler(Looper.getMainLooper());
+    private static Handler sHandler = new Handler(Looper.getMainLooper());
 
     public static void show(String msg) {
         Toast.makeText(BaseApplication.getContext(), msg, Toast.LENGTH_SHORT).show();
@@ -50,7 +50,7 @@ public class ToastHelper {
 
     public static void showOnUiThread(final String msg) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            mHandler.post(() ->
+            sHandler.post(() ->
                     Toast.makeText(BaseApplication.getContext(), msg, Toast.LENGTH_SHORT).show());
         } else {
             show(msg);
@@ -59,7 +59,7 @@ public class ToastHelper {
 
     public static void showOnUiThread(final int stringId) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            mHandler.post(() ->
+            sHandler.post(() ->
                     Toast.makeText(BaseApplication.getContext(),
                             BaseApplication.getContext().getResources().getText(stringId),
                             Toast.LENGTH_SHORT).show());

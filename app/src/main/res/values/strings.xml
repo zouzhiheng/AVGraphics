@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">AVGraphics</string>
-    <string name="iv_default_desc">Default Description</string>
 
     <!-- MainActivity(main) -->
     <string name="main_btn_draw_image">使用3种不同的API绘制图片</string>
@@ -15,6 +14,7 @@
     <string name="draw_image_tv_image_view">ImageView: </string>
     <string name="draw_image_tv_surface_view">SurfaceView: </string>
     <string name="draw_image_tv_custom_view">Custom View: </string>
+    <string name="draw_image_iv_image_view">Draw With ImageView</string>
 
 
     <!-- CameraActivity(camera) -->
@@ -42,7 +42,7 @@
     <string name="hwcodec_btn_transcode">视频转码</string>
 
     <string name="hwcodec_msg_no_video">无视频，请先进行录制</string>
-
+    <string name="hwcodec_msg_record_complete">视频录制已完成!</string>
 
     <!-- HWRecordActivity(hwrecord) -->
     <string name="hwrecord_btn_start">开始录制</string>
