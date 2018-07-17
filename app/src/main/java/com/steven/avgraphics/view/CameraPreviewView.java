@@ -110,7 +110,7 @@ public class CameraPreviewView extends FrameLayout {
         }
         mCameraId = 1 - mCameraId;
         mSurfaceView = new CameraSurfaceView(getContext(), mCameraId);
-        addView(mSurfaceView);
+        addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     @Override
