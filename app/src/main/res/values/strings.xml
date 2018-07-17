@@ -28,4 +28,9 @@
     <string name="hwrecord_btn_start">开始录制</string>
     <string name="hwrecord_btn_stop">结束录制</string>
 
+    <!-- CameraActivity(camera) -->
+    <string name="camera_btn_switch">切换相机</string>
+    <string name="camera_btn_start_get_data">开始获取 NV21 数据</string>
+    <string name="camera_btn_stop">结束</string>
+
 </resources>

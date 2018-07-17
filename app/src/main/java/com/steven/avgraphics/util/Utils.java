@@ -12,6 +12,7 @@ public class Utils {
 
     private static final String SDCARD = Environment.getExternalStorageDirectory().getAbsolutePath();
     private static final String APP_DIR = SDCARD + "/AVGraphics";
+    private static final String CAMERA_OUTPUT = APP_DIR + "/camera.yuv";
     private static final String HWRECORD_OUTPUT = APP_DIR + "/hwrecord.mp4";
     private static final String HWDECODE_YUV_OUTPUT = APP_DIR + "/hwdecode.yuv";
     private static final String HWDECODE_PCM_OUTPUT = APP_DIR + "/hwdecode.pcm";
@@ -39,6 +40,10 @@ public class Utils {
 
     public static String getHWTranscodeOutput() {
         return HWTRANSCODE_OUTPUT;
+    }
+
+    public static String getCameraOutput() {
+        return CAMERA_OUTPUT;
     }
 
     private static void createDir(String path) {

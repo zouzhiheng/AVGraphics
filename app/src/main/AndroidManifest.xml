@@ -24,9 +24,13 @@
         </activity>
         <activity android:name=".ui.DrawImageActivity" />
         <activity android:name=".ui.AudioActivity" />
-        <activity android:name=".ui.HWRecordActivity" />
+        <activity
+            android:name=".ui.HWRecordActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity android:name=".ui.HWCodecActivity" />
-        <activity android:name=".ui.CameraActivity" />
+        <activity
+            android:name=".ui.CameraActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>
