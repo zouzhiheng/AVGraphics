@@ -120,7 +120,7 @@ public class CameraPreviewView extends FrameLayout {
         int height = (int) (width / ASPECT_RATIO_ARRAY[0]);
         for (float ratio : ASPECT_RATIO_ARRAY) {
             height = (int) (width / ratio);
-            if (height < maxHeight) {
+            if (height <= maxHeight) {
                 mAspectRatio = ratio;
                 break;
             }
