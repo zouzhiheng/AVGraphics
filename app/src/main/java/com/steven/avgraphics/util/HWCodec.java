@@ -180,7 +180,7 @@ public class HWCodec {
         return MEDIA_TYPE_UNKNOWN;
     }
 
-    public static void transcode(String srcFilePath, String dstFilePath) {
+    public static boolean transcode(String srcFilePath, String dstFilePath) {
         MediaExtractor extractor = null;
         MediaMuxer muxer = null;
         try {
@@ -190,8 +190,10 @@ public class HWCodec {
             doTranscode(extractor, muxer);
         } catch (IOException e) {
             Log.e(TAG, "doTranscode io exception: " + e.getLocalizedMessage());
+            return false;
         } catch (Exception e) {
             Log.e(TAG, "doTranscode exception: " + e.getLocalizedMessage());
+            return false;
         } finally {
             try {
                 if (extractor != null) {
@@ -206,6 +208,7 @@ public class HWCodec {
                 Log.e(TAG, "doTranscode close exception: " + e.getLocalizedMessage());
             }
         }
+        return true;
     }
 
     private static void doTranscode(MediaExtractor extractor, MediaMuxer muxer) throws IOException {
