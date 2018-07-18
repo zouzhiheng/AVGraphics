@@ -28,6 +28,7 @@ public class MainActivity extends BaseActivity {
 
     private Button mBtnToDrawImage;
     private Button mBtnCamera;
+    private Button mBtnCamera2;
     private Button mBtnToAudio;
     private Button mBtnHWCodec;
 
@@ -46,6 +47,7 @@ public class MainActivity extends BaseActivity {
     private void findView() {
         mBtnToDrawImage = findViewById(R.id.main_btn_draw_image);
         mBtnCamera = findViewById(R.id.main_btn_camera);
+        mBtnCamera2 = findViewById(R.id.main_btn_camera2);
         mBtnToAudio = findViewById(R.id.main_btn_audio);
         mBtnHWCodec = findViewById(R.id.main_btn_hwcodec);
     }
@@ -53,6 +55,7 @@ public class MainActivity extends BaseActivity {
     private void setListener() {
         mBtnToDrawImage.setOnClickListener(v -> startActivity(DrawImageActivity.class));
         mBtnCamera.setOnClickListener(v -> startActivity(CameraActivity.class));
+        mBtnCamera2.setOnClickListener(v -> startActivity(Camera2Activity.class));
         mBtnToAudio.setOnClickListener(v -> startActivity(AudioActivity.class));
         mBtnHWCodec.setOnClickListener(v -> startActivity(HWCodecActivity.class));
     }

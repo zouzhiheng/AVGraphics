@@ -80,6 +80,13 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mAudioPlayer.stop();
+        mAudioRecorder.stop();
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.audio_btn_start_record:
@@ -113,7 +120,7 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
     private void stopRecord() {
         mIsRecording = false;
         mAudioRecorder.stop();
-        resetButtonState();
+        resetButtons();
         try {
             mFileOutputStream.flush();
             mFileOutputStream.close();
@@ -130,7 +137,7 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
 
     private void stopPlay() {
         mAudioPlayer.stop();
-        resetButtonState();
+        resetButtons();
     }
 
     private void disableButtons() {
@@ -140,18 +147,11 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
         mBtnStopRecord.setEnabled(false);
     }
 
-    private void resetButtonState() {
+    private void resetButtons() {
         mBtnStartPlay.setEnabled(true);
         mBtnStopPlay.setEnabled(false);
         mBtnStartRecord.setEnabled(true);
         mBtnStopRecord.setEnabled(false);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mAudioPlayer.stop();
-        mAudioRecorder.stop();
     }
 
     @Override
@@ -221,7 +221,7 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
                 Log.e(TAG, "stop play faild");
             }
             release();
-            Utils.runOnUiThread(AudioActivity.this::resetButtonState);
+            Utils.runOnUiThread(AudioActivity.this::resetButtons);
         }
 
         private void release() {

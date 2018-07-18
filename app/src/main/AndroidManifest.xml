@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-feature android:name="android.hardware.camera2"/>
+
     <application
         android:name=".BaseApplication"
         android:allowBackup="true"
@@ -25,11 +27,13 @@
         <activity android:name=".ui.DrawImageActivity" />
         <activity android:name=".ui.AudioActivity" />
         <activity
-            android:name=".ui.HWRecordActivity"
+            android:name=".ui.HWCodecActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".ui.HWCodecActivity" />
         <activity
             android:name=".ui.CameraActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".ui.Camera2Activity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
