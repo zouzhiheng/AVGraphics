@@ -4,6 +4,7 @@
     <!-- MainActivity(main) -->
     <string name="main_btn_draw_image">使用3种不同的API绘制图片</string>
     <string name="main_btn_camera">相机预览获取 NV21 数据</string>
+    <string name="main_btn_camera2">使用 Camera2 拍照</string>
     <string name="main_btn_audio">音频数据的采集和播放</string>
     <string name="main_btn_hwcodec">硬编解码</string>
 
@@ -24,6 +25,12 @@
 
     <string name="camera_msg_open_file_failed">无法打开输出文件!</string>
     <string name="camera_msg_preview_failed">开启相机预览失败!</string>
+
+
+    <!-- Camera2Activity(camera2) -->
+    <string name="camera2_btn_take_picture">拍照</string>
+
+    <string name="camera2_msg_no_camera_service">获取 Camera 服务失败</string>
 
 
     <!-- AudioActivity(audio) -->

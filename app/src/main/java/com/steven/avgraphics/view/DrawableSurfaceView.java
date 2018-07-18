@@ -17,9 +17,6 @@ import com.steven.avgraphics.R;
 
 public class DrawableSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
-    private static final String TAG = "DrawableSurfaceView";
-
-    private final Object DRAW_LOCK = new Object();
     private Bitmap mBitmap;
 
     public DrawableSurfaceView(Context context) {
@@ -61,11 +58,8 @@ public class DrawableSurfaceView extends SurfaceView implements SurfaceHolder.Ca
     public void surfaceCreated(SurfaceHolder holder) {
         Canvas canvas = null;
         try {
-            long start = System.currentTimeMillis();
             canvas = holder.lockCanvas();
-            synchronized (DRAW_LOCK) {
-                onDraw(canvas);
-            }
+            onDraw(canvas);
         } finally {
             if (canvas != null) {
                 holder.unlockCanvasAndPost(canvas);
