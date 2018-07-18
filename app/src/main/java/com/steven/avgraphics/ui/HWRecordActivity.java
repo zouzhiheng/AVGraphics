@@ -67,6 +67,14 @@ public class HWRecordActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mIsRecording) {
+            stopRecord();
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hwrecord_btn_start_record:

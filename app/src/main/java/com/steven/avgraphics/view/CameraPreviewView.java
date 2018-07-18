@@ -173,10 +173,10 @@ public class CameraPreviewView extends FrameLayout {
         public void surfaceDestroyed(SurfaceHolder holder) {
             mFocusAnimation.cancel();
             mIndicatorAnimation.cancel();
-            releaseCamera();
             if (mPreviewCallback != null) {
                 mPreviewCallback.onPreviewStopped();
             }
+            releaseCamera();
         }
 
         @SuppressWarnings("SuspiciousNameCombination")
@@ -215,10 +215,7 @@ public class CameraPreviewView extends FrameLayout {
 
         private void cameraFocus(final float x, final float y) {
             mCamera.cancelAutoFocus();
-            CameraHelper.setFocusMode(mCamera, Camera.Parameters.FOCUS_MODE_AUTO);
-
-            mCamera.autoFocus((success, camera) ->
-                    CameraHelper.setFocusMode(mCamera, Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO));
+            CameraHelper.setFocusMode(mCamera, Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
 
             mFocusAnimation.cancel();
             mIvFocus.clearAnimation();

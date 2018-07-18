@@ -80,6 +80,13 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mAudioPlayer.stop();
+        mAudioRecorder.stop();
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.audio_btn_start_record:
@@ -145,13 +152,6 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
         mBtnStopPlay.setEnabled(false);
         mBtnStartRecord.setEnabled(true);
         mBtnStopRecord.setEnabled(false);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mAudioPlayer.stop();
-        mAudioRecorder.stop();
     }
 
     @Override
