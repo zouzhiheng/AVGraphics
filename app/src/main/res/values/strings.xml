@@ -30,8 +30,8 @@
     <!-- Camera2Activity(camera2) -->
     <string name="camera2_btn_take_picture">拍照</string>
 
+    <string name="camera2_msg_no_permission">权限不足，无法打开相机</string>
     <string name="camera2_msg_no_camera_service">获取 Camera 服务失败</string>
-
 
     <!-- AudioActivity(audio) -->
     <string name="audio_btn_start_record">开始录制</string>
