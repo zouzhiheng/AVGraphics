@@ -10,15 +10,17 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
@@ -34,6 +36,8 @@ import java.util.Collections;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera2Activity extends AppCompatActivity {
 
+    private static final String TAG = "Camera2Activity";
+
 //    private static final float[] ASCPECT_RATIO_ARRAY = {9.0f / 16, 3.0f / 4};
 
     private TextureView mTextureView;
@@ -42,6 +46,9 @@ public class Camera2Activity extends AppCompatActivity {
     private CaptureRequest mCaptureRequest;
     private CaptureRequest.Builder mCaptureRequestBuilder;
     private CameraCaptureSession mCaptureSession;
+
+    private HandlerThread mBackgroundThread;
+    private Handler mBackgroundHandler;
     private float mAspectRatio = 9.0f / 16;
     private Size mPreviewSize;
     private String mCameraId;
@@ -63,6 +70,7 @@ public class Camera2Activity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        startBackgroundThread();
         if (!mTextureView.isAvailable()) {
             mTextureView.setSurfaceTextureListener(getTextureListener());
         } else {
@@ -72,8 +80,15 @@ public class Camera2Activity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        super.onPause();
         closeCamera();
+        stopBackgroundThread();
+        super.onPause();
+    }
+
+    private void startBackgroundThread() {
+        mBackgroundThread = new HandlerThread("Camera2");
+        mBackgroundThread.start();
+        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
     }
 
     private TextureView.SurfaceTextureListener getTextureListener() {
@@ -143,12 +158,17 @@ public class Camera2Activity extends AppCompatActivity {
 
             @Override
             public void onDisconnected(@NonNull CameraDevice camera) {
-
+                camera.close();
+                mCameraDevice = null;
             }
 
             @Override
             public void onError(@NonNull CameraDevice camera, int error) {
-
+                Log.e(TAG, "open camera error: " + error);
+                ToastHelper.showOnUiThread(R.string.camera2_msg_open_error);
+                camera.close();
+                mCameraDevice = null;
+                finish();
             }
         };
     }
@@ -168,7 +188,8 @@ public class Camera2Activity extends AppCompatActivity {
                             mCaptureRequest = mCaptureRequestBuilder.build();
                             mCaptureSession = session;
                             try {
-                                mCaptureSession.setRepeatingRequest(mCaptureRequest, getCaptureCallback(), null);
+                                mCaptureSession.setRepeatingRequest(mCaptureRequest,
+                                        getCaptureCallback(), mBackgroundHandler);
                             } catch (CameraAccessException e) {
                                 e.printStackTrace();
                             }
@@ -176,7 +197,7 @@ public class Camera2Activity extends AppCompatActivity {
 
                         @Override
                         public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-
+                            Log.e(TAG, "startPreview onConfigureFailed");
                         }
                     }, null);
         } catch (CameraAccessException e) {
@@ -186,12 +207,6 @@ public class Camera2Activity extends AppCompatActivity {
 
     private CameraCaptureSession.CaptureCallback getCaptureCallback() {
         return new CameraCaptureSession.CaptureCallback() {
-            @Override
-            public void onCaptureProgressed(@NonNull CameraCaptureSession session,
-                                            @NonNull CaptureRequest request,
-                                            @NonNull CaptureResult partialResult) {
-                super.onCaptureProgressed(session, request, partialResult);
-            }
 
             @Override
             public void onCaptureCompleted(@NonNull CameraCaptureSession session,
@@ -200,6 +215,17 @@ public class Camera2Activity extends AppCompatActivity {
                 super.onCaptureCompleted(session, request, result);
             }
         };
+    }
+
+    private void stopBackgroundThread() {
+        mBackgroundThread.quitSafely();
+        try {
+            mBackgroundThread.join();
+            mBackgroundThread = null;
+            mBackgroundHandler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void closeCamera() {

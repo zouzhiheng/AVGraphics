@@ -32,6 +32,7 @@
 
     <string name="camera2_msg_no_permission">权限不足，无法打开相机</string>
     <string name="camera2_msg_no_camera_service">获取 Camera 服务失败</string>
+    <string name="camera2_msg_open_error">打开相机过程中出现错误!</string>
 
     <!-- AudioActivity(audio) -->
     <string name="audio_btn_start_record">开始录制</string>
