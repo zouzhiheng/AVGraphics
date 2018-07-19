@@ -1,12 +1,11 @@
 package com.steven.avgraphics.util;
 
 
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
-import android.util.Size;
+import android.view.Surface;
 
 import com.steven.avgraphics.BaseApplication;
 
@@ -58,11 +57,50 @@ public class CameraHelper {
         camera.setParameters(parameters);
     }
 
+    public static void setDisplayOritation(Activity activity, Camera camera, int cameraId) {
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        int degress = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degress = 0;
+                break;
+            case Surface.ROTATION_90:
+                degress = 90;
+                break;
+            case Surface.ROTATION_180:
+                degress = 180;
+                break;
+            case Surface.ROTATION_270:
+                degress = 270;
+                break;
+        }
+
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degress) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {
+            result = (info.orientation - degress + 360) % 360; // back-facing
+        }
+        Log.d(TAG, "window rotation: " + degress + ", camera oritation: " + result);
+        camera.setDisplayOrientation(result);
+    }
+
+    public static boolean isFacingBack(int cameraId) {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+        return info.facing == Camera.CameraInfo.CAMERA_FACING_BACK;
+    }
+
     public static void setOptimalSize(Camera camera, float aspectRatio, int maxWidth, int maxHeight) {
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size size = CameraHelper.chooseOptimalSize(parameters.getSupportedPreviewSizes(),
                 aspectRatio, maxWidth, maxHeight);
         parameters.setPreviewSize(size.width, size.height);
+        Log.d(TAG,  "input max: (" + maxWidth + ", " + maxHeight + "), output size: ("
+                + size.width + ", " + size.height + ")");
         camera.setParameters(parameters);
     }
 
@@ -83,41 +121,12 @@ public class CameraHelper {
         return options.get(0);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public static Size chooseOptimalSize2(List<Size> options, float aspectRatio, int maxWidth,
-                                         int maxHeight) {
-        List<Size> alternative = new ArrayList<>();
-        for (Size option : options) {
-            if (option.getHeight() == option.getWidth() * aspectRatio
-                    && option.getWidth() <= maxWidth && option.getHeight() <= maxHeight) {
-                alternative.add(option);
-            }
-        }
-
-        if (alternative.size() > 0) {
-            return Collections.max(alternative, new CompareSizesByArea2());
-        }
-
-        return options.get(0);
-    }
-
     private static class CompareSizesByArea implements Comparator<Camera.Size> {
 
         @Override
         public int compare(Camera.Size lhs, Camera.Size rhs) {
             // 转型 long 是为了确保乘法运算不会溢出
             return Long.signum((long) lhs.width * lhs.height - (long) rhs.width * rhs.height);
-        }
-
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private static class CompareSizesByArea2 implements Comparator<Size> {
-
-        @Override
-        public int compare(Size lhs, Size rhs) {
-            // 转型 long 是为了确保乘法运算不会溢出
-            return Long.signum((long) lhs.getWidth() * lhs.getHeight() - (long) rhs.getWidth() * rhs.getHeight());
         }
 
     }

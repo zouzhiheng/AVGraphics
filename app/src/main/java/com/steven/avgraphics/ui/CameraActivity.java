@@ -10,6 +10,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 
+import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
@@ -19,7 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class CameraActivity extends AppCompatActivity implements View.OnClickListener,
+public class CameraActivity extends BaseActivity implements View.OnClickListener,
         Camera.PreviewCallback, CameraPreviewView.PreviewCallback  {
 
     private static final String TAG = "CameraActivity";
@@ -60,6 +61,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         mBtnSwitch.setOnClickListener(this);
         mBtnStartGetData.setOnClickListener(this);
         mBtnStop.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mCameraPreviewView.release();
     }
 
     @Override

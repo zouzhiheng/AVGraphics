@@ -45,4 +45,5 @@
             android:enabled="false"
             android:text="@string/camera_btn_stop" />
     </LinearLayout>
+
 </FrameLayout>

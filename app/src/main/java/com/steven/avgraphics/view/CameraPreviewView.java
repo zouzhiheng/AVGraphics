@@ -1,6 +1,7 @@
 package com.steven.avgraphics.view;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -86,7 +87,8 @@ public class CameraPreviewView extends FrameLayout {
     }
 
     private void addView(Context context) {
-        addView(new View(context), new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(new View(context), new LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT));
 
         mIvFocus = new ImageView(context);
         mIvFocus.setImageResource(R.drawable.cpv_focus);
@@ -97,7 +99,8 @@ public class CameraPreviewView extends FrameLayout {
         addView(mIvIndicator, new LayoutParams(mIndicatorWidth, mIndicatorHeight, Gravity.CENTER));
 
         mSurfaceView = new CameraSurfaceView(context);
-        addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     public void setPreviewCallback(PreviewCallback previewCallback) {
@@ -110,7 +113,12 @@ public class CameraPreviewView extends FrameLayout {
         }
         mCameraId = 1 - mCameraId;
         mSurfaceView = new CameraSurfaceView(getContext(), mCameraId);
-        addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    public void release() {
+        mSurfaceView.releaseCamera();
     }
 
     @Override
@@ -133,7 +141,8 @@ public class CameraPreviewView extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mPreviewCallback = null;
+        mFocusAnimation.cancel();
+        mIndicatorAnimation.cancel();
     }
 
     private class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
@@ -171,8 +180,6 @@ public class CameraPreviewView extends FrameLayout {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            mFocusAnimation.cancel();
-            mIndicatorAnimation.cancel();
             if (mPreviewCallback != null) {
                 mPreviewCallback.onPreviewStopped();
             }
@@ -190,7 +197,7 @@ public class CameraPreviewView extends FrameLayout {
             }
 
             CameraHelper.setOptimalSize(mCamera, mAspectRatio, height, width);
-            mCamera.setDisplayOrientation(90);
+            CameraHelper.setDisplayOritation((Activity) getContext(), mCamera, mCameraId);
             try {
                 startPreview(holder);
             } catch (IOException e) {

@@ -81,6 +81,7 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
         if (mIsRecording) {
             stopRecord();
         }
+        mCameraPreviewView.release();
     }
 
     @Override

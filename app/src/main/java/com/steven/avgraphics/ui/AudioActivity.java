@@ -214,11 +214,13 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
 
         private void stop() {
             mIsPlaying = false;
-            try {
-                mExecutor.shutdown();
-                mExecutor.awaitTermination(50, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "stop play faild");
+            if (mExecutor != null) {
+                try {
+                    mExecutor.shutdown();
+                    mExecutor.awaitTermination(50, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "stop play faild");
+                }
             }
             release();
             Utils.runOnUiThread(AudioActivity.this::resetButtons);
