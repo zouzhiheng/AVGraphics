@@ -22,7 +22,6 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -31,6 +30,7 @@ import android.view.TextureView;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
@@ -46,9 +46,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class Camera2Activity extends AppCompatActivity {
-
-    private static final String TAG = "Camera2Activity";
+public class Camera2Activity extends BaseActivity {
 
     private static final float ASPECT_RATIO = 9.0f / 16;
 
@@ -229,7 +227,7 @@ public class Camera2Activity extends AppCompatActivity {
     }
 
     private Size chooseOptimalSize(Size[] options, float aspectRatio, int maxWidth,
-                                         int maxHeight) {
+                                   int maxHeight) {
         List<Size> alternative = new ArrayList<>();
         for (Size option : options) {
             if (option.getHeight() == option.getWidth() * aspectRatio

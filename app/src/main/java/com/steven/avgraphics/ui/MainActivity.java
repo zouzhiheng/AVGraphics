@@ -26,12 +26,6 @@ public class MainActivity extends BaseActivity {
 
     private static final int RC_PERMISSION = 1;
 
-    private Button mBtnToDrawImage;
-    private Button mBtnCamera;
-    private Button mBtnCamera2;
-    private Button mBtnToAudio;
-    private Button mBtnHWCodec;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,24 +34,12 @@ public class MainActivity extends BaseActivity {
     }
 
     private void init() {
-        findView();
-        setListener();
-    }
-
-    private void findView() {
-        mBtnToDrawImage = findViewById(R.id.main_btn_draw_image);
-        mBtnCamera = findViewById(R.id.main_btn_camera);
-        mBtnCamera2 = findViewById(R.id.main_btn_camera2);
-        mBtnToAudio = findViewById(R.id.main_btn_audio);
-        mBtnHWCodec = findViewById(R.id.main_btn_hwcodec);
-    }
-
-    private void setListener() {
-        mBtnToDrawImage.setOnClickListener(v -> startActivity(DrawImageActivity.class));
-        mBtnCamera.setOnClickListener(v -> startActivity(CameraActivity.class));
-        mBtnCamera2.setOnClickListener(v -> startActivity(Camera2Activity.class));
-        mBtnToAudio.setOnClickListener(v -> startActivity(AudioActivity.class));
-        mBtnHWCodec.setOnClickListener(v -> startActivity(HWCodecActivity.class));
+        findViewById(R.id.main_btn_draw_image).setOnClickListener(v -> startActivity(DrawImageActivity.class));
+        findViewById(R.id.main_btn_camera).setOnClickListener(v -> startActivity(CameraActivity.class));
+        findViewById(R.id.main_btn_camera2).setOnClickListener(v -> startActivity(Camera2Activity.class));
+        findViewById(R.id.main_btn_audio).setOnClickListener(v -> startActivity(AudioActivity.class));
+        findViewById(R.id.main_btn_opensl).setOnClickListener(v -> startActivity(OpenSLActivity.class));
+        findViewById(R.id.main_btn_hwcodec).setOnClickListener(v -> startActivity(HWCodecActivity.class));
     }
 
     @Override
@@ -70,6 +52,7 @@ public class MainActivity extends BaseActivity {
         String[] permissions = {
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.MODIFY_AUDIO_SETTINGS,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
         };
@@ -128,6 +111,6 @@ public class MainActivity extends BaseActivity {
     }
 
     static {
-        System.loadLibrary("native-lib");
+        System.loadLibrary("sles");
     }
 }

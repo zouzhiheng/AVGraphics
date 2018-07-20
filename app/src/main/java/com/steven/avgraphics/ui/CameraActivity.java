@@ -23,8 +23,6 @@ import java.io.IOException;
 public class CameraActivity extends BaseActivity implements View.OnClickListener,
         Camera.PreviewCallback, CameraPreviewView.PreviewCallback  {
 
-    private static final String TAG = "CameraActivity";
-
     private Button mBtnSwitch;
     private Button mBtnStartGetData;
     private Button mBtnStop;
