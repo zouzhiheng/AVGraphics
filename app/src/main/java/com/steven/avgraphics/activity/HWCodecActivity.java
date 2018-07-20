@@ -1,4 +1,4 @@
-package com.steven.avgraphics.ui;
+package com.steven.avgraphics.activity;
 
 import android.hardware.Camera;
 import android.os.Bundle;

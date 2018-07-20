@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.steven.avgraphics.ui.OpenSLActivity">
+    tools:context="com.steven.avgraphics.activity.OpenSLActivity">
 
     <Button
         android:id="@+id/opensl_btn_start_play"

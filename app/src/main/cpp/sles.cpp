@@ -52,7 +52,7 @@ void releaseResampleBuf(void);
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_ui_OpenSLActivity__1createEngine(JNIEnv *env, jclass type) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1createEngine(JNIEnv *env, jclass type) {
     SLresult result;
 
     // create engine
@@ -92,10 +92,10 @@ Java_com_steven_avgraphics_ui_OpenSLActivity__1createEngine(JNIEnv *env, jclass 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_ui_OpenSLActivity__1createBufferQueueAudioPlayer(JNIEnv *env,
-                                                                            jclass type,
-                                                                            jint sampleRate,
-                                                                            jint bufSize) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1createBufferQueueAudioPlayer(JNIEnv *env,
+                                                                                  jclass type,
+                                                                                  jint sampleRate,
+                                                                                  jint bufSize) {
 
     SLresult result;
 
@@ -202,9 +202,10 @@ void releaseResampleBuf(void) {
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_steven_avgraphics_ui_OpenSLActivity__1createAssetAudioPlayer(JNIEnv *env, jclass type,
-                                                                      jobject assetManager,
-                                                                      jstring filename_) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1createAssetAudioPlayer(JNIEnv *env,
+                                                                            jclass type,
+                                                                            jobject assetManager,
+                                                                            jstring filename_) {
     const char *filename = env->GetStringUTFChars(filename_, 0);
     assert(filename != NULL);
 
@@ -267,8 +268,9 @@ Java_com_steven_avgraphics_ui_OpenSLActivity__1createAssetAudioPlayer(JNIEnv *en
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_ui_OpenSLActivity__1setPlayingAssetAudioPlayer(JNIEnv *env, jclass type,
-                                                                          jboolean isPlaying) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1setPlayingAssetAudioPlayer(JNIEnv *env,
+                                                                                jclass type,
+                                                                                jboolean isPlaying) {
     SLresult result;
 
     if (fdPlayerPlay != NULL) {
@@ -282,7 +284,7 @@ Java_com_steven_avgraphics_ui_OpenSLActivity__1setPlayingAssetAudioPlayer(JNIEnv
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_ui_OpenSLActivity__1shutdown(JNIEnv *env, jclass type) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1shutdown(JNIEnv *env, jclass type) {
 
     if (bqPlayerObj != NULL) {
         (*bqPlayerObj)->Destroy(bqPlayerObj);

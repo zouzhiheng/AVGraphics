@@ -1,4 +1,4 @@
-package com.steven.avgraphics.ui;
+package com.steven.avgraphics.activity;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;

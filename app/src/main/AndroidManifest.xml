@@ -18,25 +18,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.DrawImageActivity" />
-        <activity android:name=".ui.AudioActivity" />
+        <activity android:name=".activity.DrawImageActivity" />
+        <activity android:name=".activity.AudioActivity" />
         <activity
-            android:name=".ui.HWCodecActivity"
+            android:name=".activity.HWCodecActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
-            android:name=".ui.CameraActivity"
+            android:name=".activity.CameraActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
-            android:name=".ui.Camera2Activity"
+            android:name=".activity.Camera2Activity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name=".ui.OpenSLActivity"></activity>
+        <activity android:name=".activity.OpenSLActivity"></activity>
     </application>
 
 </manifest>

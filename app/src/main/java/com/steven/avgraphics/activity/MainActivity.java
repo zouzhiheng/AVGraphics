@@ -1,4 +1,4 @@
-package com.steven.avgraphics.ui;
+package com.steven.avgraphics.activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.BaseApplication;

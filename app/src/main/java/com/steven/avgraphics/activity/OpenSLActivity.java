@@ -1,10 +1,9 @@
-package com.steven.avgraphics.ui;
+package com.steven.avgraphics.activity;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.Button;
 
@@ -38,14 +37,13 @@ public class OpenSLActivity extends BaseActivity {
             finish();
             return;
         }
-        _createEngine();
-        AssetManager assetManager = getAssets();
         String nativeParam = manager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
         int sampleRate = Integer.parseInt(nativeParam);
         nativeParam = manager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
         int bufSize = Integer.parseInt(nativeParam);
-//        _createBufferQueueAudioPlayer(sampleRate, bufSize);
-//        _createAssetAudioPlayer(assetManager, "background.mp3");
+        _createEngine();
+        _createBufferQueueAudioPlayer(sampleRate, bufSize);
+        _createAssetAudioPlayer(getAssets(), "background.mp3");
     }
 
     private void findView() {
