@@ -7,6 +7,11 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <malloc.h>
+#include <android/log.h>
+
+#define LOG_TAG "opensles"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 // engine interfaces
 static SLObjectItf engineObj = NULL;
@@ -38,6 +43,22 @@ static SLSeekItf fdPlayerSeek;
 static SLMuteSoloItf fdPlayerMuteSolo;
 static SLVolumeItf fdPlayerVolume;
 
+// audio recorder interfaces
+static SLObjectItf recorderObj = NULL;
+static SLRecordItf recorderRecord;
+static SLAndroidSimpleBufferQueueItf recorderBQ;
+
+// 5 seconds of recorded audio at 16 kHz mono, 16-bit signed little endian
+#define RECORDER_FRAMES 4096
+static short emptyBuffer[RECORDER_FRAMES];
+static short dataBuffer[RECORDER_FRAMES];
+static short *recorderBuffers[2] = {emptyBuffer, dataBuffer};
+static int recordBufferIndex = 0;
+static unsigned recorderSize = RECORDER_FRAMES;
+static bool isRecording = false;
+
+FILE *pcmFile = NULL;
+
 static pthread_mutex_t audioEngineLock = PTHREAD_MUTEX_INITIALIZER;
 
 // aux effect on the output mix, used by the buffer queue player
@@ -46,6 +67,8 @@ static const SLEnvironmentalReverbSettings reverbSettings =
 
 
 void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
+
+void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
 void releaseResampleBuf(void);
 
@@ -96,7 +119,6 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createBufferQueueAudioPlaye
                                                                                   jclass type,
                                                                                   jint sampleRate,
                                                                                   jint bufSize) {
-
     SLresult result;
 
     if (sampleRate > 0 && bufSize > 0) {
@@ -283,6 +305,110 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1setPlayingAssetAudioPlayer(
 }
 
 extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_steven_avgraphics_activity_OpenSLActivity__1createAudioRecorder(JNIEnv *env, jclass type,
+                                                                         jstring filePath_) {
+    const char *filePath = env->GetStringUTFChars(filePath_, 0);
+
+    pcmFile = fopen(filePath, "w");
+
+    SLresult result;
+
+    SLDataLocator_IODevice locDevice = {SL_DATALOCATOR_IODEVICE, SL_IODEVICE_AUDIOINPUT,
+                                        SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
+    SLDataSource audioSrc = {&locDevice, NULL};
+
+    SLDataLocator_AndroidSimpleBufferQueue locBQ = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+    SLDataFormat_PCM formatPcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_48,
+                                  SL_PCMSAMPLEFORMAT_FIXED_16, SL_PCMSAMPLEFORMAT_FIXED_16,
+                                  SL_SPEAKER_FRONT_CENTER, SL_BYTEORDER_LITTLEENDIAN};
+    SLDataSink audioSink = {&locBQ, &formatPcm};
+
+    const SLInterfaceID id[1] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
+    const SLboolean req[1] = {SL_BOOLEAN_TRUE};
+    result = (*engineEngine)->CreateAudioRecorder(engineEngine, &recorderObj, &audioSrc, &audioSink,
+                                                  1, id, req);
+    if (SL_RESULT_SUCCESS != result) {
+        return JNI_FALSE;
+    }
+
+    result = (*recorderObj)->Realize(recorderObj, SL_BOOLEAN_FALSE);
+    if (SL_RESULT_SUCCESS != result) {
+        return JNI_FALSE;
+    }
+
+    result = (*recorderObj)->GetInterface(recorderObj, SL_IID_RECORD, &recorderRecord);
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    result = (*recorderObj)->GetInterface(recorderObj, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBQ);
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    result = (*recorderBQ)->RegisterCallback(recorderBQ, bqRecorderCallback, NULL);
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    env->ReleaseStringUTFChars(filePath_, filePath);
+
+    return JNI_TRUE;
+}
+
+void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
+    assert(bq == recorderBQ);
+    assert(NULL == context);
+
+    fwrite(recorderBuffers[recordBufferIndex], 1, recorderSize, pcmFile);
+    if (isRecording) {
+        recordBufferIndex = 1 - recordBufferIndex;
+        (*recorderBQ)->Enqueue(recorderBQ, recorderBuffers[recordBufferIndex], recorderSize);
+    } else {
+        (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_STOPPED);
+        fclose(pcmFile);
+        pcmFile = NULL;
+        LOGI("stop recording");
+    }
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_OpenSLActivity__1startRecord(JNIEnv *env, jclass type) {
+    SLresult result;
+
+    if (pthread_mutex_lock(&audioEngineLock)) {
+        LOGE("pthread_mutex_lock error");
+        return;
+    }
+
+    result = (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_STOPPED);
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    result = (*recorderBQ)->Clear(recorderBQ);
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    result = (*recorderBQ)->Enqueue(recorderBQ, recorderBuffers[recordBufferIndex],
+                                    RECORDER_FRAMES * sizeof(short));
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    result = (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_RECORDING);
+    assert(SL_RESULT_SUCCESS == result);
+    (void)result;
+
+    isRecording = true;
+    LOGI("start recording...");
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_OpenSLActivity__1stopRecord(JNIEnv *env, jclass type) {
+    isRecording = false;
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_OpenSLActivity__1shutdown(JNIEnv *env, jclass type) {
 
@@ -304,6 +430,13 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1shutdown(JNIEnv *env, jclas
         fdPlayerVolume = NULL;
     }
 
+    if (recorderObj != NULL) {
+        (*recorderObj)->Destroy(recorderObj);
+        recorderObj = NULL;
+        recorderRecord = NULL;
+        recorderBQ = NULL;
+    }
+
     if (outputMixObj != NULL) {
         (*outputMixObj)->Destroy(outputMixObj);
         outputMixObj = NULL;
@@ -318,3 +451,4 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1shutdown(JNIEnv *env, jclas
 
     pthread_mutex_destroy(&audioEngineLock);
 }
+

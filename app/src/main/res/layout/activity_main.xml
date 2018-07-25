@@ -13,7 +13,8 @@
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/main_btn_draw_image" />
+        android:text="@string/main_btn_draw_image"
+        android:textAllCaps="false" />
 
     <Button
         android:id="@+id/main_btn_camera"
@@ -32,7 +33,8 @@
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/main_btn_camera2" />
+        android:text="@string/main_btn_camera2"
+        android:textAllCaps="false" />
 
     <Button
         android:id="@+id/main_btn_audio"

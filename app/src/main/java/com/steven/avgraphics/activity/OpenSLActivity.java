@@ -72,11 +72,16 @@ public class OpenSLActivity extends BaseActivity {
     }
 
     private void startRecord() {
-
+        if (_createAudioRecorder("/sdcard/opensles.pcm")) {
+            _startRecord();
+        }
+        disableButtons();
+        mBtnStopRecord.postDelayed(() -> mBtnStopRecord.setEnabled(true), 1000);
     }
 
     private void stopRecord() {
-
+        _stopRecord();
+        resetButtons();
     }
 
     private void disableButtons() {
@@ -114,6 +119,12 @@ public class OpenSLActivity extends BaseActivity {
 
     // true == PLAYING, false == PAUSED
     private static native void _setPlayingAssetAudioPlayer(boolean isPlaying);
+
+    private static native boolean _createAudioRecorder(String filePath);
+
+    private static native void _startRecord();
+
+    private static native void _stopRecord();
 
     private static native void _shutdown();
     
