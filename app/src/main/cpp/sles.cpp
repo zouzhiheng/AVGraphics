@@ -15,7 +15,7 @@
 
 // engine interfaces
 static SLObjectItf engineObj = NULL;
-static SLEngineItf engineEngine = NULL;
+static SLEngineItf engine = NULL;
 
 // output mix interfaces
 static SLObjectItf outputMixObj = NULL;
@@ -23,7 +23,7 @@ static SLEnvironmentalReverbItf outputMixER = NULL;
 
 // buffer queue player interfaces
 static SLObjectItf bqPlayerObj = NULL;
-static SLPlayItf bqPlayerPlay = NULL;
+static SLPlayItf bqPlayer = NULL;
 static SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue;
 static SLEffectSendItf bqPlayerEffectSend;
 static SLVolumeItf bqPlayerVolume;
@@ -38,17 +38,17 @@ static int nextCount;
 
 // file descriptor player interfaces
 static SLObjectItf fdPlayerObj = NULL;
-static SLPlayItf fdPlayerPlay;
+static SLPlayItf fdPlayer;
 static SLSeekItf fdPlayerSeek;
 static SLMuteSoloItf fdPlayerMuteSolo;
 static SLVolumeItf fdPlayerVolume;
 
 // audio recorder interfaces
 static SLObjectItf recorderObj = NULL;
-static SLRecordItf recorderRecord;
+static SLRecordItf recorder;
 static SLAndroidSimpleBufferQueueItf recorderBQ;
 
-// 5 seconds of recorded audio at 16 kHz mono, 16-bit signed little endian
+
 #define RECORDER_FRAMES 4096
 static short emptyBuffer[RECORDER_FRAMES];
 static short dataBuffer[RECORDER_FRAMES];
@@ -72,6 +72,14 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
 void releaseResampleBuf(void);
 
+void releaseBQPlayer();
+
+void releaseFDPlayer();
+
+void releaseRecorder();
+
+void release();
+
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -89,14 +97,14 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createEngine(JNIEnv *env, j
     (void) result;
 
     // get the engine interface, which is needed in order to create other objects
-    result = (*engineObj)->GetInterface(engineObj, SL_IID_ENGINE, &engineEngine);
+    result = (*engineObj)->GetInterface(engineObj, SL_IID_ENGINE, &engine);
     assert(SL_RESULT_SUCCESS == result);
     (void) result;
 
     // create output mix, with environmental reverb specified as a non-required interface
     const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
     const SLboolean req[1] = {SL_BOOLEAN_FALSE};
-    (*engineEngine)->CreateOutputMix(engineEngine, &outputMixObj, 1, ids, req);
+    (*engine)->CreateOutputMix(engine, &outputMixObj, 1, ids, req);
 
     result = (*outputMixObj)->Realize(outputMixObj, SL_BOOLEAN_FALSE);
     assert(SL_RESULT_SUCCESS == result);
@@ -151,8 +159,8 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createBufferQueueAudioPlaye
      */
     const SLInterfaceID ids[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND};
     const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
-    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &bqPlayerObj, &audioSource,
-                                                &audioSink, bqPlayerSampleRate ? 2 : 3, ids, req);
+    result = (*engine)->CreateAudioPlayer(engine, &bqPlayerObj, &audioSource,
+                                          &audioSink, bqPlayerSampleRate ? 2 : 3, ids, req);
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
@@ -160,7 +168,7 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createBufferQueueAudioPlaye
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
-    result = (*bqPlayerObj)->GetInterface(bqPlayerObj, SL_IID_PLAY, &bqPlayerPlay);
+    result = (*bqPlayerObj)->GetInterface(bqPlayerObj, SL_IID_PLAY, &bqPlayer);
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
@@ -184,7 +192,7 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createBufferQueueAudioPlaye
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
-    result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PLAYING);
+    result = (*bqPlayer)->SetPlayState(bqPlayer, SL_PLAYSTATE_PLAYING);
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 }
@@ -228,6 +236,8 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAssetAudioPlayer(JNIE
                                                                             jclass type,
                                                                             jobject assetManager,
                                                                             jstring filename_) {
+    releaseRecorder();
+
     const char *filename = env->GetStringUTFChars(filename_, 0);
     assert(filename != NULL);
 
@@ -256,8 +266,8 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAssetAudioPlayer(JNIE
 
     const SLInterfaceID ids[3] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
     const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
-    result = (*engineEngine)->CreateAudioPlayer(engineEngine, &fdPlayerObj, &audioSrc, &audioSink,
-                                                3, ids, req);
+    result = (*engine)->CreateAudioPlayer(engine, &fdPlayerObj, &audioSrc, &audioSink,
+                                          3, ids, req);
     assert(SL_RESULT_SUCCESS == result);
     (void) result;
 
@@ -265,7 +275,7 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAssetAudioPlayer(JNIE
     assert(SL_RESULT_SUCCESS == result);
     (void) result;
 
-    result = (*fdPlayerObj)->GetInterface(fdPlayerObj, SL_IID_PLAY, &fdPlayerPlay);
+    result = (*fdPlayerObj)->GetInterface(fdPlayerObj, SL_IID_PLAY, &fdPlayer);
     assert(SL_RESULT_SUCCESS == result);
     (void) result;
 
@@ -290,15 +300,14 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAssetAudioPlayer(JNIE
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_OpenSLActivity__1setPlayingAssetAudioPlayer(JNIEnv *env,
-                                                                                jclass type,
-                                                                                jboolean isPlaying) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1setAssetAudioPlayerState(JNIEnv *env,
+                                                                              jclass type,
+                                                                              jboolean isPlaying) {
     SLresult result;
 
-    if (fdPlayerPlay != NULL) {
-        result = (*fdPlayerPlay)->SetPlayState(fdPlayerPlay, isPlaying
-                                                             ? SL_PLAYSTATE_PLAYING
-                                                             : SL_PLAYSTATE_PAUSED);
+    if (fdPlayer != NULL) {
+        result = (*fdPlayer)->SetPlayState(fdPlayer,
+                                           isPlaying ? SL_PLAYSTATE_PLAYING : SL_PLAYSTATE_PAUSED);
         assert(SL_RESULT_SUCCESS == result);
         (void) result;
     }
@@ -314,11 +323,19 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAudioRecorder(JNIEnv 
 
     SLresult result;
 
+    // deviceType: SL_IODEVICE_AUDIOINPUT
+    // deviceId: SL_DEFAULTDEVICEID_AUDIOINPUT
     SLDataLocator_IODevice locDevice = {SL_DATALOCATOR_IODEVICE, SL_IODEVICE_AUDIOINPUT,
                                         SL_DEFAULTDEVICEID_AUDIOINPUT, NULL};
     SLDataSource audioSrc = {&locDevice, NULL};
 
+    // num buffers: 2
     SLDataLocator_AndroidSimpleBufferQueue locBQ = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+    // format: PCM
+    // channel: 1
+    // sampleRate: 48000
+    // sampleFormat: 16bit
+    // endian: little endian
     SLDataFormat_PCM formatPcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_48,
                                   SL_PCMSAMPLEFORMAT_FIXED_16, SL_PCMSAMPLEFORMAT_FIXED_16,
                                   SL_SPEAKER_FRONT_CENTER, SL_BYTEORDER_LITTLEENDIAN};
@@ -326,8 +343,8 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAudioRecorder(JNIEnv 
 
     const SLInterfaceID id[1] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE};
     const SLboolean req[1] = {SL_BOOLEAN_TRUE};
-    result = (*engineEngine)->CreateAudioRecorder(engineEngine, &recorderObj, &audioSrc, &audioSink,
-                                                  1, id, req);
+    result = (*engine)->CreateAudioRecorder(engine, &recorderObj, &audioSrc, &audioSink,
+                                            1, id, req);
     if (SL_RESULT_SUCCESS != result) {
         return JNI_FALSE;
     }
@@ -337,17 +354,18 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1createAudioRecorder(JNIEnv 
         return JNI_FALSE;
     }
 
-    result = (*recorderObj)->GetInterface(recorderObj, SL_IID_RECORD, &recorderRecord);
+    result = (*recorderObj)->GetInterface(recorderObj, SL_IID_RECORD, &recorder);
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
-    result = (*recorderObj)->GetInterface(recorderObj, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recorderBQ);
+    result = (*recorderObj)->GetInterface(recorderObj, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
+                                          &recorderBQ);
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
     result = (*recorderBQ)->RegisterCallback(recorderBQ, bqRecorderCallback, NULL);
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
     env->ReleaseStringUTFChars(filePath_, filePath);
 
@@ -363,10 +381,11 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
         recordBufferIndex = 1 - recordBufferIndex;
         (*recorderBQ)->Enqueue(recorderBQ, recorderBuffers[recordBufferIndex], recorderSize);
     } else {
-        (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_STOPPED);
+        (*recorder)->SetRecordState(recorder, SL_RECORDSTATE_STOPPED);
         fclose(pcmFile);
         pcmFile = NULL;
-        LOGI("stop recording");
+        pthread_mutex_unlock(&audioEngineLock);
+        LOGI("recorder stopped");
     }
 
 }
@@ -381,22 +400,22 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1startRecord(JNIEnv *env, jc
         return;
     }
 
-    result = (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_STOPPED);
+    result = (*recorder)->SetRecordState(recorder, SL_RECORDSTATE_STOPPED);
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
     result = (*recorderBQ)->Clear(recorderBQ);
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
     result = (*recorderBQ)->Enqueue(recorderBQ, recorderBuffers[recordBufferIndex],
                                     RECORDER_FRAMES * sizeof(short));
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
-    result = (*recorderRecord)->SetRecordState(recorderRecord, SL_RECORDSTATE_RECORDING);
+    result = (*recorder)->SetRecordState(recorder, SL_RECORDSTATE_RECORDING);
     assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (void) result;
 
     isRecording = true;
     LOGI("start recording...");
@@ -410,32 +429,14 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1stopRecord(JNIEnv *env, jcl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_OpenSLActivity__1shutdown(JNIEnv *env, jclass type) {
+Java_com_steven_avgraphics_activity_OpenSLActivity__1release(JNIEnv *env, jclass type) {
+    release();
+}
 
-    if (bqPlayerObj != NULL) {
-        (*bqPlayerObj)->Destroy(bqPlayerObj);
-        bqPlayerObj = NULL;
-        bqPlayerPlay = NULL;
-        bqPlayerBufferQueue = NULL;
-        bqPlayerEffectSend = NULL;
-        bqPlayerVolume = NULL;
-    }
-
-    if (fdPlayerObj != NULL) {
-        (*fdPlayerObj)->Destroy(fdPlayerObj);
-        fdPlayerObj = NULL;
-        fdPlayerPlay = NULL;
-        fdPlayerSeek = NULL;
-        fdPlayerMuteSolo = NULL;
-        fdPlayerVolume = NULL;
-    }
-
-    if (recorderObj != NULL) {
-        (*recorderObj)->Destroy(recorderObj);
-        recorderObj = NULL;
-        recorderRecord = NULL;
-        recorderBQ = NULL;
-    }
+void release() {
+    releaseBQPlayer();
+    releaseFDPlayer();
+    releaseRecorder();
 
     if (outputMixObj != NULL) {
         (*outputMixObj)->Destroy(outputMixObj);
@@ -446,9 +447,40 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1shutdown(JNIEnv *env, jclas
     if (engineObj != NULL) {
         (*engineObj)->Destroy(engineObj);
         engineObj = NULL;
-        engineEngine = NULL;
+        engine = NULL;
     }
 
     pthread_mutex_destroy(&audioEngineLock);
+}
+
+void releaseBQPlayer() {
+    if (bqPlayerObj != NULL) {
+        (*bqPlayerObj)->Destroy(bqPlayerObj);
+        bqPlayerObj = NULL;
+        bqPlayer = NULL;
+        bqPlayerBufferQueue = NULL;
+        bqPlayerEffectSend = NULL;
+        bqPlayerVolume = NULL;
+    }
+}
+
+void releaseFDPlayer() {
+    if (fdPlayerObj != NULL) {
+        (*fdPlayerObj)->Destroy(fdPlayerObj);
+        fdPlayerObj = NULL;
+        fdPlayer = NULL;
+        fdPlayerSeek = NULL;
+        fdPlayerMuteSolo = NULL;
+        fdPlayerVolume = NULL;
+    }
+}
+
+void releaseRecorder() {
+    if (recorderObj != NULL) {
+        (*recorderObj)->Destroy(recorderObj);
+        recorderObj = NULL;
+        recorder = NULL;
+        recorderBQ = NULL;
+    }
 }
 

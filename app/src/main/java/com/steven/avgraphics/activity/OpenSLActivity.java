@@ -61,13 +61,13 @@ public class OpenSLActivity extends BaseActivity {
     }
 
     private void startPlay() {
-        _setPlayingAssetAudioPlayer(true);
+        _setAssetAudioPlayerState(true);
         disableButtons();
         mBtnStopPlay.setEnabled(true);
     }
 
     private void stopPlay() {
-        _setPlayingAssetAudioPlayer(false);
+        _setAssetAudioPlayerState(false);
         resetButtons();
     }
 
@@ -102,13 +102,14 @@ public class OpenSLActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        _setPlayingAssetAudioPlayer(false);
+        _setAssetAudioPlayerState(false);
+        _stopRecord();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        _shutdown();
+        _release();
     }
 
     private static native void _createEngine();
@@ -118,7 +119,7 @@ public class OpenSLActivity extends BaseActivity {
     private static native boolean _createAssetAudioPlayer(AssetManager assetManager, String filename);
 
     // true == PLAYING, false == PAUSED
-    private static native void _setPlayingAssetAudioPlayer(boolean isPlaying);
+    private static native void _setAssetAudioPlayerState(boolean isPlaying);
 
     private static native boolean _createAudioRecorder(String filePath);
 
@@ -126,6 +127,6 @@ public class OpenSLActivity extends BaseActivity {
 
     private static native void _stopRecord();
 
-    private static native void _shutdown();
+    private static native void _release();
     
 }
