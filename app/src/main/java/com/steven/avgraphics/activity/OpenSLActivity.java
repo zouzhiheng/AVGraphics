@@ -99,7 +99,7 @@ public class OpenSLActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void startPlayPcm() {
-        _startPlayPcm("", 0, 0);
+        _startPlayPcm(Utils.getOpenSLOutput());
         disableButtons();
         mBtnStopPlayPcm.setEnabled(true);
     }
@@ -145,7 +145,7 @@ public class OpenSLActivity extends BaseActivity implements View.OnClickListener
     private static native void _stopRecord();
 
     @SuppressWarnings("SameParameterValue")
-    private static native void _startPlayPcm(String filePath, int sampleRate, int bufSize);
+    private static native void _startPlayPcm(String filePath);
 
     private static native void _stopPlayPcm();
 

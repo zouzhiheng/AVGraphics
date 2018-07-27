@@ -17,10 +17,10 @@ private:
     AudioEngine *mAudioEngine;
     SLObjectItf mRecorderObj;
     SLRecordItf mRecorder;
-    SLAndroidSimpleBufferQueueItf mRecorderBQ;
+    SLAndroidSimpleBufferQueueItf mBufferQueue;
 
-    unsigned mRecorderBufSize;
-    short *mRecorderBuffers[2];
+    unsigned mBufSize;
+    short *mBuffers[2];
     int mIndex;
 
     bool mIsRecording;

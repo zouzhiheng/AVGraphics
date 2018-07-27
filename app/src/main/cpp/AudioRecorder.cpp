@@ -5,14 +5,14 @@
 #include "AudioRecorder.h"
 #include "log.h"
 
-#define RECORDER_FRAMES 960
+#define RECORDER_FRAMES 2048
 
 AudioRecorder::AudioRecorder(const char *filePath)
         : mAudioEngine(new AudioEngine()), mFile(fopen(filePath, "w")), mRecorderObj(nullptr),
-          mRecorder(nullptr), mRecorderBQ(nullptr), mRecorderBufSize(RECORDER_FRAMES), mIndex(0),
+          mRecorder(nullptr), mBufferQueue(nullptr), mBufSize(RECORDER_FRAMES), mIndex(0),
           mIsRecording(false), mIsInitialized(false) {
-    mRecorderBuffers[1] = new short[mRecorderBufSize];
-    mRecorderBuffers[0] = new short[mRecorderBufSize];
+    mBuffers[1] = new short[mBufSize];
+    mBuffers[0] = new short[mBufSize];
 }
 
 bool AudioRecorder::start() {
@@ -30,13 +30,12 @@ bool AudioRecorder::start() {
         return false;
     }
 
-    result = (*mRecorderBQ)->Clear(mRecorderBQ);
+    result = (*mBufferQueue)->Clear(mBufferQueue);
     if (SL_RESULT_SUCCESS != result) {
         return false;
     }
 
-    result = (*mRecorderBQ)->Enqueue(mRecorderBQ, mRecorderBuffers[mIndex],
-                                     mRecorderBufSize * sizeof(short));
+    result = (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], mBufSize * sizeof(short));
     if (SL_RESULT_SUCCESS != result) {
         return false;
     }
@@ -90,12 +89,12 @@ bool AudioRecorder::initRecorder() {
     }
 
     result = (*mRecorderObj)->GetInterface(mRecorderObj, SL_IID_ANDROIDSIMPLEBUFFERQUEUE,
-                                           &mRecorderBQ);
+                                           &mBufferQueue);
     if (SL_RESULT_SUCCESS != result) {
         return false;
     }
 
-    result = (*mRecorderBQ)->RegisterCallback(mRecorderBQ, recorderCallback, this);
+    result = (*mBufferQueue)->RegisterCallback(mBufferQueue, recorderCallback, this);
     return SL_RESULT_SUCCESS == result;
 
 }
@@ -104,15 +103,15 @@ void AudioRecorder::recorderCallback(SLAndroidSimpleBufferQueueItf bq, void *con
     assert(context != nullptr);
 
     AudioRecorder *recorder = (AudioRecorder *) context;
-    assert(bq == recorder->mRecorderBQ);
+    assert(bq == recorder->mBufferQueue);
 
-    fwrite(recorder->mRecorderBuffers[recorder->mIndex], 1, recorder->mRecorderBufSize,
+    fwrite(recorder->mBuffers[recorder->mIndex], 1, recorder->mBufSize,
            recorder->mFile);
     if (recorder->mIsRecording) {
         recorder->mIndex = 1 - recorder->mIndex;
-        (*recorder->mRecorderBQ)->Enqueue(recorder->mRecorderBQ,
-                                          recorder->mRecorderBuffers[recorder->mIndex],
-                                          recorder->mRecorderBufSize);
+        (*recorder->mBufferQueue)->Enqueue(recorder->mBufferQueue,
+                                           recorder->mBuffers[recorder->mIndex],
+                                           recorder->mBufSize);
     } else {
         (*recorder->mRecorder)->SetRecordState(recorder->mRecorder, SL_RECORDSTATE_STOPPED);
         fclose(recorder->mFile);
@@ -134,7 +133,7 @@ void AudioRecorder::release() {
         (*mRecorderObj)->Destroy(mRecorderObj);
         mRecorderObj = nullptr;
         mRecorder = nullptr;
-        mRecorderBQ = nullptr;
+        mBufferQueue = nullptr;
     }
 
     if (mAudioEngine) {
@@ -142,14 +141,14 @@ void AudioRecorder::release() {
         mAudioEngine = nullptr;
     }
 
-    if (mRecorderBuffers[0]) {
-        delete[] mRecorderBuffers[0];
-        mRecorderBuffers[0] = nullptr;
+    if (mBuffers[0]) {
+        delete[] mBuffers[0];
+        mBuffers[0] = nullptr;
     }
 
-    if (mRecorderBuffers[1]) {
-        delete[] mRecorderBuffers[1];
-        mRecorderBuffers[1] = nullptr;
+    if (mBuffers[1]) {
+        delete[] mBuffers[1];
+        mBuffers[1] = nullptr;
     }
 
     if (mFile) {

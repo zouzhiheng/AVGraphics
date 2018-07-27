@@ -5,17 +5,24 @@
 #include <assert.h>
 #include "BQAudioPlayer.h"
 #include "log.h"
+#include <pthread.h>
+
+#define SAMPLE_RATE 48000
+#define BUFFER_SIZE 2048
 
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
 BQAudioPlayer::BQAudioPlayer(const char *filePath)
-        : mAudioEngine(new AudioEngine()), mFile(fopen(filePath, "r")), mPlayerObj(nullptr), mPlayer(nullptr),
-          mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr), mSampleRate(0),
-          mBufSize(0), mResampleBuf(nullptr), mIsPlaying(false) {
-
+        : mAudioEngine(new AudioEngine()), mFile(fopen(filePath, "r")), mPlayerObj(nullptr),
+          mPlayer(nullptr), mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr),
+          mSampleRate(0), mIndex(0), mBufSize(0), mIsPlaying(false) {
+    initPlayer(SAMPLE_RATE, BUFFER_SIZE);
+    mBuffers[0] = new short[mBufSize];
+    mBuffers[1] = new short[mBufSize];
+    mMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
-void BQAudioPlayer::initPlayer(const char *filePath, int sampleRate, int bufSize) {
+void BQAudioPlayer::initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize) {
     SLresult result;
 
     if (sampleRate > 0 && bufSize > 0) {
@@ -66,7 +73,7 @@ void BQAudioPlayer::initPlayer(const char *filePath, int sampleRate, int bufSize
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
-    result = (*mBufferQueue)->RegisterCallback(mBufferQueue, playerCallback, nullptr);
+    result = (*mBufferQueue)->RegisterCallback(mBufferQueue, playerCallback, this);
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
@@ -89,7 +96,23 @@ void BQAudioPlayer::initPlayer(const char *filePath, int sampleRate, int bufSize
 }
 
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
+    BQAudioPlayer *audioPlayer = (BQAudioPlayer *) context;
+    pthread_mutex_unlock(&audioPlayer->mMutex);
+}
 
+void BQAudioPlayer::start() {
+    LOGI("BQAudioPlayer started");
+    while (mIsPlaying && !feof(mFile)) {
+        fread(mBuffers[mIndex], 1, mBufSize, mFile);
+        pthread_mutex_lock(&mMutex);
+        (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], mBufSize * sizeof(short));
+        mIndex = 1 - mIndex;
+    }
+    LOGI("BQAudioPlayer stopped");
+}
+
+void BQAudioPlayer::stop() {
+    mIsPlaying = false;
 }
 
 BQAudioPlayer::~BQAudioPlayer() {
@@ -111,13 +134,20 @@ void BQAudioPlayer::release() {
         mAudioEngine = nullptr;
     }
 
-    if (mResampleBuf) {
-        delete mResampleBuf;
-        mResampleBuf = nullptr;
+    if (mBuffers[0]) {
+        delete[] mBuffers[0];
+        mBuffers[0] = nullptr;
+    }
+
+    if (mBuffers[1]) {
+        delete[] mBuffers[1];
+        mBuffers[1] = nullptr;
     }
 
     if (mFile) {
         fclose(mFile);
         mFile = nullptr;
     }
+
+    pthread_mutex_destroy(&mMutex);
 }

@@ -21,21 +21,29 @@ private:
     SLEffectSendItf mEffectSend;
     SLVolumeItf mVolume;
     SLmilliHertz mSampleRate;
-    jint mBufSize;
-    short *mResampleBuf;
 
+    short *mBuffers[2];
+    SLuint32 mBufSize;
+    int mIndex;
     bool mIsPlaying;
 
-private:
-    void initPlayer(const char *filePath, int sampleRate, int bufSize);
+    pthread_mutex_t mMutex;
 
-protected:
+private:
+    void initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize);
+
     void release();
 
 public:
     BQAudioPlayer(const char *filePath);
 
+    void start();
+
+    void stop();
+
     ~BQAudioPlayer();
+
+    friend void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 };
 
 #endif //AVGRAPHICS_BQAUDIOPLAYER_H

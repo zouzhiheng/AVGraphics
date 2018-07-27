@@ -4,11 +4,13 @@
 #include "AssetAudioPlayer.h"
 #include "AudioRecorder.h"
 #include "log.h"
+#include "BQAudioPlayer.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 
 AssetAudioPlayer *assetAudioPlayer = nullptr;
+BQAudioPlayer *bqAudioPlayer = nullptr;
 AudioRecorder *audioRecorder = nullptr;
 
 extern "C"
@@ -88,9 +90,15 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1stopRecord(JNIEnv *env, jcl
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_OpenSLActivity__1startPlayPcm(JNIEnv *env, jclass type,
-                                                                  jstring filePath_,
-                                                                  jint sampleRate, jint bufSize) {
+                                                                  jstring filePath_) {
     const char *filePath = env->GetStringUTFChars(filePath_, 0);
+
+    if (bqAudioPlayer) {
+        bqAudioPlayer->stop();
+        delete bqAudioPlayer;
+    }
+    bqAudioPlayer = new BQAudioPlayer(filePath);
+    bqAudioPlayer->start();
 
     env->ReleaseStringUTFChars(filePath_, filePath);
 }
@@ -98,7 +106,12 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1startPlayPcm(JNIEnv *env, j
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_OpenSLActivity__1stopPlayPcm(JNIEnv *env, jclass type) {
-
+    if (!bqAudioPlayer) {
+        return;
+    }
+    bqAudioPlayer->stop();
+    delete bqAudioPlayer;
+    bqAudioPlayer = nullptr;
 }
 
 #pragma clang diagnostic pop
