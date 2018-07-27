@@ -9,57 +9,56 @@
 #include <assert.h>
 
 class AudioEngine {
-protected:
-    SLObjectItf mEngineObj;
-    SLEngineItf mEngine;
+public:
+    SLObjectItf engineObj;
+    SLEngineItf engine;
 
-    SLObjectItf mOutputMixObj;
+    SLObjectItf outputMixObj;
 
-protected:
+public:
+    AudioEngine() : engineObj(nullptr), engine(nullptr), outputMixObj(nullptr) {
+        createEngine();
+    }
+
     void createEngine() {
         SLresult result;
 
-        result = slCreateEngine(&mEngineObj, 0, nullptr, 0, nullptr, nullptr);
+        result = slCreateEngine(&engineObj, 0, nullptr, 0, nullptr, nullptr);
         assert(result == SL_RESULT_SUCCESS);
         (void) result;
 
-        result = (*mEngineObj)->Realize(mEngineObj, SL_BOOLEAN_FALSE);
+        result = (*engineObj)->Realize(engineObj, SL_BOOLEAN_FALSE);
         assert(SL_RESULT_SUCCESS == result);
         (void) result;
 
-        result = (*mEngineObj)->GetInterface(mEngineObj, SL_IID_ENGINE, &mEngine);
+        result = (*engineObj)->GetInterface(engineObj, SL_IID_ENGINE, &engine);
         assert(SL_RESULT_SUCCESS == result);
         (void) result;
 
         const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
         const SLboolean req[1] = {SL_BOOLEAN_FALSE};
-        (*mEngine)->CreateOutputMix(mEngine, &mOutputMixObj, 1, ids, req);
+        (*engine)->CreateOutputMix(engine, &outputMixObj, 1, ids, req);
 
-        result = (*mOutputMixObj)->Realize(mOutputMixObj, SL_BOOLEAN_FALSE);
+        result = (*outputMixObj)->Realize(outputMixObj, SL_BOOLEAN_FALSE);
         assert(SL_RESULT_SUCCESS == result);
         (void) result;
     }
 
-    virtual void release() {
-        if (mOutputMixObj) {
-            (*mOutputMixObj)->Destroy(mOutputMixObj);
-            mOutputMixObj = nullptr;
-        }
-
-        if (mEngineObj) {
-            (*mEngineObj)->Destroy(mEngineObj);
-            mEngineObj = nullptr;
-            mEngine = nullptr;
-        }
-    }
-
-public:
-    AudioEngine() : mEngineObj(nullptr), mEngine(nullptr), mOutputMixObj(nullptr) {
-        createEngine();
-    }
-
     virtual ~AudioEngine() {
         release();
+    }
+
+    virtual void release() {
+        if (outputMixObj) {
+            (*outputMixObj)->Destroy(outputMixObj);
+            outputMixObj = nullptr;
+        }
+
+        if (engineObj) {
+            (*engineObj)->Destroy(engineObj);
+            engineObj = nullptr;
+            engine = nullptr;
+        }
     }
 };
 

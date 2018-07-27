@@ -10,8 +10,9 @@
 #include <android/asset_manager.h>
 #include "AudioEngine.h"
 
-class AssetAudioPlayer : public AudioEngine {
+class AssetAudioPlayer {
 private:
+    AudioEngine *mAudioEngine;
     SLObjectItf mPlayerObj;
     SLPlayItf mPlayer;
     SLSeekItf mSeek;
@@ -23,7 +24,7 @@ private:
 
     void setPlayerState(SLuint32 state);
 
-    void release() override;
+    void release();
 
 public:
     AssetAudioPlayer(AAsset *asset);

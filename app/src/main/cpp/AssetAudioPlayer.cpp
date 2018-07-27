@@ -10,8 +10,9 @@
 #include "log.h"
 
 AssetAudioPlayer::AssetAudioPlayer(AAsset *asset)
-        : AudioEngine(), mPlayerObj(nullptr), mPlayer(nullptr), mVolume(nullptr),
-          mMuteSolo(nullptr), mSeek(nullptr) {
+        : mAudioEngine(new AudioEngine()), mPlayerObj(nullptr), mPlayer(nullptr),
+          mVolume(nullptr), mMuteSolo(nullptr), mSeek(nullptr) {
+    mAudioEngine->createEngine();
     initPlayer(asset);
 }
 
@@ -27,13 +28,13 @@ void AssetAudioPlayer::initPlayer(AAsset *asset) {
     SLDataFormat_MIME formatMime = {SL_DATAFORMAT_MIME, nullptr, SL_CONTAINERTYPE_UNSPECIFIED};
     SLDataSource audioSrc = {&locFD, &formatMime};
 
-    SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mOutputMixObj};
+    SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mAudioEngine->outputMixObj};
     SLDataSink audioSink = {&locOutputMix, nullptr};
 
     const SLInterfaceID ids[3] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
     const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
-    result = (*mEngine)->CreateAudioPlayer(mEngine, &mPlayerObj, &audioSrc, &audioSink,
-                                           3, ids, req);
+    result = (*mAudioEngine->engine)->CreateAudioPlayer(mAudioEngine->engine, &mPlayerObj,
+                                                        &audioSrc, &audioSink, 3, ids, req);
     assert(SL_RESULT_SUCCESS == result);
     (void) result;
 
@@ -97,6 +98,13 @@ void AssetAudioPlayer::release() {
         mMuteSolo = nullptr;
         mVolume = nullptr;
     }
+
+    if (mAudioEngine) {
+        mAudioEngine->release();
+        delete mAudioEngine;
+        mAudioEngine = nullptr;
+    }
+
     LOGI("AssetAudioPlayer released");
 }
 

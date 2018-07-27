@@ -10,17 +10,16 @@
 #include <stdio.h>
 #include "AudioEngine.h"
 
-class AudioRecorder : public AudioEngine {
+class AudioRecorder {
 private:
     FILE *mFile;
 
+    AudioEngine *mAudioEngine;
     SLObjectItf mRecorderObj;
     SLRecordItf mRecorder;
     SLAndroidSimpleBufferQueueItf mRecorderBQ;
 
-    unsigned mRecorderSize;
-    short *mWorkBuffer;
-    short *mIdleBuffer;
+    unsigned mRecorderBufSize;
     short *mRecorderBuffers[2];
     int mIndex;
 
@@ -30,7 +29,7 @@ private:
 private:
     bool initRecorder();
 
-    void release() override;
+    void release();
 
     static void recorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 

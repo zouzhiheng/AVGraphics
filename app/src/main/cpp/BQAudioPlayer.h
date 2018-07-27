@@ -14,22 +14,25 @@ class BQAudioPlayer : public AudioEngine {
 private:
     FILE *mFile;
 
-    SLObjectItf bqPlayerObj;
-    SLPlayItf bqPlayer;
-    SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue;
-    SLEffectSendItf bqPlayerEffectSend;
-    SLVolumeItf bqPlayerVolume;
-    SLmilliHertz bqPlayerSampleRate;
-    jint bqPlayerBufSize;
-    short *resampleBuf;
+    SLObjectItf mPlayerObj;
+    SLPlayItf mPlayer;
+    SLAndroidSimpleBufferQueueItf mBufferQueue;
+    SLEffectSendItf mEffectSend;
+    SLVolumeItf mVolume;
+    SLmilliHertz mSampleRate;
+    jint mBufSize;
+    short *mResampleBuf;
 
-    bool isPlaying;
+    bool mIsPlaying;
 
 private:
-    void initPlayer(const char* filePath, int sampleRate, int bufSize);
+    void initPlayer(const char *filePath, int sampleRate, int bufSize);
+
+protected:
+    void release() override;
 
 public:
-    BQAudioPlayer(FILE *mFile);
+    BQAudioPlayer(const char *filePath);
 
     virtual ~BQAudioPlayer();
 };
