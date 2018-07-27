@@ -1,21 +1,23 @@
 package com.steven.avgraphics.activity;
 
-import android.content.Context;
 import android.content.res.AssetManager;
-import android.media.AudioManager;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
+import com.steven.avgraphics.util.ToastHelper;
+import com.steven.avgraphics.util.Utils;
 
-public class OpenSLActivity extends BaseActivity {
+public class OpenSLActivity extends BaseActivity implements View.OnClickListener {
 
-    private Button mBtnStartPlay;
-    private Button mBtnStopPlay;
+    private Button mBtnStartPlayMp3;
+    private Button mBtnStopPlayMp3;
     private Button mBtnStartRecord;
     private Button mBtnStopRecord;
+    private Button mBtnStartPlayPcm;
+    private Button mBtnStopPlayPcm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,58 +27,70 @@ public class OpenSLActivity extends BaseActivity {
     }
 
     private void init() {
-        setupAudioPlayer();
         findView();
         setListener();
     }
 
-    private void setupAudioPlayer() {
-        AudioManager manager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (manager == null) {
-            Log.e(TAG, "initData failed, cannot find audio service");
-            finish();
-            return;
-        }
-        String nativeParam = manager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
-        int sampleRate = Integer.parseInt(nativeParam);
-        nativeParam = manager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-        int bufSize = Integer.parseInt(nativeParam);
-        _createEngine();
-        _createBufferQueueAudioPlayer(sampleRate, bufSize);
-        _createAssetAudioPlayer(getAssets(), "background.mp3");
-    }
-
     private void findView() {
-        mBtnStartPlay = findViewById(R.id.opensl_btn_start_play);
-        mBtnStopPlay = findViewById(R.id.opensl_btn_stop_play);
+        mBtnStartPlayMp3 = findViewById(R.id.opensl_btn_start_play_mp3);
+        mBtnStopPlayMp3 = findViewById(R.id.opensl_btn_stop_play_mp3);
         mBtnStartRecord = findViewById(R.id.opensl_btn_start_record);
         mBtnStopRecord = findViewById(R.id.opensl_btn_stop_record);
+        mBtnStartPlayPcm = findViewById(R.id.opensl_btn_start_play_pcm);
+        mBtnStopPlayPcm = findViewById(R.id.opensl_btn_stop_play_pcm);
     }
 
     private void setListener() {
-        mBtnStartPlay.setOnClickListener(v -> startPlay());
-        mBtnStopPlay.setOnClickListener(v -> stopPlay());
-        mBtnStartRecord.setOnClickListener(v -> startRecord());
-        mBtnStopRecord.setOnClickListener(v -> stopRecord());
+        mBtnStartPlayMp3.setOnClickListener(this);
+        mBtnStopPlayMp3.setOnClickListener(this);
+        mBtnStartRecord.setOnClickListener(this);
+        mBtnStopRecord.setOnClickListener(this);
+        mBtnStartPlayPcm.setOnClickListener(this);
+        mBtnStopPlayPcm.setOnClickListener(this);
     }
 
-    private void startPlay() {
-        _setAssetAudioPlayerState(true);
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.opensl_btn_start_play_mp3:
+                startPlayMp3();
+                break;
+            case R.id.opensl_btn_stop_play_mp3:
+                stopPlayMp3();
+                break;
+            case R.id.opensl_btn_start_record:
+                startRecord();
+                break;
+            case R.id.opensl_btn_stop_record:
+                stopRecord();
+                break;
+            case R.id.opensl_btn_start_play_pcm:
+                startPlayPcm();
+                break;
+            case R.id.opensl_btn_stop_play_pcm:
+                stopPlayPcm();
+                break;
+        }
+    }
+
+    private void startPlayMp3() {
+        _startPlayMp3(getAssets(), "background.mp3");
         disableButtons();
-        mBtnStopPlay.setEnabled(true);
+        mBtnStopPlayMp3.setEnabled(true);
     }
 
-    private void stopPlay() {
-        _setAssetAudioPlayerState(false);
+    private void stopPlayMp3() {
+        _stopPlayMp3();
         resetButtons();
     }
 
     private void startRecord() {
-        if (_createAudioRecorder("/sdcard/opensles.pcm")) {
-            _startRecord();
+        if (_startRecord(Utils.getOpenSLOutput())) {
+            disableButtons();
+            mBtnStopRecord.postDelayed(() -> mBtnStopRecord.setEnabled(true), 1000);
+        } else {
+            ToastHelper.show(R.string.opensl_msg_init_recorder_failed);
         }
-        disableButtons();
-        mBtnStopRecord.postDelayed(() -> mBtnStopRecord.setEnabled(true), 1000);
     }
 
     private void stopRecord() {
@@ -84,49 +98,55 @@ public class OpenSLActivity extends BaseActivity {
         resetButtons();
     }
 
+    private void startPlayPcm() {
+        _startPlayPcm("", 0, 0);
+        disableButtons();
+        mBtnStopPlayPcm.setEnabled(true);
+    }
+
+    private void stopPlayPcm() {
+        _stopPlayPcm();
+        resetButtons();
+    }
+
     private void disableButtons() {
-        mBtnStartPlay.setEnabled(false);
-        mBtnStopPlay.setEnabled(false);
+        mBtnStartPlayMp3.setEnabled(false);
+        mBtnStopPlayMp3.setEnabled(false);
         mBtnStartRecord.setEnabled(false);
         mBtnStopRecord.setEnabled(false);
+        mBtnStartPlayPcm.setEnabled(false);
+        mBtnStopPlayPcm.setEnabled(false);
     }
 
     private void resetButtons() {
-        mBtnStartPlay.setEnabled(true);
-        mBtnStopPlay.setEnabled(false);
+        mBtnStartPlayMp3.setEnabled(true);
+        mBtnStopPlayMp3.setEnabled(false);
         mBtnStartRecord.setEnabled(true);
         mBtnStopRecord.setEnabled(false);
+        mBtnStartPlayPcm.setEnabled(true);
+        mBtnStopPlayPcm.setEnabled(false);
     }
-
 
     @Override
     protected void onPause() {
         super.onPause();
-        _setAssetAudioPlayerState(false);
+        _stopPlayMp3();
+        _stopPlayPcm();
         _stopRecord();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        _release();
-    }
+    @SuppressWarnings("SameParameterValue")
+    private static native void _startPlayMp3(AssetManager assetManager, String filename);
 
-    private static native void _createEngine();
+    private static native void _stopPlayMp3();
 
-    private static native void _createBufferQueueAudioPlayer(int sampleRate, int bufSize);
-
-    private static native boolean _createAssetAudioPlayer(AssetManager assetManager, String filename);
-
-    // true == PLAYING, false == PAUSED
-    private static native void _setAssetAudioPlayerState(boolean isPlaying);
-
-    private static native boolean _createAudioRecorder(String filePath);
-
-    private static native void _startRecord();
+    private static native boolean _startRecord(String filePath);
 
     private static native void _stopRecord();
 
-    private static native void _release();
-    
+    @SuppressWarnings("SameParameterValue")
+    private static native void _startPlayPcm(String filePath, int sampleRate, int bufSize);
+
+    private static native void _stopPlayPcm();
+
 }

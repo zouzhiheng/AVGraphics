@@ -46,11 +46,13 @@
 
 
     <!-- OpenSLActivity(opensl) -->
-    <string name="opensl_btn_start_play">开始播放</string>
+    <string name="opensl_btn_start_play_mp3">开始播放 MP3 文件</string>
     <string name="opensl_btn_stop_play">停止播放</string>
     <string name="opensl_btn_start_record">开始录制</string>
     <string name="opensl_btn_stop_record">停止录制</string>
+    <string name="opensl_btn_start_play_pcm">开始播放 PCM 文件</string>
 
+    <string name="opensl_msg_init_recorder_failed">音频录制器初始化失败!</string>
 
     <!-- HWCodecActivity(hwcodec) -->
     <string name="hwcodec_btn_decode">解码</string>
