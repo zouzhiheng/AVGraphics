@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.steven.avgraphics.ui.Camera2Activity">
+    tools:context="com.steven.avgraphics.activity.Camera2Activity">
 
     <TextureView
         android:id="@+id/camera2_texture_view"

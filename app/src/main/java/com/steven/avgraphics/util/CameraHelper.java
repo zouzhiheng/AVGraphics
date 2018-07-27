@@ -1,9 +1,11 @@
 package com.steven.avgraphics.util;
 
 
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.util.Log;
+import android.view.Surface;
 
 import com.steven.avgraphics.BaseApplication;
 
@@ -55,11 +57,50 @@ public class CameraHelper {
         camera.setParameters(parameters);
     }
 
+    public static void setDisplayOritation(Activity activity, Camera camera, int cameraId) {
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+        int degress = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degress = 0;
+                break;
+            case Surface.ROTATION_90:
+                degress = 90;
+                break;
+            case Surface.ROTATION_180:
+                degress = 180;
+                break;
+            case Surface.ROTATION_270:
+                degress = 270;
+                break;
+        }
+
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+        int result;
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degress) % 360;
+            result = (360 - result) % 360;  // compensate the mirror
+        } else {
+            result = (info.orientation - degress + 360) % 360; // back-facing
+        }
+        Log.d(TAG, "window rotation: " + degress + ", camera oritation: " + result);
+        camera.setDisplayOrientation(result);
+    }
+
+    public static boolean isFacingBack(int cameraId) {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+        return info.facing == Camera.CameraInfo.CAMERA_FACING_BACK;
+    }
+
     public static void setOptimalSize(Camera camera, float aspectRatio, int maxWidth, int maxHeight) {
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size size = CameraHelper.chooseOptimalSize(parameters.getSupportedPreviewSizes(),
                 aspectRatio, maxWidth, maxHeight);
         parameters.setPreviewSize(size.width, size.height);
+        Log.d(TAG,  "input max: (" + maxWidth + ", " + maxHeight + "), output size: ("
+                + size.width + ", " + size.height + ")");
         camera.setParameters(parameters);
     }
 

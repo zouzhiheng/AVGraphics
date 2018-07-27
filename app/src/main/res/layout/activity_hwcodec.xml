@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.steven.avgraphics.ui.HWCodecActivity">
+    tools:context="com.steven.avgraphics.activity.HWCodecActivity">
 
     <com.steven.avgraphics.view.CameraPreviewView
         android:id="@+id/hwcodec_cpv_preview"

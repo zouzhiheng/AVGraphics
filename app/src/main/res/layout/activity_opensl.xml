@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.steven.avgraphics.activity.OpenSLActivity">
+
+    <Button
+        android:id="@+id/opensl_btn_start_play_mp3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:text="@string/opensl_btn_start_play_mp3"/>
+
+    <Button
+        android:id="@+id/opensl_btn_stop_play_mp3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:enabled="false"
+        android:text="@string/opensl_btn_stop_play"/>
+
+    <Button
+        android:id="@+id/opensl_btn_start_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xlarge"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:text="@string/opensl_btn_start_record"/>
+
+    <Button
+        android:id="@+id/opensl_btn_stop_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:enabled="false"
+        android:text="@string/opensl_btn_stop_record"/>
+
+    <Button
+        android:id="@+id/opensl_btn_start_play_pcm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xlarge"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:text="@string/opensl_btn_start_play_pcm"/>
+
+    <Button
+        android:id="@+id/opensl_btn_stop_play_pcm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:enabled="false"
+        android:text="@string/opensl_btn_stop_play"/>
+
+</LinearLayout>

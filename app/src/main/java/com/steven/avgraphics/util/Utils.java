@@ -23,6 +23,8 @@ public class Utils {
     private static final String HWDECODE_PCM_OUTPUT = APP_DIR + "/hwdecode.pcm";
     private static final String HWTRANSCODE_OUTPUT = APP_DIR + "/hwtranscode.mp4";
 
+    private static final String OPENSL_OUTPUT = APP_DIR + "/opensl.pcm";
+
     private static Handler sHandler = new Handler(Looper.getMainLooper());
 
     static {
@@ -55,6 +57,10 @@ public class Utils {
 
     public static String getCamera2Output() {
         return CAMERA2_OUTPUT;
+    }
+
+    public static String getOpenSLOutput() {
+        return OPENSL_OUTPUT;
     }
 
     private static void createDir(String path) {

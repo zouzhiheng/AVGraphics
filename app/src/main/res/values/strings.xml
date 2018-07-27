@@ -2,10 +2,11 @@
     <string name="app_name">AVGraphics</string>
 
     <!-- MainActivity(main) -->
-    <string name="main_btn_draw_image">使用3种不同的API绘制图片</string>
+    <string name="main_btn_draw_image">使用 3 种不同的 API 绘制图片</string>
     <string name="main_btn_camera">相机预览获取 NV21 数据</string>
     <string name="main_btn_camera2">使用 Camera2 拍照</string>
-    <string name="main_btn_audio">音频数据的采集和播放</string>
+    <string name="main_btn_audio">Android API 实现音频的播放及录制</string>
+    <string name="main_btn_opensl">OpenSL 实现音频的播放及录制</string>
     <string name="main_btn_hwcodec">硬编解码</string>
 
     <string name="main_msg_no_permission">权限不足，无法运行</string>
@@ -30,8 +31,9 @@
     <!-- Camera2Activity(camera2) -->
     <string name="camera2_btn_take_picture">拍照</string>
 
+    <string name="camera2_msg_no_permission">权限不足，无法打开相机</string>
     <string name="camera2_msg_no_camera_service">获取 Camera 服务失败</string>
-
+    <string name="camera2_msg_open_error">打开相机过程中出现错误!</string>
 
     <!-- AudioActivity(audio) -->
     <string name="audio_btn_start_record">开始录制</string>
@@ -42,6 +44,15 @@
     <string name="audio_msg_no_audio_file">无音频文件，请先进行录制</string>
     <string name="audio_msg_playing_now">当前正在播放中</string>
 
+
+    <!-- OpenSLActivity(opensl) -->
+    <string name="opensl_btn_start_play_mp3">开始播放 MP3 文件</string>
+    <string name="opensl_btn_stop_play">停止播放</string>
+    <string name="opensl_btn_start_record">开始录制</string>
+    <string name="opensl_btn_stop_record">停止录制</string>
+    <string name="opensl_btn_start_play_pcm">开始播放 PCM 文件</string>
+
+    <string name="opensl_msg_init_recorder_failed">音频录制器初始化失败!</string>
 
     <!-- HWCodecActivity(hwcodec) -->
     <string name="hwcodec_btn_decode">解码</string>

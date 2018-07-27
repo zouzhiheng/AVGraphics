@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.steven.avgraphics.ui.CameraActivity">
+    tools:context="com.steven.avgraphics.activity.CameraActivity">
 
     <com.steven.avgraphics.view.CameraPreviewView
         android:id="@+id/camera_cpv_preview"
@@ -45,4 +45,5 @@
             android:enabled="false"
             android:text="@string/camera_btn_stop" />
     </LinearLayout>
+
 </FrameLayout>
