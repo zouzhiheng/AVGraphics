@@ -10,10 +10,11 @@
 #include <SLES/OpenSLES_Android.h>
 #include "AudioEngine.h"
 
-class BQAudioPlayer : public AudioEngine {
+class BQAudioPlayer {
 private:
     FILE *mFile;
 
+    AudioEngine *mAudioEngine;
     SLObjectItf mPlayerObj;
     SLPlayItf mPlayer;
     SLAndroidSimpleBufferQueueItf mBufferQueue;
@@ -29,12 +30,12 @@ private:
     void initPlayer(const char *filePath, int sampleRate, int bufSize);
 
 protected:
-    void release() override;
+    void release();
 
 public:
     BQAudioPlayer(const char *filePath);
 
-    virtual ~BQAudioPlayer();
+    ~BQAudioPlayer();
 };
 
 #endif //AVGRAPHICS_BQAUDIOPLAYER_H

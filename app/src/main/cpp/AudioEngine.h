@@ -15,11 +15,7 @@ public:
 
     SLObjectItf outputMixObj;
 
-public:
-    AudioEngine() : engineObj(nullptr), engine(nullptr), outputMixObj(nullptr) {
-        createEngine();
-    }
-
+private:
     void createEngine() {
         SLresult result;
 
@@ -44,10 +40,6 @@ public:
         (void) result;
     }
 
-    virtual ~AudioEngine() {
-        release();
-    }
-
     virtual void release() {
         if (outputMixObj) {
             (*outputMixObj)->Destroy(outputMixObj);
@@ -59,6 +51,15 @@ public:
             engineObj = nullptr;
             engine = nullptr;
         }
+    }
+
+public:
+    AudioEngine() : engineObj(nullptr), engine(nullptr), outputMixObj(nullptr) {
+        createEngine();
+    }
+
+    virtual ~AudioEngine() {
+        release();
     }
 };
 

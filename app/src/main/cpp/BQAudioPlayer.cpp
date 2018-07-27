@@ -9,7 +9,7 @@
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
 BQAudioPlayer::BQAudioPlayer(const char *filePath)
-        : AudioEngine(), mFile(fopen(filePath, "r")), mPlayerObj(nullptr), mPlayer(nullptr),
+        : mAudioEngine(new AudioEngine()), mFile(fopen(filePath, "r")), mPlayerObj(nullptr), mPlayer(nullptr),
           mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr), mSampleRate(0),
           mBufSize(0), mResampleBuf(nullptr), mIsPlaying(false) {
 
@@ -38,7 +38,7 @@ void BQAudioPlayer::initPlayer(const char *filePath, int sampleRate, int bufSize
     }
     SLDataSource audioSource = {&locBufq, &formatPcm};
 
-    SLDataLocator_OutputMix locOutpuMix = {SL_DATALOCATOR_OUTPUTMIX, outputMixObj};
+    SLDataLocator_OutputMix locOutpuMix = {SL_DATALOCATOR_OUTPUTMIX, mAudioEngine->outputMixObj};
     SLDataSink audioSink = {&locOutpuMix, nullptr};
 
     /*
@@ -48,8 +48,9 @@ void BQAudioPlayer::initPlayer(const char *filePath, int sampleRate, int bufSize
      */
     const SLInterfaceID ids[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND};
     const SLboolean req[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
-    result = (*engine)->CreateAudioPlayer(engine, &mPlayerObj, &audioSource,
-                                           &audioSink, mSampleRate ? 2 : 3, ids, req);
+    result = (*mAudioEngine->engine)->CreateAudioPlayer(mAudioEngine->engine, &mPlayerObj,
+                                                        &audioSource, &audioSink,
+                                                        mSampleRate ? 2 : 3, ids, req);
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
@@ -103,6 +104,11 @@ void BQAudioPlayer::release() {
         mBufferQueue = nullptr;
         mEffectSend = nullptr;
         mVolume = nullptr;
+    }
+
+    if (mAudioEngine) {
+        delete mAudioEngine;
+        mAudioEngine = nullptr;
     }
 
     if (mResampleBuf) {

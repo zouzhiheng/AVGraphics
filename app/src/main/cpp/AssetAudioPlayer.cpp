@@ -12,7 +12,6 @@
 AssetAudioPlayer::AssetAudioPlayer(AAsset *asset)
         : mAudioEngine(new AudioEngine()), mPlayerObj(nullptr), mPlayer(nullptr),
           mVolume(nullptr), mMuteSolo(nullptr), mSeek(nullptr) {
-    mAudioEngine->createEngine();
     initPlayer(asset);
 }
 

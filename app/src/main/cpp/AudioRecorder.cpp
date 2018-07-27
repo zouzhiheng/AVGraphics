@@ -17,7 +17,6 @@ AudioRecorder::AudioRecorder(const char *filePath)
 
 bool AudioRecorder::start() {
     if (!mIsInitialized) {
-        mAudioEngine->createEngine();
         if (!initRecorder()) {
             return false;
         }
@@ -139,7 +138,6 @@ void AudioRecorder::release() {
     }
 
     if (mAudioEngine) {
-        mAudioEngine->release();
         delete mAudioEngine;
         mAudioEngine = nullptr;
     }
