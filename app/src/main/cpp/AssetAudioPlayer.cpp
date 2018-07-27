@@ -99,7 +99,6 @@ void AssetAudioPlayer::release() {
     }
 
     if (mAudioEngine) {
-        mAudioEngine->release();
         delete mAudioEngine;
         mAudioEngine = nullptr;
     }
