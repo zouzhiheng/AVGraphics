@@ -12,6 +12,8 @@
 
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
+void* playThread(void *arg);
+
 BQAudioPlayer::BQAudioPlayer(const char *filePath)
         : mAudioEngine(new AudioEngine()), mFile(fopen(filePath, "r")), mPlayerObj(nullptr),
           mPlayer(nullptr), mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr),
@@ -92,23 +94,33 @@ void BQAudioPlayer::initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize) {
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
 
-    mIsPlaying = true;
 }
 
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    BQAudioPlayer *audioPlayer = (BQAudioPlayer *) context;
-    pthread_mutex_unlock(&audioPlayer->mMutex);
+    BQAudioPlayer *player = (BQAudioPlayer *) context;
+    pthread_mutex_unlock(&player->mMutex);
 }
 
 void BQAudioPlayer::start() {
+    if (!mIsPlaying) {
+        mIsPlaying = true;
+        pthread_create(&mPlayThread, nullptr, playThread, this);
+    }
+}
+
+void* playThread(void *arg) {
+    BQAudioPlayer *player = (BQAudioPlayer*)arg;
     LOGI("BQAudioPlayer started");
-    while (mIsPlaying && !feof(mFile)) {
-        fread(mBuffers[mIndex], 1, mBufSize, mFile);
-        pthread_mutex_lock(&mMutex);
-        (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], mBufSize * sizeof(short));
-        mIndex = 1 - mIndex;
+    while (player->mIsPlaying && !feof(player->mFile)) {
+        fread(player->mBuffers[player->mIndex], 1, player->mBufSize,player-> mFile);
+        pthread_mutex_lock(&player->mMutex);
+        (*player->mBufferQueue)->Enqueue(player->mBufferQueue, player->mBuffers[player->mIndex],
+                                         player->mBufSize);
+        player->mIndex = 1 - player->mIndex;
     }
     LOGI("BQAudioPlayer stopped");
+
+    return 0;
 }
 
 void BQAudioPlayer::stop() {

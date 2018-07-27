@@ -28,6 +28,7 @@ private:
     bool mIsPlaying;
 
     pthread_mutex_t mMutex;
+    pthread_t mPlayThread;
 
 private:
     void initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize);
@@ -42,6 +43,8 @@ public:
     void stop();
 
     ~BQAudioPlayer();
+
+    friend void *playThread(void *arg);
 
     friend void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 };
