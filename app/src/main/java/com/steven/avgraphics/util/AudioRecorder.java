@@ -18,12 +18,14 @@ public class AudioRecorder {
 
     private static final int DEFAULT_SAMPLE_RATE = 48000;
     private static final int DEFAULT_PCM_DATA_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+    private static final int DEFAULT_CHANNELS = 1;
 
     private ExecutorService mExecutor = Executors.newCachedThreadPool();
     private AudioRecord mAudioRecord;
     private int mBufferSize;
     private int mSampleRate = DEFAULT_SAMPLE_RATE;
     private int mPcmFormat = DEFAULT_PCM_DATA_FORMAT;
+    private int mChannels = DEFAULT_CHANNELS;
 
     private AudioRecordCallback mRecordCallback;
     private Handler mHandler;
@@ -31,6 +33,10 @@ public class AudioRecorder {
 
     public void setSampleRate(int sampleRate) {
         mSampleRate = sampleRate;
+    }
+
+    public int getSampleRate() {
+        return mSampleRate;
     }
 
     public void setPcmFormat(int pcmFormat) {
@@ -41,16 +47,20 @@ public class AudioRecorder {
         mRecordCallback = recordCallback;
     }
 
+    public void setChannels(int channels) {
+        mChannels = channels;
+    }
+
     public int getChannels() {
-        return 1;
+        return mChannels;
     }
 
     public boolean start() {
         try {
-            mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, AudioFormat.CHANNEL_IN_MONO,
-                    mPcmFormat);
+            int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_IN_MONO : AudioFormat.CHANNEL_OUT_STEREO;
+            mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, channelConfig, mPcmFormat);
             mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, mSampleRate,
-                    AudioFormat.CHANNEL_IN_MONO, mPcmFormat, mBufferSize);
+                    channelConfig, mPcmFormat, mBufferSize);
         } catch (Exception e) {
             Log.e(TAG, "init AudioRecord exception: " + e.getLocalizedMessage());
             return false;

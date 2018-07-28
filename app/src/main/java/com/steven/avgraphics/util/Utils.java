@@ -18,6 +18,9 @@ public class Utils {
     private static final String CAMERA_OUTPUT = APP_DIR + "/camera.yuv";
     private static final String CAMERA2_OUTPUT = APP_DIR + "/camera2.jpg";
 
+    private static final String AUDIO_OUTPUT_PCM = APP_DIR + "/audio_record.pcm";
+    private static final String AUDIO_OUTPUT_WAV = APP_DIR + "/audio_record.wav";
+
     private static final String HWRECORD_OUTPUT = APP_DIR + "/hwrecord.mp4";
     private static final String HWDECODE_YUV_OUTPUT = APP_DIR + "/hwdecode.yuv";
     private static final String HWDECODE_PCM_OUTPUT = APP_DIR + "/hwdecode.pcm";
@@ -31,8 +34,35 @@ public class Utils {
         createDir(APP_DIR);
     }
 
+    private static void createDir(String path) {
+        File file = new File(path);
+        if (!file.exists() && !file.mkdir()) {
+            ToastHelper.show("文件夹创建过程中出现错误: " + path);
+        }
+    }
+
     public static String getAppDir() {
         return APP_DIR;
+    }
+
+    public static String getCameraOutput() {
+        return CAMERA_OUTPUT;
+    }
+
+    public static String getCamera2Output() {
+        return CAMERA2_OUTPUT;
+    }
+
+    public static String getAudioOutputPcm() {
+        return AUDIO_OUTPUT_PCM;
+    }
+
+    public static String getAudioOutputWav() {
+        return AUDIO_OUTPUT_WAV;
+    }
+
+    public static String getOpenSLOutput() {
+        return OPENSL_OUTPUT;
     }
 
     public static String getHWRecordOutput() {
@@ -49,25 +79,6 @@ public class Utils {
 
     public static String getHWTranscodeOutput() {
         return HWTRANSCODE_OUTPUT;
-    }
-
-    public static String getCameraOutput() {
-        return CAMERA_OUTPUT;
-    }
-
-    public static String getCamera2Output() {
-        return CAMERA2_OUTPUT;
-    }
-
-    public static String getOpenSLOutput() {
-        return OPENSL_OUTPUT;
-    }
-
-    private static void createDir(String path) {
-        File file = new File(path);
-        if (!file.exists() && !file.mkdir()) {
-            ToastHelper.show("文件夹创建过程中出现错误: " + path);
-        }
     }
 
     public static void runOnUiThread(Runnable action) {
