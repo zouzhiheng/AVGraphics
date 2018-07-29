@@ -37,8 +37,9 @@ public class MainActivity extends BaseActivity {
         findViewById(R.id.main_btn_camera).setOnClickListener(v -> startActivity(CameraActivity.class));
         findViewById(R.id.main_btn_camera2).setOnClickListener(v -> startActivity(Camera2Activity.class));
         findViewById(R.id.main_btn_audio).setOnClickListener(v -> startActivity(AudioActivity.class));
-        findViewById(R.id.main_btn_opensl).setOnClickListener(v -> startActivity(OpenSLActivity.class));
         findViewById(R.id.main_btn_hwcodec).setOnClickListener(v -> startActivity(HWCodecActivity.class));
+        findViewById(R.id.main_btn_opensl).setOnClickListener(v -> startActivity(OpenSLActivity.class));
+        findViewById(R.id.main_btn_opengl).setOnClickListener(v -> startActivity(GLTriangleActivity.class));
     }
 
     @Override

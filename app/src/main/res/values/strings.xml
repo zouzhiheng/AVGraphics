@@ -6,8 +6,9 @@
     <string name="main_btn_camera">相机预览获取 NV21 数据</string>
     <string name="main_btn_camera2">使用 Camera2 拍照</string>
     <string name="main_btn_audio">Android API 实现音频的播放及录制</string>
-    <string name="main_btn_opensl">OpenSL 实现音频的播放及录制</string>
     <string name="main_btn_hwcodec">硬编解码</string>
+    <string name="main_btn_opensl">OpenSL 实现音频的播放及录制</string>
+    <string name="main_btn_opengl">OpenGL ES</string>
 
     <string name="main_msg_no_permission">权限不足，无法运行</string>
 
@@ -69,5 +70,11 @@
     <string name="hwcodec_msg_create_codec_failed">创建硬件编码器失败!</string>
     <string name="hwcodec_msg_video_is_processing">视频正在处理中，请稍后…</string>
     <string name="hwcodec_msg_preview_failed">开启相机预览失败!</string>
+
+
+    <!-- GLTriangleActivity(gltri) -->
+    <string name="gltri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
+    <string name="gltri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
+
 
 </resources>

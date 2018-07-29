@@ -47,6 +47,15 @@
         android:textAllCaps="false" />
 
     <Button
+        android:id="@+id/main_btn_hwcodec"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/main_btn_hwcodec" />
+
+    <Button
         android:id="@+id/main_btn_opensl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,12 +66,13 @@
         android:textAllCaps="false" />
 
     <Button
-        android:id="@+id/main_btn_hwcodec"
+        android:id="@+id/main_btn_opengl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/main_btn_hwcodec" />
+        android:text="@string/main_btn_opengl"
+        android:textAllCaps="false" />
 
 </LinearLayout>

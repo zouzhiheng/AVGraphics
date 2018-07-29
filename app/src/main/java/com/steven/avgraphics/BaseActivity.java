@@ -4,9 +4,12 @@ package com.steven.avgraphics;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import com.steven.avgraphics.util.ToastHelper;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
@@ -33,6 +36,16 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected <T extends Activity> void startActivity(Class<T> clz) {
         Intent intent = new Intent(this, clz);
         startActivity(intent);
+    }
+
+    protected void finishWidthToast(String msg) {
+        ToastHelper.showOnUiThread(msg);
+        finish();
+    }
+
+    protected void finishWidthToast(int msgId) {
+        ToastHelper.showOnUiThread(msgId);
+        finish();
     }
 
 }

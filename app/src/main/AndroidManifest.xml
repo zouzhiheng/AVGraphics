@@ -37,6 +37,7 @@
             android:name=".activity.Camera2Activity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity android:name=".activity.OpenSLActivity" />
+        <activity android:name=".activity.GLTriangleActivity" />
     </application>
 
 </manifest>
