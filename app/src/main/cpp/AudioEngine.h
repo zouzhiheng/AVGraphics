@@ -33,6 +33,7 @@ private:
 
         const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
         const SLboolean req[1] = {SL_BOOLEAN_FALSE};
+        // outputMixObj 用于输出声音数据
         (*engine)->CreateOutputMix(engine, &outputMixObj, 1, ids, req);
 
         result = (*outputMixObj)->Realize(outputMixObj, SL_BOOLEAN_FALSE);

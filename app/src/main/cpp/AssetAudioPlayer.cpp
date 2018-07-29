@@ -23,10 +23,12 @@ void AssetAudioPlayer::initPlayer(AAsset *asset) {
     assert(fd >= 0);
     AAsset_close(asset);
 
+    // 配置音频数据源
     SLDataLocator_AndroidFD locFD = {SL_DATALOCATOR_ANDROIDFD, fd, start, length};
     SLDataFormat_MIME formatMime = {SL_DATAFORMAT_MIME, nullptr, SL_CONTAINERTYPE_UNSPECIFIED};
     SLDataSource audioSrc = {&locFD, &formatMime};
 
+    // 配置音频数据输出池
     SLDataLocator_OutputMix locOutputMix = {SL_DATALOCATOR_OUTPUTMIX, mAudioEngine->outputMixObj};
     SLDataSink audioSink = {&locOutputMix, nullptr};
 

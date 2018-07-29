@@ -179,12 +179,12 @@ public class AudioActivity extends BaseActivity implements View.OnClickListener,
         header[1] = 'I';
         header[2] = 'F';
         header[3] = 'F';
-        // total data length
+        // pcm data length
         header[4] = (byte) (pcmDataLength & 0xff);
         header[5] = (byte) ((pcmDataLength >> 8) & 0xff);
         header[6] = (byte) ((pcmDataLength >> 16) & 0xff);
         header[7] = (byte) ((pcmDataLength >> 24) & 0xff);
-        //WAVE
+        // WAVE
         header[8] = 'W';
         header[9] = 'A';
         header[10] = 'V';

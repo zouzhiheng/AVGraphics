@@ -35,11 +35,14 @@ bool AudioRecorder::start() {
         return false;
     }
 
+    // enqueue an empty buffer to be filled by the recorder
+    // (for streaming recording, we would enqueue at least 2 empty buffers to start things off)
     result = (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], mBufSize * sizeof(short));
     if (SL_RESULT_SUCCESS != result) {
         return false;
     }
 
+    // 开始录制
     result = (*mRecorder)->SetRecordState(mRecorder, SL_RECORDSTATE_RECORDING);
     if (SL_RESULT_SUCCESS != result) {
         return false;
@@ -96,9 +99,9 @@ bool AudioRecorder::initRecorder() {
 
     result = (*mBufferQueue)->RegisterCallback(mBufferQueue, recorderCallback, this);
     return SL_RESULT_SUCCESS == result;
-
 }
 
+// 每录制完成一帧音频，就会回调这个函数
 void AudioRecorder::recorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     assert(context != nullptr);
 
