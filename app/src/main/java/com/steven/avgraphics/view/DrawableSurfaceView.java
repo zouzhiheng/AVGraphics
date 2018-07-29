@@ -59,7 +59,7 @@ public class DrawableSurfaceView extends SurfaceView implements SurfaceHolder.Ca
         Canvas canvas = null;
         try {
             canvas = holder.lockCanvas();
-            onDraw(canvas);
+            draw(canvas);
         } finally {
             if (canvas != null) {
                 holder.unlockCanvasAndPost(canvas);

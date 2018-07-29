@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.steven.avgraphics.activity.GLTriangleActivity">
+    tools:context="com.steven.avgraphics.activity.gles.TriangleActivity">
 
     <android.opengl.GLSurfaceView
-        android:id="@+id/gltri_surface_view"
+        android:id="@+id/gltri_glsv_window"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -72,9 +72,20 @@
     <string name="hwcodec_msg_preview_failed">开启相机预览失败!</string>
 
 
-    <!-- GLTriangleActivity(gltri) -->
-    <string name="gltri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
-    <string name="gltri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
+    <!-- TriangleActivity(tri) -->
+    <string name="tri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
+    <string name="tri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
+
+
+    <!-- OpenGLActivity(opengl) -->
+    <string name="opengl_btn_triangle">Triangle</string>
+    <string name="opengl_btn_shape">Shape</string>
+
+
+    <!-- ShapeActivity(shape) -->
+    <string name="shape_btn_triangle">三角形</string>
+    <string name="shape_btn_square">正方形</string>
+    <string name="shape_btn_circle">圆形</string>
 
 
 </resources>

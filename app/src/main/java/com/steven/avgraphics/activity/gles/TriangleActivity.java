@@ -1,4 +1,4 @@
-package com.steven.avgraphics.activity;
+package com.steven.avgraphics.activity.gles;
 
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
@@ -17,7 +17,7 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class GLTriangleActivity extends BaseActivity {
+public class TriangleActivity extends BaseActivity {
 
     private static final String VERTEX_SHADER = "" +
             "#version 300 es\n" +
@@ -60,7 +60,7 @@ public class GLTriangleActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gltriangle);
+        setContentView(R.layout.activity_triangle);
         init();
     }
 
@@ -70,7 +70,7 @@ public class GLTriangleActivity extends BaseActivity {
     }
 
     private void initGLSurfaceView() {
-        mGLSurfaceView = findViewById(R.id.gltri_surface_view);
+        mGLSurfaceView = findViewById(R.id.gltri_glsv_window);
         // 宽高 1:1，避免出现坐标系 x、y 轴单位长度不同，而导致图形拉伸的现象
         mGLSurfaceView.getLayoutParams().width = Utils.getScreenWidth();
         mGLSurfaceView.getLayoutParams().height = Utils.getScreenWidth();
@@ -113,7 +113,7 @@ public class GLTriangleActivity extends BaseActivity {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             mProgram = loadProgram();
             if (mProgram == 0) {
-                finishWidthToast(R.string.gltri_msg_create_program_failed);
+                finishWidthToast(R.string.tri_msg_create_program_failed);
                 return;
             }
             GLES30.glClearColor(0.66f, 0.66f, 0.66f, 1);
@@ -146,13 +146,13 @@ public class GLTriangleActivity extends BaseActivity {
                 return 0;
             }
 
-            int vertexShader;
-            if ((vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, VERTEX_SHADER)) == 0) {
+            int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, VERTEX_SHADER);
+            if (vertexShader == 0) {
                 return 0;
             }
 
-            int fragmentShader;
-            if ((fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, FRAGMENT_SHADER)) == 0) {
+            int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, FRAGMENT_SHADER);
+            if (fragmentShader == 0) {
                 return 0;
             }
 

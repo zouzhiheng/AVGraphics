@@ -39,7 +39,7 @@ public class MainActivity extends BaseActivity {
         findViewById(R.id.main_btn_audio).setOnClickListener(v -> startActivity(AudioActivity.class));
         findViewById(R.id.main_btn_hwcodec).setOnClickListener(v -> startActivity(HWCodecActivity.class));
         findViewById(R.id.main_btn_opensl).setOnClickListener(v -> startActivity(OpenSLActivity.class));
-        findViewById(R.id.main_btn_opengl).setOnClickListener(v -> startActivity(GLTriangleActivity.class));
+        findViewById(R.id.main_btn_opengl).setOnClickListener(v -> startActivity(OpenGLActivity.class));
     }
 
     @Override
@@ -112,5 +112,6 @@ public class MainActivity extends BaseActivity {
 
     static {
         System.loadLibrary("sles");
+        System.loadLibrary("gles");
     }
 }
