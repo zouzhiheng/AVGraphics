@@ -13,6 +13,8 @@ Triangle *triangle = nullptr;
 Circle *circle = nullptr;
 Square *square = nullptr;
 
+// --- JniTriangleActivity
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1init(JNIEnv *env, jclass type) {
@@ -44,12 +46,16 @@ Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1draw(JNIEnv *env,
     triangle->draw();
 }
 
+
+// --- EGLCircleActivity
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1init(JNIEnv *env, jclass type,
                                                                   jobject surface, jint width,
                                                                   jint height) {
     if (circle) {
+        circle->stop();
         delete circle;
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
@@ -78,12 +84,16 @@ Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1release(JNIEnv *env
     }
 }
 
+
+// --- VaoVboActivity
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1init(JNIEnv *env, jclass type,
                                                                jobject surface, jint width,
                                                                jint height) {
     if (square) {
+        square->stop();
         delete square;
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
@@ -112,12 +122,16 @@ Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1release(JNIEnv *env, j
     }
 }
 
+
+// --- MatrixTransformActivity
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1init(JNIEnv *env, jclass type,
                                                                         jobject surface, jint width,
                                                                         jint height) {
     if (square) {
+        square->stop();
         delete square;
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
