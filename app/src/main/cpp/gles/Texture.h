@@ -25,7 +25,7 @@ private:
     GLfloat mMatrix[16];
     AAssetManager *mAssetManager;
 
-protected:
+private:
     bool doInit() override;
 
     void doDraw() override;

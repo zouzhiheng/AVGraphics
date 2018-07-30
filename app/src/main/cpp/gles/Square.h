@@ -15,7 +15,7 @@ private:
     GLint mMatrixLoc;
     GLfloat mMatrix[16];
 
-protected:
+private:
     bool doInit() override;
 
     void doDraw() override;

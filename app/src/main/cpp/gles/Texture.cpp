@@ -85,8 +85,6 @@ void Texture::setAssetManager(AAssetManager *assetManager) {
 }
 
 bool Texture::doInit() {
-    EGLDemo::doInit();
-
     std::string *vShader = readShaderFromAsset(mAssetManager, "texture.vert");
     std::string *fShader = readShaderFromAsset(mAssetManager, "texture.frag");
 
@@ -138,12 +136,8 @@ void Texture::doDraw() {
 
     glDisableVertexAttribArray(ATTRIB_POSITION);
     glDisableVertexAttribArray(ATTRIB_TEX_COORD);
-
-    glFlush();
-    mEGLCore->swapBuffer();
 }
 
 void Texture::doStop() {
     glDeleteTextures(1, &mTexId);
-    EGLDemo::doStop();
 }

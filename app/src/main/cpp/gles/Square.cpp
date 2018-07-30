@@ -70,8 +70,6 @@ void Square::setMatrix(GLfloat *matrx) {
 }
 
 bool Square::doInit() {
-    EGLDemo::doInit();
-
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
 
     mMatrixLoc = glGetUniformLocation(mProgram, "mMatrix");
@@ -117,13 +115,9 @@ void Square::doDraw() {
     glBindVertexArray(mVaoId);
     glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, (const GLvoid *) 0);
     glBindVertexArray(0);
-
-    glFlush();
-    mEGLCore->swapBuffer();
 }
 
 void Square::doStop() {
     glDeleteVertexArrays(1, &mVaoId);
     glDeleteBuffers(2, mVboIds);
-    EGLDemo::doStop();
 }

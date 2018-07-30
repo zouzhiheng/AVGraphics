@@ -12,6 +12,7 @@
 
 class EGLDemo : public GLDemo {
 private:
+    EGLCore *mEGLCore;
     ANativeWindow *mWindow;
 
     pthread_t mStartThread;
@@ -19,18 +20,20 @@ private:
     pthread_cond_t mCondition;
     bool mIsRendering;
 
-protected:
-    EGLCore *mEGLCore;
-
 private:
+    bool init();
+
     void renderLoop();
 
-protected:
+    void drawAndSwapBuffer();
+
+    void stopDrawing();
+
     virtual bool doInit() = 0;
 
     virtual void doDraw() = 0;
 
-    virtual void doStop();
+    virtual void doStop() = 0;
 
 public:
     EGLDemo(ANativeWindow *window);

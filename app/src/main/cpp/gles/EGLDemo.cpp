@@ -26,21 +26,21 @@ void EGLDemo::start() {
 }
 
 void *startThreadCallback(void *arg) {
-    EGLDemo *shape = (EGLDemo *) arg;
-    if (shape->doInit()) {
-        shape->renderLoop();
-        shape->doStop();
+    EGLDemo *demo = (EGLDemo *) arg;
+    if (demo->init()) {
+        demo->renderLoop();
+        demo->stopDrawing();
     }
     return 0;
 }
 
-bool EGLDemo::doInit() {
+bool EGLDemo::init() {
     if (!mEGLCore->buildContext(mWindow)) {
         LOGE("buildContext failed");
         return false;
     }
 
-    return true;
+    return doInit();
 }
 
 void EGLDemo::renderLoop() {
@@ -49,7 +49,7 @@ void EGLDemo::renderLoop() {
     while (mIsRendering) {
         pthread_mutex_lock(&mMutex);
 
-        doDraw();
+        drawAndSwapBuffer();
         pthread_cond_wait(&mCondition, &mMutex);
 
         pthread_mutex_unlock(&mMutex);
@@ -57,7 +57,14 @@ void EGLDemo::renderLoop() {
     LOGD("renderLoop ended");
 }
 
-void EGLDemo::doStop() {
+void EGLDemo::drawAndSwapBuffer() {
+    doDraw();
+    glFlush();
+    mEGLCore->swapBuffer();
+}
+
+void EGLDemo::stopDrawing() {
+    doStop();
     glDeleteProgram(mProgram);
     mEGLCore->release();
 }

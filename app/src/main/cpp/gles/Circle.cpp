@@ -68,11 +68,8 @@ void Circle::createVertices() {
 }
 
 bool Circle::doInit() {
-    EGLDemo::doInit();
-
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
-
     return mProgram > 0;
 }
 
@@ -87,9 +84,10 @@ void Circle::doDraw() {
     glVertexAttribPointer(ATTRIB_POSITION, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE, 0, mVertices);
     glDrawArrays(GL_TRIANGLE_FAN, 0, mVertexNumer);
     glDisableVertexAttribArray(ATTRIB_POSITION);
+}
 
-    glFlush();
-    mEGLCore->swapBuffer();
+void Circle::doStop() {
+
 }
 
 Circle::~Circle() {

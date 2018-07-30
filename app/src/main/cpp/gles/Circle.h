@@ -15,10 +15,11 @@ private:
 private:
     void createVertices();
 
-protected:
     bool doInit() override;
 
     void doDraw() override;
+
+    void doStop() override;
 
 public:
     Circle(ANativeWindow *window);
