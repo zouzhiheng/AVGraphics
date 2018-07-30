@@ -41,7 +41,7 @@ public:
 
     void draw();
 
-    void stop();
+    virtual void stop();
 
     friend void *startThreadCallback(void *arg);
 };

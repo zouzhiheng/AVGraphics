@@ -25,7 +25,8 @@ add_library( gles
              ${dir_gles}/EGLCore.cpp
              ${dir_gles}/Triangle.cpp
              ${dir_gles}/Circle.cpp
-             ${dir_gles}/Square.cpp )
+             ${dir_gles}/Square.cpp
+             ${dir_gles}/Texture.cpp )
 
 
 include_directories( src/main/cpp/util )

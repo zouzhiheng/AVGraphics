@@ -1,17 +1,16 @@
 package com.steven.avgraphics.activity.gles;
 
 import android.opengl.GLSurfaceView;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Surface;
 
+import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.Utils;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class JniTriangleActivity extends AppCompatActivity {
+public class JniTriangleActivity extends BaseActivity {
 
     private GLSurfaceView mGLSurfaceView;
 

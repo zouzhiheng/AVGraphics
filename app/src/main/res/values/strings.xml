@@ -80,6 +80,7 @@
     <string name="opengl_btn_egl_circle">EGL 搭建环境绘制圆形</string>
     <string name="opengl_btn_vao_vbo">使用 VAO &amp; VBO 特性绘制正方形</string>
     <string name="opengl_btn_matrix_transform">矩阵变换</string>
+    <string name="opengl_btn_texture">使用纹理绘制图片</string>
 
     <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
 
@@ -97,6 +98,14 @@
     <string name="mxtsf_btn_left_rotate">左旋</string>
     <string name="mxtsf_btn_right_rotate">右旋</string>
     <string name="mxtsf_btn_mvp">MVP 矩阵</string>
+
+
+    <!-- TextureActivity(tex) -->
+    <string name="tex_btn_origin">原图</string>
+    <string name="tex_btn_gray">黑白</string>
+    <string name="tex_btn_blur">模糊</string>
+    <string name="tex_btn_cool">冷色调</string>
+    <string name="tex_btn_warm">暖色调</string>
 
 
 </resources>

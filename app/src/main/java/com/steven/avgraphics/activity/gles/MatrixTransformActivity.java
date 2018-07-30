@@ -1,16 +1,16 @@
 package com.steven.avgraphics.activity.gles;
 
 import android.opengl.Matrix;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.Utils;
 
-public class MatrixTransformActivity extends AppCompatActivity {
+public class MatrixTransformActivity extends BaseActivity {
 
     private static final float PI = 3.14159265358979f;
 
@@ -29,7 +29,7 @@ public class MatrixTransformActivity extends AppCompatActivity {
         initSurfaceView();
         setListener();
     }
-    
+
     private void initSurfaceView() {
         SurfaceView surfaceView = findViewById(R.id.mxtsf_sv_window);
         surfaceView.getLayoutParams().width = Utils.getScreenWidth();
