@@ -5,6 +5,7 @@
 #include <android/asset_manager_jni.h>
 #include <string>
 #include <log.h>
+#include <cstring>
 #include "Texture.h"
 #include "glutil.h"
 
@@ -32,64 +33,62 @@ const static int INDEX_NUMBER = 6;
 
 Texture::Texture(ANativeWindow *window) : EGLDemo(window), mTexId(0), mTexWidth(0), mTexHeight(0),
                                           mMatrixLoc(0), mFilterTypeLoc(0), mFilterColorLoc(0),
-                                          mSamplerLoc(0), mFilterType(0), mFilterColor(nullptr),
-                                          mPixel(nullptr), mMatrix(nullptr),
+                                          mSamplerLoc(0), mFilterType(0), mPixel(nullptr),
                                           mAssetManager(nullptr) {
-
+    memset(mFilterColor, 0, sizeof(mFilterColor));
+    memset(mMatrix, 0, sizeof(mMatrix));
+    mMatrix[0] = 1;
+    mMatrix[5] = 1;
+    mMatrix[10] = 1;
+    mMatrix[15] = 1;
 }
 
 Texture::~Texture() {
-//    if (mFilterColor) {
-//        delete mFilterColor;
-//        mFilterColor = nullptr;
-//    }
-//
-//    if (mPixel) {
-//        delete mPixel;
-//        mPixel = nullptr;
-//    }
-//
-//    if (mMatrix) {
-//        delete mMatrix;
-//        mMatrix = nullptr;
-//    }
-//
-//    mAssetManager = nullptr;
+    if (mPixel) {
+        delete mPixel;
+        mPixel = nullptr;
+    }
+
+    mAssetManager = nullptr;
 }
 
-void Texture::setTexWidth(GLint mTexWidth) {
-    Texture::mTexWidth = mTexWidth;
+void Texture::setTexWidth(GLint texWidth) {
+    mTexWidth = texWidth;
 }
 
-void Texture::setTexHeight(GLint mTexHeight) {
-    Texture::mTexHeight = mTexHeight;
+void Texture::setTexHeight(GLint texHeight) {
+    mTexHeight = texHeight;
 }
 
-void Texture::setFilterType(GLint mFilterType) {
-    Texture::mFilterType = mFilterType;
+void Texture::setFilterType(GLint filterType) {
+    mFilterType = filterType;
 }
 
-void Texture::setFilterColor(GLfloat *mFilterColor) {
-    Texture::mFilterColor = mFilterColor;
+void Texture::setFilterColor(GLfloat *filterColor) {
+    memcpy(mFilterColor, filterColor, sizeof(mFilterColor));
 }
 
-void Texture::setPixel(uint8_t *mPixel) {
-    Texture::mPixel = mPixel;
+void Texture::setPixel(uint8_t *pixel, size_t dataLen) {
+    if (mPixel) {
+        delete mPixel;
+    }
+    mPixel = new uint8_t[dataLen];
+    memcpy(mPixel, pixel, dataLen);
 }
 
-void Texture::setMatrix(GLfloat *mMatrix) {
-    Texture::mMatrix = mMatrix;
+void Texture::setMatrix(GLfloat *matrix) {
+    memcpy(mMatrix, matrix, sizeof(mMatrix));
 }
 
-void Texture::setAssetManager(AAssetManager *mAssetManager) {
-    Texture::mAssetManager = mAssetManager;
+void Texture::setAssetManager(AAssetManager *assetManager) {
+    mAssetManager = assetManager;
 }
 
 bool Texture::doInit() {
     EGLDemo::doInit();
 
     std::string *vShader = readShaderFromAsset(mAssetManager, "texture.vert");
-    std::string *fShader = readShaderFromAsset(mAssetManager, "texture.frag");\
+    std::string *fShader = readShaderFromAsset(mAssetManager, "texture.frag");
 
     mProgram = loadProgram(vShader->c_str(), fShader->c_str());
 

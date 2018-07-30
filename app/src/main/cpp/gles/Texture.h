@@ -20,9 +20,9 @@ private:
     GLint mSamplerLoc;
 
     GLint mFilterType;
-    GLfloat *mFilterColor;
+    GLfloat mFilterColor[3];
     uint8_t *mPixel;
-    GLfloat *mMatrix;
+    GLfloat mMatrix[16];
     AAssetManager *mAssetManager;
 
 protected:
@@ -37,19 +37,19 @@ public:
 
     ~Texture() override;
 
-    void setTexWidth(GLint mTexWidth);
+    void setTexWidth(GLint texWidth);
 
-    void setTexHeight(GLint mTexHeight);
+    void setTexHeight(GLint texHeight);
 
-    void setFilterType(GLint mFilterType);
+    void setFilterType(GLint filterType);
 
-    void setFilterColor(GLfloat *mFilterColor);
+    void setFilterColor(GLfloat *filterColor);
 
-    void setPixel(uint8_t *mPixel);
+    void setPixel(uint8_t *pixel, size_t dataLen);
 
     void setMatrix(GLfloat *mMatrix);
 
-    void setAssetManager(AAssetManager *mAssetManager);
+    void setAssetManager(AAssetManager *assetManager);
 };
 
 

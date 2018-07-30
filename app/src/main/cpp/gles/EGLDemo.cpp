@@ -45,7 +45,7 @@ bool EGLDemo::doInit() {
 
 void EGLDemo::renderLoop() {
     mIsRendering = true;
-    LOGI("renderLoop started");
+    LOGD("renderLoop started");
     while (mIsRendering) {
         pthread_mutex_lock(&mMutex);
 
@@ -54,7 +54,7 @@ void EGLDemo::renderLoop() {
 
         pthread_mutex_unlock(&mMutex);
     }
-    LOGI("renderLoop ended");
+    LOGD("renderLoop ended");
 }
 
 void EGLDemo::doStop() {

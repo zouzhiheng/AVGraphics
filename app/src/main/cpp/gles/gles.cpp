@@ -180,9 +180,10 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_TextureActivity__1init(JNIEnv *env, jclass type,
                                                                 jobject surface, jint texWidth,
-                                                                jint texHeight, jbyteArray rgba_,
+                                                                jint texHeight, jbyteArray pixel_,
+                                                                jint pixelDataLen,
                                                                 jobject assetManager) {
-    jbyte *rgba = env->GetByteArrayElements(rgba_, NULL);
+    jbyte *pixel = env->GetByteArrayElements(pixel_, NULL);
 
     if (texture) {
         texture->stop();
@@ -193,12 +194,12 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1init(JNIEnv *env, jcl
     texture = new Texture(window);
     texture->setTexWidth(texWidth);
     texture->setTexHeight(texHeight);
-    texture->setPixel((uint8_t *) rgba);
+    texture->setPixel((uint8_t *) pixel, (size_t) pixelDataLen);
     texture->setAssetManager(manager);
     texture->resize(texWidth, texHeight);
     texture->start();
 
-    env->ReleaseByteArrayElements(rgba_, rgba, 0);
+    env->ReleaseByteArrayElements(pixel_, pixel, 0);
 }
 
 extern "C"

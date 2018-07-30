@@ -4,8 +4,8 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.Matrix;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -17,7 +17,6 @@ import java.nio.ByteBuffer;
 
 public class TextureActivity extends AppCompatActivity {
 
-    private Filter mFilter = Filter.NONE;
     private Bitmap mBitmap;
     private byte[] mPixel;
     private float[] mMvpMatrix = new float[16];
@@ -36,6 +35,7 @@ public class TextureActivity extends AppCompatActivity {
     }
 
     private void initData() {
+        Matrix.setIdentityM(mMvpMatrix, 0);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tex_cat, options);
@@ -53,50 +53,15 @@ public class TextureActivity extends AppCompatActivity {
     }
 
     private void setListener() {
-        findViewById(R.id.tex_btn_origin).setOnClickListener(v -> {
-            mFilter = Filter.NONE;
-            _draw(mMvpMatrix, mFilter.getType(), mFilter.getData());
-        });
-        findViewById(R.id.tex_btn_gray).setOnClickListener(v -> {
-            mFilter = Filter.GRAY;
-            _draw(mMvpMatrix, mFilter.getType(), mFilter.getData());
-        });
-        findViewById(R.id.tex_btn_blur).setOnClickListener(v -> {
-            mFilter = Filter.BLUR;
-            _draw(mMvpMatrix, mFilter.getType(), mFilter.getData());
-        });
-        findViewById(R.id.tex_btn_cool).setOnClickListener(v -> {
-            mFilter = Filter.COOL;
-            _draw(mMvpMatrix, mFilter.getType(), mFilter.getData());
-        });
-        findViewById(R.id.tex_btn_warm).setOnClickListener(v -> {
-            mFilter = Filter.WARM;
-            _draw(mMvpMatrix, mFilter.getType(), mFilter.getData());
-        });
+        findViewById(R.id.tex_btn_origin).setOnClickListener(v -> redraw(Filter.NONE));
+        findViewById(R.id.tex_btn_gray).setOnClickListener(v -> redraw(Filter.GRAY));
+        findViewById(R.id.tex_btn_blur).setOnClickListener(v -> redraw(Filter.BLUR));
+        findViewById(R.id.tex_btn_cool).setOnClickListener(v -> redraw(Filter.COOL));
+        findViewById(R.id.tex_btn_warm).setOnClickListener(v -> redraw(Filter.WARM));
     }
 
-    public enum Filter {
-        NONE(0, new float[]{0.0f, 0.0f, 0.0f}),
-        GRAY(1, new float[]{0.299f, 0.587f, 0.114f}),
-        COOL(2, new float[]{0.0f, 0.0f, 0.1f}),
-        WARM(2, new float[]{0.1f, 0.1f, 0.0f}),
-        BLUR(3, new float[]{0.006f, 0.004f, 0.002f});
-
-        private int mType;
-        private float[] mData;
-
-        Filter(int mType, float[] data) {
-            this.mType = mType;
-            this.mData = data;
-        }
-
-        public int getType() {
-            return mType;
-        }
-
-        public float[] getData() {
-            return mData;
-        }
+    private void redraw(Filter filter) {
+        _draw(mMvpMatrix, filter.mType, filter.mData);
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -104,14 +69,15 @@ public class TextureActivity extends AppCompatActivity {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
             AssetManager assetManager = getAssets();
-            _init(holder.getSurface(), mBitmap.getWidth(), mBitmap.getHeight(), mPixel, assetManager);
+            _init(holder.getSurface(), mBitmap.getWidth(), mBitmap.getHeight(), mPixel,
+                    mPixel.length, assetManager);
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             _resize(width, height);
             setMatrix(width, height);
-            _draw(mMvpMatrix, mFilter.getType(), mFilter.getData());
+            _draw(mMvpMatrix, Filter.NONE.mType, Filter.NONE.mData);
         }
 
         @Override
@@ -152,8 +118,24 @@ public class TextureActivity extends AppCompatActivity {
 
     }
 
-    private static native void _init(Surface surface, int texWidth, int texHeight, byte[] rgba,
-                                     AssetManager assetManager);
+    public enum Filter {
+        NONE(0, new float[]{0.0f, 0.0f, 0.0f}),
+        GRAY(1, new float[]{0.299f, 0.587f, 0.114f}),
+        COOL(2, new float[]{0.0f, 0.0f, 0.1f}),
+        WARM(2, new float[]{0.1f, 0.1f, 0.0f}),
+        BLUR(3, new float[]{0.006f, 0.004f, 0.002f});
+
+        private int mType;
+        private float[] mData;
+
+        Filter(int mType, float[] data) {
+            this.mType = mType;
+            this.mData = data;
+        }
+    }
+
+    private static native void _init(Surface surface, int texWidth, int texHeight, byte[] pixel,
+                                     int pixelDataLen, AssetManager assetManager);
 
     private static native void _resize(int width, int height);
 
