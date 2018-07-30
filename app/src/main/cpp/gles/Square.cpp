@@ -5,6 +5,7 @@
 #include <jni.h>
 #include <android/native_window_jni.h>
 #include <android/log.h>
+#include <cstring>
 #include "glutil.h"
 #include "Square.h"
 
@@ -16,10 +17,11 @@ const static char *VERTEX_SHADER = ""
         "#version 300 es\n"
         "layout(location=0) in vec4 aPosition;\n"
         "layout(location=1) in vec4 aColor;\n"
+        "uniform mat4 mMatrix;\n"
         "out vec4 vColor;\n"
         "void main() {\n"
         "   vColor = aColor;\n"
-        "   gl_Position = aPosition;\n"
+        "   gl_Position = mMatrix * aPosition;\n"
         "}\n";
 
 const static char *FRAGMENT_SHADER = ""
@@ -54,18 +56,30 @@ const static int VERTEX_COLOR_SIZE = 4;
 const static int VERTEX_STRIDE = sizeof(GLfloat) * (VERTEX_POS_SIZE + VERTEX_COLOR_SIZE);
 const static int INDEX_NUMBER = 6;
 
-Square::Square(ANativeWindow *window) : EGLDemo(window) {
-
+Square::Square(ANativeWindow *window) : EGLDemo(window), mVaoId(0), mMatrixLoc(0) {
+    memset(mVboIds, 0, sizeof(mVboIds));
+    // 初始化为单位矩阵
+    memset(mMatrix, 0, sizeof(mMatrix));
+    mMatrix[0] = 1;
+    mMatrix[5] = 1;
+    mMatrix[10] = 1;
+    mMatrix[15] = 1;
 }
 
 Square::~Square() {
 
 }
 
+void Square::setMatrix(GLfloat *matrx) {
+    memcpy(mMatrix, matrx, sizeof(mMatrix));
+}
+
 bool Square::doInit() {
     EGLDemo::doInit();
 
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
+
+    mMatrixLoc = glGetUniformLocation(mProgram, "mMatrix");
 
     glGenBuffers(2, mVboIds);
     glBindBuffer(GL_ARRAY_BUFFER, mVboIds[0]);
@@ -102,6 +116,8 @@ void Square::doDraw() {
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(mProgram);
+
+    glUniformMatrix4fv(mMatrixLoc, 1, GL_FALSE, mMatrix);
 
     glBindVertexArray(mVaoId);
     glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, (const GLvoid *) 0);
@@ -146,6 +162,48 @@ Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1draw(JNIEnv *env, jcla
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1release(JNIEnv *env, jclass type) {
+    if (square) {
+        square->stop();
+        delete square;
+        square = nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1init(JNIEnv *env, jclass type,
+                                                                        jobject surface, jint width,
+                                                                        jint height) {
+    if (square) {
+        delete square;
+    }
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    square = new Square(window);
+    square->resize(width, height);
+    square->start();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1draw(JNIEnv *env, jclass type,
+                                                                        jfloatArray matrix_) {
+    if (square == nullptr) {
+        LOGE("draw error, shape is null");
+        return;
+    }
+
+    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
+
+    square->setMatrix(matrix);
+    square->draw();
+
+    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1release(JNIEnv *env,
+                                                                           jclass type) {
     if (square) {
         square->stop();
         delete square;

@@ -6,9 +6,6 @@
 #include "log.h"
 #include "BQAudioPlayer.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-
 AssetAudioPlayer *assetAudioPlayer = nullptr;
 BQAudioPlayer *bqAudioPlayer = nullptr;
 AudioRecorder *audioRecorder = nullptr;
@@ -113,5 +110,3 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1stopPlayPcm(JNIEnv *env, jc
     delete bqAudioPlayer;
     bqAudioPlayer = nullptr;
 }
-
-#pragma clang diagnostic pop

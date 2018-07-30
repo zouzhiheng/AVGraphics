@@ -10,6 +10,7 @@ import com.steven.avgraphics.R;
 import com.steven.avgraphics.activity.gles.EGLCircleActivity;
 import com.steven.avgraphics.activity.gles.JavaTriangleActivity;
 import com.steven.avgraphics.activity.gles.JniTriangleActivity;
+import com.steven.avgraphics.activity.gles.MatrixTransformActivity;
 import com.steven.avgraphics.activity.gles.VaoVboActivity;
 
 public class OpenGLActivity extends BaseActivity {
@@ -30,6 +31,8 @@ public class OpenGLActivity extends BaseActivity {
                 v -> startActivity(EGLCircleActivity.class));
         findViewById(R.id.opengl_btn_vao_vbo).setOnClickListener(
                 v -> startActivity(VaoVboActivity.class));
+        findViewById(R.id.opengl_btn_matrix_transform).setOnClickListener(
+                v -> startActivity(MatrixTransformActivity.class));
     }
 
     @Override

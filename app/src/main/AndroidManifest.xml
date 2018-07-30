@@ -42,6 +42,7 @@
         <activity android:name=".activity.gles.JniTriangleActivity" />
         <activity android:name=".activity.gles.EGLCircleActivity" />
         <activity android:name=".activity.gles.VaoVboActivity" />
+        <activity android:name=".activity.gles.MatrixTransformActivity"></activity>
     </application>
 
 </manifest>

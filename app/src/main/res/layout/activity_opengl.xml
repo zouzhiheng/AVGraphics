@@ -46,4 +46,15 @@
         android:text="@string/opengl_btn_vao_vbo"
         android:textAllCaps="false" />
 
+    <Button
+        android:id="@+id/opengl_btn_matrix_transform"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/opengl_btn_matrix_transform"
+        android:textAllCaps="false" />
+
+
 </LinearLayout>

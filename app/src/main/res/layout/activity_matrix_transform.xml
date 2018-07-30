@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.steven.avgraphics.activity.gles.MatrixTransformActivity">
+
+    <SurfaceView
+        android:id="@+id/mxtsf_sv_window"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/mxtsf_btn_magnify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_magnify"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/mxtsf_btn_minify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_minify"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/mxtsf_btn_left_translate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_left_translate"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/mxtsf_btn_right_translate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_right_translate"
+                android:textAllCaps="false" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/mxtsf_btn_left_rotate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_left_rotate"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/mxtsf_btn_right_rotate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_right_rotate"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/mxtsf_btn_mvp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mxtsf_btn_mvp"
+                android:textAllCaps="false" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
