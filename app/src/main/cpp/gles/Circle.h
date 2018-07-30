@@ -5,23 +5,25 @@
 #ifndef OPENGLDEMO_OVAL_H
 #define OPENGLDEMO_OVAL_H
 
-#include "Shape.h"
+#include "EGLDemo.h"
 
-class Circle : public Shape {
+class Circle : public EGLDemo {
 private:
     GLfloat *mVertices;
     GLuint mVertexNumer;
+
+private:
+    void createVertices();
+
+protected:
+    bool doInit() override;
+
+    void doDraw() override;
 
 public:
     Circle(ANativeWindow *window);
 
     ~Circle() override;
-
-    void createVertices();
-
-    bool doInit() override;
-
-    void doDraw() override;
 };
 
 

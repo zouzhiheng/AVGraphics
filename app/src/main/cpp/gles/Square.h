@@ -5,9 +5,9 @@
 #ifndef OPENGLDEMO_SQUARE_H
 #define OPENGLDEMO_SQUARE_H
 
-#include "shape.h"
+#include "EGLDemo.h"
 
-class Square : public Shape {
+class Square : public EGLDemo {
 private:
     GLuint mVboIds[2];
     GLuint mVaoId;

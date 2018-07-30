@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include "Shape.h"
+#include "EGLDemo.h"
 #include "Triangle.h"
 #include "Circle.h"
 #include "Square.h"
@@ -20,18 +20,13 @@
 
 void *startThreadCallback(void *arg);
 
-Shape::Shape(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mStartThread(0),
+EGLDemo::EGLDemo(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mStartThread(0),
                                       mIsRendering(false) {
     pthread_mutex_init(&mMutex, nullptr);
     pthread_cond_init(&mCondition, nullptr);
 }
 
-void Shape::resize(int width, int height) {
-    mWidth = width;
-    mHeight = height;
-}
-
-void Shape::start() {
+void EGLDemo::start() {
     if (mWindow == nullptr || mWidth == 0 || mHeight == 0) {
         LOGE("not configured, cannot start");
         return;
@@ -40,7 +35,7 @@ void Shape::start() {
 }
 
 void *startThreadCallback(void *arg) {
-    Shape *shape = (Shape *) arg;
+    EGLDemo *shape = (EGLDemo *) arg;
     if (shape->doInit()) {
         shape->renderLoop();
         shape->doStop();
@@ -48,7 +43,7 @@ void *startThreadCallback(void *arg) {
     return 0;
 }
 
-bool Shape::doInit() {
+bool EGLDemo::doInit() {
     if (!mEGLCore->buildContext(mWindow)) {
         LOGE("buildContext failed");
         return false;
@@ -57,7 +52,7 @@ bool Shape::doInit() {
     return true;
 }
 
-void Shape::renderLoop() {
+void EGLDemo::renderLoop() {
     mIsRendering = true;
     LOGI("renderLoop started");
     while (mIsRendering) {
@@ -71,19 +66,19 @@ void Shape::renderLoop() {
     LOGI("renderLoop ended");
 }
 
-void Shape::doStop() {
+void EGLDemo::doStop() {
     glDeleteProgram(mProgram);
     mEGLCore->release();
 }
 
-void Shape::draw() {
+void EGLDemo::draw() {
     pthread_mutex_lock(&mMutex);
     mIsRendering = true;
     pthread_cond_signal(&mCondition);
     pthread_mutex_unlock(&mMutex);
 }
 
-void Shape::stop() {
+void EGLDemo::stop() {
     pthread_mutex_lock(&mMutex);
     mIsRendering = false;
     pthread_cond_signal(&mCondition);
@@ -92,7 +87,7 @@ void Shape::stop() {
     pthread_join(mStartThread, 0);
 }
 
-Shape::~Shape() {
+EGLDemo::~EGLDemo() {
     pthread_mutex_destroy(&mMutex);
     pthread_cond_destroy(&mCondition);
 
@@ -107,11 +102,7 @@ Shape::~Shape() {
     }
 }
 
-const static int SHAPE_TRIANGLE = 1;
-const static int SHAPE_CIRCLE = 2;
-const static int SHAPE_SQUARE = 3;
-
-Shape *shape = nullptr;
+EGLDemo *shape = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -122,14 +113,7 @@ Java_com_steven_avgraphics_activity_gles_ShapeActivity__1init(JNIEnv *env, jclas
         delete shape;
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    switch (shapeType) {
-        case SHAPE_CIRCLE:
-            shape = new Circle(window);
-            break;
-        case SHAPE_SQUARE:
-            shape = new Square(window);
-            break;
-    }
+    shape = new Square(window);
     shape->resize(width, height);
     shape->start();
 }

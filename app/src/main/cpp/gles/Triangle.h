@@ -5,13 +5,11 @@
 #ifndef OPENGLDEMO_COLORFUL_TRIANGLE_H
 #define OPENGLDEMO_COLORFUL_TRIANGLE_H
 
-#include "Shape.h"
+#include "GLDemo.h"
 
 class Triangle : public GLDemo {
 public:
     void init();
-
-    void resize(int width, int height);
 
     void draw();
 };

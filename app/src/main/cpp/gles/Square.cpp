@@ -47,7 +47,7 @@ const static int VERTEX_COLOR_SIZE = 4;
 const static int VERTEX_STRIDE = sizeof(GLfloat) * (VERTEX_POS_SIZE + VERTEX_COLOR_SIZE);
 const static int INDEX_NUMBER = 6;
 
-Square::Square(ANativeWindow *window) : Shape(window) {
+Square::Square(ANativeWindow *window) : EGLDemo(window) {
 
 }
 
@@ -56,7 +56,7 @@ Square::~Square() {
 }
 
 bool Square::doInit() {
-    Shape::doInit();
+    EGLDemo::doInit();
 
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
 
@@ -107,6 +107,6 @@ void Square::doDraw() {
 void Square::doStop() {
     glDeleteVertexArrays(1, &mVaoId);
     glDeleteBuffers(2, mVboIds);
-    Shape::doStop();
+    EGLDemo::doStop();
 }
 

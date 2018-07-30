@@ -10,7 +10,7 @@
 #include "GLDemo.h"
 #include "EGLCore.h"
 
-class Shape : public GLDemo {
+class EGLDemo : public GLDemo {
 private:
     ANativeWindow *mWindow;
 
@@ -33,11 +33,9 @@ protected:
     virtual void doStop();
 
 public:
-    Shape(ANativeWindow *window);
+    EGLDemo(ANativeWindow *window);
 
-    virtual ~Shape();
-
-    void resize(int width, int height);
+    virtual ~EGLDemo();
 
     void start();
 

@@ -49,11 +49,6 @@ void Triangle::init() {
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
 }
 
-void Triangle::resize(int width, int height) {
-    mWidth = width;
-    mHeight = height;
-}
-
 void Triangle::draw() {
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);

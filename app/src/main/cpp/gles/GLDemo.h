@@ -23,28 +23,9 @@ public:
 
     }
 
-    GLuint getProgram() const {
-        return mProgram;
-    }
-
-    void setProgram(GLuint mProgram) {
-        GLDemo::mProgram = mProgram;
-    }
-
-    GLint getWidth() const {
-        return mWidth;
-    }
-
-    void setWidth(GLint mWidth) {
-        GLDemo::mWidth = mWidth;
-    }
-
-    GLint getHeight() const {
-        return mHeight;
-    }
-
-    void setHeight(GLint mHeight) {
-        GLDemo::mHeight = mHeight;
+    void resize(int width, int height) {
+        mWidth = width;
+        mHeight = height;
     }
 };
 

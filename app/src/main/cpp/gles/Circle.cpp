@@ -7,6 +7,9 @@
 #include "glutil.h"
 #include <cmath>
 #include <vector>
+#include <jni.h>
+#include <android/native_window_jni.h>
+#include <log.h>
 
 using namespace std;
 
@@ -43,7 +46,7 @@ const static int ATTRIB_POSITION = 0;
 const static int ATTRIB_COLOR = 1;
 const static int VERTEX_POS_SIZE = 3;
 
-Circle::Circle(ANativeWindow *window) : Shape(window) {
+Circle::Circle(ANativeWindow *window) : EGLDemo(window) {
     createVertices();
 }
 
@@ -72,7 +75,7 @@ void Circle::createVertices() {
 }
 
 bool Circle::doInit() {
-    Shape::doInit();
+    EGLDemo::doInit();
 
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
@@ -100,6 +103,42 @@ Circle::~Circle() {
     if (mVertices) {
         delete mVertices;
         mVertices = nullptr;
+    }
+}
+
+Circle *circle = nullptr;
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1init(JNIEnv *env, jclass type,
+                                                                  jobject surface, jint width,
+                                                                  jint height) {
+    if (circle) {
+        delete circle;
+    }
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    circle = new Circle(window);
+    circle->resize(width, height);
+    circle->start();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1draw(JNIEnv *env, jclass type) {
+    if (circle == nullptr) {
+        LOGE("draw error, shape is null");
+        return;
+    }
+    circle->draw();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1release(JNIEnv *env, jclass type) {
+    if (circle) {
+        circle->stop();
+        delete circle;
+        circle = nullptr;
     }
 }
 

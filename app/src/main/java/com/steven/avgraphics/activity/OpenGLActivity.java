@@ -27,7 +27,7 @@ public class OpenGLActivity extends BaseActivity {
         findViewById(R.id.opengl_btn_jni_triangle).setOnClickListener(
                 v -> startActivity(JniTriangleActivity.class));
         findViewById(R.id.opengl_btn_egl_circle).setOnClickListener(
-                v -> ShapeActivity.start(OpenGLActivity.this, ShapeActivity.SHAPE_CIRCLE));
+                v -> startActivity(EGLCircleActivity.class));
         findViewById(R.id.opengl_btn_square).setOnClickListener(
                 v -> ShapeActivity.start(OpenGLActivity.this, ShapeActivity.SHAPE_SQUARE));
     }
