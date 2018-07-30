@@ -38,10 +38,10 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity android:name=".activity.OpenSLActivity" />
         <activity android:name=".activity.gles.JavaTriangleActivity" />
-        <activity android:name=".activity.gles.ShapeActivity" />
         <activity android:name=".activity.OpenGLActivity" />
         <activity android:name=".activity.gles.JniTriangleActivity" />
-        <activity android:name=".activity.gles.EGLCircleActivity"></activity>
+        <activity android:name=".activity.gles.EGLCircleActivity" />
+        <activity android:name=".activity.gles.VaoVboActivity" />
     </application>
 
 </manifest>

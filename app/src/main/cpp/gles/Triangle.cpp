@@ -3,9 +3,9 @@
 //
 
 #include <jni.h>
-#include <log.h>
 #include "glutil.h"
 #include "Triangle.h"
+#include <android/log.h>
 
 #define LOG_TAG "Triangle"
 #define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)

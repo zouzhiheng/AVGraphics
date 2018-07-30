@@ -78,14 +78,14 @@
     <string name="opengl_btn_java_triangle">Java 层绘制三角形</string>
     <string name="opengl_btn_jni_triangle">Native 层绘制三角形</string>
     <string name="opengl_btn_egl_circle">EGL 搭建环境绘制圆形</string>
-    <string name="opengl_btn_square">正方形</string>
+    <string name="opengl_btn_vao_vbo">使用 VAO &amp; VBO 特性绘制正方形</string>
 
     <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
 
 
-    <!-- JavaTriangleActivityvity(jatri) -->
-    <string name="jatri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
-    <string name="jatri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
+    <!-- JavaTriangleActivityvity(jvtri) -->
+    <string name="jvtri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
+    <string name="jvtri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
 
 
 </resources>

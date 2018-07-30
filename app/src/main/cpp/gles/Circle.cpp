@@ -9,7 +9,7 @@
 #include <vector>
 #include <jni.h>
 #include <android/native_window_jni.h>
-#include <log.h>
+#include <android/log.h>
 
 using namespace std;
 

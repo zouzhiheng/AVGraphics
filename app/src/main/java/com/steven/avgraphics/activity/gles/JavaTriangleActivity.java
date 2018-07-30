@@ -70,7 +70,7 @@ public class JavaTriangleActivity extends BaseActivity {
     }
 
     private void initGLSurfaceView() {
-        mGLSurfaceView = findViewById(R.id.gltri_glsv_window);
+        mGLSurfaceView = findViewById(R.id.jvtri_glsv_window);
         // 宽高 1:1，避免出现坐标系 x、y 轴单位长度不同，而导致图形拉伸的现象
         mGLSurfaceView.getLayoutParams().width = Utils.getScreenWidth();
         mGLSurfaceView.getLayoutParams().height = Utils.getScreenWidth();
@@ -113,7 +113,7 @@ public class JavaTriangleActivity extends BaseActivity {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             mProgram = loadProgram();
             if (mProgram == 0) {
-                finishWithToast(R.string.jatri_msg_create_program_failed);
+                finishWithToast(R.string.jvtri_msg_create_program_failed);
                 return;
             }
             GLES30.glClearColor(0.66f, 0.66f, 0.66f, 1);

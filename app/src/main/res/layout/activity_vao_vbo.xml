@@ -3,12 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.steven.avgraphics.activity.gles.ShapeActivity">
+    tools:context="com.steven.avgraphics.activity.gles.VaoVboActivity">
 
     <SurfaceView
-        android:id="@+id/shape_sv_window"
+        android:id="@+id/vv_sv_window"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

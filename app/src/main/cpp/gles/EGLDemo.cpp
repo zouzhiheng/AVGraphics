@@ -2,26 +2,17 @@
 // Created by Administrator on 2018/5/30 0030.
 //
 
-#include <jni.h>
 #include <android/log.h>
 #include <pthread.h>
 #include <android/native_window.h>
-#include <android/native_window_jni.h>
+#include <log.h>
 #include "EGLDemo.h"
 #include "Triangle.h"
-#include "Circle.h"
-#include "Square.h"
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#define LOG_TAG "Shape"
-#define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 void *startThreadCallback(void *arg);
 
 EGLDemo::EGLDemo(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mStartThread(0),
-                                      mIsRendering(false) {
+                                          mIsRendering(false) {
     pthread_mutex_init(&mMutex, nullptr);
     pthread_cond_init(&mCondition, nullptr);
 }
@@ -101,40 +92,3 @@ EGLDemo::~EGLDemo() {
         mEGLCore = nullptr;
     }
 }
-
-EGLDemo *shape = nullptr;
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_ShapeActivity__1init(JNIEnv *env, jclass type,
-                                                              jobject surface, jint width,
-                                                              jint height, jint shapeType) {
-    if (shape) {
-        delete shape;
-    }
-    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    shape = new Square(window);
-    shape->resize(width, height);
-    shape->start();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_ShapeActivity__1draw(JNIEnv *env, jclass type) {
-    if (shape == nullptr) {
-        LOGE("draw error, shape is null");
-        return;
-    }
-    shape->draw();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_ShapeActivity__1release(JNIEnv *env, jclass type) {
-    if (shape) {
-        shape->stop();
-        delete shape;
-        shape = nullptr;
-    }
-}
-#pragma clang diagnostic pop
