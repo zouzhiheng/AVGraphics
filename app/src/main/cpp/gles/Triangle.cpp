@@ -46,8 +46,8 @@ Triangle::Triangle(ANativeWindow *window) : Shape(window) {
 
 }
 
-bool Triangle::init() {
-    Shape::init();
+bool Triangle::doInit() {
+    Shape::doInit();
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
 
@@ -70,6 +70,6 @@ void Triangle::doDraw() {
     mEGLCore->swapBuffer();
 }
 
-void Triangle::release() {
+Triangle::~Triangle() {
 
 }

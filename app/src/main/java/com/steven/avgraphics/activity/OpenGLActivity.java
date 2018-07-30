@@ -17,10 +17,14 @@ public class OpenGLActivity extends BaseActivity {
     }
 
     private void init() {
-        findViewById(R.id.opengl_btn_triangle).setOnClickListener(
+        findViewById(R.id.opengl_btn_triangle_java).setOnClickListener(
                 v -> startActivity(TriangleActivity.class));
-        findViewById(R.id.opengl_btn_shape).setOnClickListener(
-                v -> startActivity(ShapeActivity.class));
+        findViewById(R.id.opengl_btn_triangle).setOnClickListener(
+                v -> ShapeActivity.start(OpenGLActivity.this, ShapeActivity.SHAPE_TRIANGLE));
+        findViewById(R.id.opengl_btn_circle).setOnClickListener(
+                v -> ShapeActivity.start(OpenGLActivity.this, ShapeActivity.SHAPE_CIRCLE));
+        findViewById(R.id.opengl_btn_square).setOnClickListener(
+                v -> ShapeActivity.start(OpenGLActivity.this, ShapeActivity.SHAPE_SQUARE));
     }
 
 }

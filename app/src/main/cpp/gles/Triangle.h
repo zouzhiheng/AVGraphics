@@ -11,11 +11,11 @@ class Triangle : public Shape {
 public:
     Triangle(ANativeWindow *window);
 
-    bool init() override;
+    bool doInit() override;
 
     void doDraw() override;
 
-    void release() override;
+    ~Triangle() override;
 };
 
 #endif //OPENGLDEMO_COLORFUL_TRIANGLE_H

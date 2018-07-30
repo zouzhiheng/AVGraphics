@@ -78,14 +78,10 @@
 
 
     <!-- OpenGLActivity(opengl) -->
-    <string name="opengl_btn_triangle">Triangle</string>
-    <string name="opengl_btn_shape">Shape</string>
-
-
-    <!-- ShapeActivity(shape) -->
-    <string name="shape_btn_triangle">三角形</string>
-    <string name="shape_btn_square">正方形</string>
-    <string name="shape_btn_circle">圆形</string>
+    <string name="opengl_btn_triangle_java">Java 层绘制三角形</string>
+    <string name="opengl_btn_triangle">Native 层绘制三角形</string>
+    <string name="opengl_btn_circle">圆形</string>
+    <string name="opengl_btn_square">正方形</string>
 
 
 </resources>

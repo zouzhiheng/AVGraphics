@@ -71,7 +71,9 @@ void Circle::createVertices() {
     mVertices = vertices;
 }
 
-bool Circle::init() {
+bool Circle::doInit() {
+    Shape::doInit();
+
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
 
@@ -94,7 +96,10 @@ void Circle::doDraw() {
     mEGLCore->swapBuffer();
 }
 
-void Circle::release() {
-    delete[] mVertices;
-    mVertices = nullptr;
+Circle::~Circle() {
+    if (mVertices) {
+        delete mVertices;
+        mVertices = nullptr;
+    }
 }
+

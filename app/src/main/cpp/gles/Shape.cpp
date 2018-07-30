@@ -9,6 +9,8 @@
 #include <android/native_window_jni.h>
 #include "Shape.h"
 #include "Triangle.h"
+#include "Circle.h"
+#include "Square.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -16,9 +18,9 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-void *threadStartCallback(void *arg);
+void *startThreadCallback(void *arg);
 
-Shape::Shape(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mThreadId(0),
+Shape::Shape(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mStartThread(0),
                                       mIsRendering(false) {
     pthread_mutex_init(&mMutex, nullptr);
     pthread_cond_init(&mCondition, nullptr);
@@ -34,20 +36,19 @@ void Shape::start() {
         LOGE("not configured, cannot start");
         return;
     }
-    pthread_create(&mThreadId, nullptr, threadStartCallback, (void *) this);
+    pthread_create(&mStartThread, nullptr, startThreadCallback, (void *) this);
 }
 
-void *threadStartCallback(void *arg) {
+void *startThreadCallback(void *arg) {
     Shape *shape = (Shape *) arg;
-    if (!shape->init()) {
-        return 0;
+    if (shape->doInit()) {
+        shape->renderLoop();
+        shape->doStop();
     }
-    shape->renderLoop();
-    shape->release();
     return 0;
 }
 
-bool Shape::init() {
+bool Shape::doInit() {
     if (!mEGLCore->buildContext(mWindow)) {
         LOGE("buildContext failed");
         return false;
@@ -70,6 +71,11 @@ void Shape::renderLoop() {
     LOGI("renderLoop ended");
 }
 
+void Shape::doStop() {
+    glDeleteProgram(mProgram);
+    mEGLCore->release();
+}
+
 void Shape::draw() {
     pthread_mutex_lock(&mMutex);
     mIsRendering = true;
@@ -83,15 +89,12 @@ void Shape::stop() {
     pthread_cond_signal(&mCondition);
     pthread_mutex_unlock(&mMutex);
 
-    pthread_join(mThreadId, 0);
+    pthread_join(mStartThread, 0);
 }
 
-void Shape::release() {
+Shape::~Shape() {
     pthread_mutex_destroy(&mMutex);
     pthread_cond_destroy(&mCondition);
-
-    glDeleteProgram(mProgram);
-    mEGLCore->release();
 
     if (mWindow) {
         ANativeWindow_release(mWindow);
@@ -104,39 +107,56 @@ void Shape::release() {
     }
 }
 
-Triangle *triangle = nullptr;
+const static int SHAPE_TRIANGLE = 1;
+const static int SHAPE_CIRCLE = 2;
+const static int SHAPE_SQUARE = 3;
+
+Shape *shape = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_ShapeActivity__1init(JNIEnv *env, jclass type,
                                                               jobject surface, jint width,
-                                                              jint height) {
-    if (triangle) {
-        delete triangle;
+                                                              jint height, jint shapeType) {
+    if (shape) {
+        delete shape;
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    triangle = new Triangle(window);
-    triangle->resize(width, height);
-    triangle->start();
+    switch (shapeType) {
+        case SHAPE_TRIANGLE:
+            shape = new Triangle(window);
+            break;
+        case SHAPE_CIRCLE:
+            shape = new Circle(window);
+            break;
+        case SHAPE_SQUARE:
+            shape = new Square(window);
+            break;
+        default:
+            shape = new Triangle(window);
+            break;
+    }
+    shape->resize(width, height);
+    shape->start();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_ShapeActivity__1draw(JNIEnv *env, jclass type) {
-    if (triangle == nullptr) {
+    if (shape == nullptr) {
         LOGE("draw error, shape is null");
         return;
     }
-    triangle->draw();
+    shape->draw();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_ShapeActivity__1release(JNIEnv *env, jclass type) {
-    if (triangle) {
-        triangle->stop();
-        delete triangle;
-        triangle = nullptr;
+    if (shape) {
+        shape->stop();
+        delete shape;
+        shape = nullptr;
     }
 }
 #pragma clang diagnostic pop

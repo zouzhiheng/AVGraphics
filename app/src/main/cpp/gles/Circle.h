@@ -15,13 +15,13 @@ private:
 public:
     Circle(ANativeWindow *window);
 
+    ~Circle() override;
+
     void createVertices();
 
-    bool init() override;
+    bool doInit() override;
 
     void doDraw() override;
-
-    void release() override;
 };
 
 

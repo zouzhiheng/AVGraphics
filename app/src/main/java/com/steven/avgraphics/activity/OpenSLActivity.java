@@ -12,6 +12,8 @@ import com.steven.avgraphics.util.Utils;
 
 public class OpenSLActivity extends BaseActivity implements View.OnClickListener {
 
+    private static final String ASSET_MP3_FILE = "opensl.mp3";
+
     private Button mBtnStartPlayMp3;
     private Button mBtnStopPlayMp3;
     private Button mBtnStartRecord;
@@ -74,7 +76,7 @@ public class OpenSLActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void startPlayMp3() {
-        _startPlayMp3(getAssets(), "background.mp3");
+        _startPlayMp3(getAssets(), ASSET_MP3_FILE);
         disableButtons();
         mBtnStopPlayMp3.setEnabled(true);
     }
@@ -135,7 +137,6 @@ public class OpenSLActivity extends BaseActivity implements View.OnClickListener
         _stopRecord();
     }
 
-    @SuppressWarnings("SameParameterValue")
     private static native void _startPlayMp3(AssetManager assetManager, String filename);
 
     private static native void _stopPlayMp3();
@@ -144,7 +145,6 @@ public class OpenSLActivity extends BaseActivity implements View.OnClickListener
 
     private static native void _stopRecord();
 
-    @SuppressWarnings("SameParameterValue")
     private static native void _startPlayPcm(String filePath);
 
     private static native void _stopPlayPcm();

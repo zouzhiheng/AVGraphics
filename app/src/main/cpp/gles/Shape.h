@@ -11,27 +11,31 @@
 #include "EGLCore.h"
 
 class Shape : public GLDemo {
-protected:
+private:
     ANativeWindow *mWindow;
-    EGLCore *mEGLCore;
 
-    pthread_t mThreadId;
+    pthread_t mStartThread;
     pthread_mutex_t mMutex;
     pthread_cond_t mCondition;
     bool mIsRendering;
+
+protected:
+    EGLCore *mEGLCore;
 
 private:
     void renderLoop();
 
 protected:
-    virtual bool init() = 0;
+    virtual bool doInit() = 0;
 
     virtual void doDraw() = 0;
 
-    virtual void release();
+    virtual void doStop();
 
 public:
     Shape(ANativeWindow *window);
+
+    virtual ~Shape();
 
     void resize(int width, int height);
 
@@ -41,7 +45,7 @@ public:
 
     void stop();
 
-    friend void *threadStartCallback(void *arg);
+    friend void *startThreadCallback(void *arg);
 };
 
 #endif //OPENGLDEMO_SHAPE_RENDERER_H

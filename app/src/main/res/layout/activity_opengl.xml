@@ -7,6 +7,16 @@
     tools:context="com.steven.avgraphics.activity.OpenGLActivity">
 
     <Button
+        android:id="@+id/opengl_btn_triangle_java"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/opengl_btn_triangle_java"
+        android:textAllCaps="false" />
+
+    <Button
         android:id="@+id/opengl_btn_triangle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,13 +27,23 @@
         android:textAllCaps="false" />
 
     <Button
-        android:id="@+id/opengl_btn_shape"
+        android:id="@+id/opengl_btn_circle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/opengl_btn_shape"
+        android:text="@string/opengl_btn_circle"
+        android:textAllCaps="false" />
+
+    <Button
+        android:id="@+id/opengl_btn_square"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:text="@string/opengl_btn_square"
         android:textAllCaps="false" />
 
 </LinearLayout>
