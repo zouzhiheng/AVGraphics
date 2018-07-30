@@ -27,6 +27,8 @@ add_library( gles
              ${dir_gles}/Triangle.cpp )
 
 
+include_directories( src/main/cpp/util )
+
 # --- link libraries
 target_link_libraries( sles
 

@@ -38,12 +38,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    protected void finishWidthToast(String msg) {
+    protected void finishWithToast(String msg) {
         ToastHelper.showOnUiThread(msg);
         finish();
     }
 
-    protected void finishWidthToast(int msgId) {
+    protected void finishWithToast(int msgId) {
         ToastHelper.showOnUiThread(msgId);
         finish();
     }

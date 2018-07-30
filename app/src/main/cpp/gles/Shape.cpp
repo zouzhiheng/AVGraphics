@@ -123,17 +123,11 @@ Java_com_steven_avgraphics_activity_gles_ShapeActivity__1init(JNIEnv *env, jclas
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     switch (shapeType) {
-        case SHAPE_TRIANGLE:
-            shape = new Triangle(window);
-            break;
         case SHAPE_CIRCLE:
             shape = new Circle(window);
             break;
         case SHAPE_SQUARE:
             shape = new Square(window);
-            break;
-        default:
-            shape = new Triangle(window);
             break;
     }
     shape->resize(width, height);

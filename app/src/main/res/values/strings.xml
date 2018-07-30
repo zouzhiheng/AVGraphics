@@ -36,6 +36,7 @@
     <string name="camera2_msg_no_camera_service">获取 Camera 服务失败</string>
     <string name="camera2_msg_open_error">打开相机过程中出现错误!</string>
 
+
     <!-- AudioActivity(audio) -->
     <string name="audio_btn_start_record">开始录制</string>
     <string name="audio_btn_stop_record">停止录制</string>
@@ -55,6 +56,7 @@
 
     <string name="opensl_msg_init_recorder_failed">音频录制器初始化失败!</string>
 
+
     <!-- HWCodecActivity(hwcodec) -->
     <string name="hwcodec_btn_decode">解码</string>
     <string name="hwcodec_btn_transcode">转码</string>
@@ -72,16 +74,18 @@
     <string name="hwcodec_msg_preview_failed">开启相机预览失败!</string>
 
 
-    <!-- TriangleActivity(tri) -->
-    <string name="tri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
-    <string name="tri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
-
-
     <!-- OpenGLActivity(opengl) -->
-    <string name="opengl_btn_triangle_java">Java 层绘制三角形</string>
-    <string name="opengl_btn_triangle">Native 层绘制三角形</string>
-    <string name="opengl_btn_circle">圆形</string>
+    <string name="opengl_btn_java_triangle">Java 层绘制三角形</string>
+    <string name="opengl_btn_jni_triangle">Native 层绘制三角形</string>
+    <string name="opengl_btn_egl_circle">EGL 搭建环境绘制一个圆形</string>
     <string name="opengl_btn_square">正方形</string>
+
+    <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
+
+
+    <!-- JavaTriangleActivityvity(jatri) -->
+    <string name="jatri_msg_create_program_failed">OpenGL 创建 Program 失败</string>
+    <string name="jatri_msg_create_shader_failed">OpenGL 创建 Shader 失败</string>
 
 
 </resources>

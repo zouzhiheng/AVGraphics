@@ -17,7 +17,7 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class TriangleActivity extends BaseActivity {
+public class JavaTriangleActivity extends BaseActivity {
 
     private static final String VERTEX_SHADER = "" +
             "#version 300 es\n" +
@@ -60,7 +60,7 @@ public class TriangleActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_triangle);
+        setContentView(R.layout.activity_java_triangle);
         init();
     }
 
@@ -113,7 +113,7 @@ public class TriangleActivity extends BaseActivity {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             mProgram = loadProgram();
             if (mProgram == 0) {
-                finishWidthToast(R.string.tri_msg_create_program_failed);
+                finishWithToast(R.string.jatri_msg_create_program_failed);
                 return;
             }
             GLES30.glClearColor(0.66f, 0.66f, 0.66f, 1);

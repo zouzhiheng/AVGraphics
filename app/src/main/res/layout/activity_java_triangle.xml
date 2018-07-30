@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.steven.avgraphics.activity.gles.TriangleActivity">
+    tools:context="com.steven.avgraphics.activity.gles.JavaTriangleActivity">
 
     <android.opengl.GLSurfaceView
         android:id="@+id/gltri_glsv_window"

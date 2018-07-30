@@ -7,15 +7,13 @@
 
 #include "Shape.h"
 
-class Triangle : public Shape {
+class Triangle : public GLDemo {
 public:
-    Triangle(ANativeWindow *window);
+    void init();
 
-    bool doInit() override;
+    void resize(int width, int height);
 
-    void doDraw() override;
-
-    ~Triangle() override;
+    void draw();
 };
 
 #endif //OPENGLDEMO_COLORFUL_TRIANGLE_H

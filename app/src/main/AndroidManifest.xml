@@ -37,9 +37,11 @@
             android:name=".activity.Camera2Activity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity android:name=".activity.OpenSLActivity" />
-        <activity android:name=".activity.gles.TriangleActivity" />
+        <activity android:name=".activity.gles.JavaTriangleActivity" />
         <activity android:name=".activity.gles.ShapeActivity" />
         <activity android:name=".activity.OpenGLActivity" />
+        <activity android:name=".activity.gles.JniTriangleActivity" />
+        <activity android:name=".activity.gles.EGLCircleActivity"></activity>
     </application>
 
 </manifest>

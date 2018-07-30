@@ -7,33 +7,33 @@
     tools:context="com.steven.avgraphics.activity.OpenGLActivity">
 
     <Button
-        android:id="@+id/opengl_btn_triangle_java"
+        android:id="@+id/opengl_btn_java_triangle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/opengl_btn_triangle_java"
+        android:text="@string/opengl_btn_java_triangle"
         android:textAllCaps="false" />
 
     <Button
-        android:id="@+id/opengl_btn_triangle"
+        android:id="@+id/opengl_btn_jni_triangle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/opengl_btn_triangle"
+        android:text="@string/opengl_btn_jni_triangle"
         android:textAllCaps="false" />
 
     <Button
-        android:id="@+id/opengl_btn_circle"
+        android:id="@+id/opengl_btn_egl_circle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
-        android:text="@string/opengl_btn_circle"
+        android:text="@string/opengl_btn_egl_circle"
         android:textAllCaps="false" />
 
     <Button

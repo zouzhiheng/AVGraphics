@@ -2,6 +2,8 @@
 // Created by Administrator on 2018/5/14 0014.
 //
 
+#include <jni.h>
+#include <log.h>
 #include "glutil.h"
 #include "Triangle.h"
 
@@ -42,19 +44,17 @@ static const GLuint ATTRIB_COLOR = 0;
 static const GLuint ATTRIB_POSITION = 1;
 static const GLuint VERTEX_COUNT = 3;
 
-Triangle::Triangle(ANativeWindow *window) : Shape(window) {
-
-}
-
-bool Triangle::doInit() {
-    Shape::doInit();
+void Triangle::init() {
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
-
-    return mProgram > 0;
 }
 
-void Triangle::doDraw() {
+void Triangle::resize(int width, int height) {
+    mWidth = width;
+    mHeight = height;
+}
+
+void Triangle::draw() {
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(mProgram);
@@ -65,11 +65,37 @@ void Triangle::doDraw() {
     glEnableVertexAttribArray(ATTRIB_POSITION);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
     glDisableVertexAttribArray(ATTRIB_POSITION);
-
-    glFlush();
-    mEGLCore->swapBuffer();
 }
 
-Triangle::~Triangle() {
+Triangle *triangle = nullptr;
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1init(JNIEnv *env, jclass type) {
+    if (triangle) {
+        delete triangle;
+    }
+    triangle = new Triangle();
+    triangle->init();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1resize(JNIEnv *env, jclass type,
+                                                                      jint width, jint height) {
+    if (!triangle) {
+        LOGE("triangle does not initialized");
+        return;
+    }
+    triangle->resize(width, height);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1draw(JNIEnv *env, jclass type) {
+    if (!triangle) {
+        LOGE("triangle does not initialized");
+        return;
+    }
+    triangle->draw();
 }
