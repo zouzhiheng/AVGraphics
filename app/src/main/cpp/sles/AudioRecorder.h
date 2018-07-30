@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/7/27 0027.
+// Created by zzh on 2018/7/27 0027.
 //
 
 #ifndef AVGRAPHICS_AUDIORECORDER_H

@@ -1,17 +1,12 @@
 //
-// Created by Administrator on 2018/5/14 0014.
+// Created by zzh on 2018/5/14 0014.
 //
+
 #include <GLES3/gl3.h>
-#include <jni.h>
 #include <android/native_window_jni.h>
-#include <android/log.h>
 #include <cstring>
 #include "glutil.h"
 #include "Square.h"
-
-#define LOG_TAG "Circle"
-#define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 const static char *VERTEX_SHADER = ""
         "#version 300 es\n"
@@ -131,82 +126,4 @@ void Square::doStop() {
     glDeleteVertexArrays(1, &mVaoId);
     glDeleteBuffers(2, mVboIds);
     EGLDemo::doStop();
-}
-
-Square *square = nullptr;
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1init(JNIEnv *env, jclass type,
-                                                               jobject surface, jint width,
-                                                               jint height) {
-    if (square) {
-        delete square;
-    }
-    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    square = new Square(window);
-    square->resize(width, height);
-    square->start();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1draw(JNIEnv *env, jclass type) {
-    if (square == nullptr) {
-        LOGE("draw error, shape is null");
-        return;
-    }
-    square->draw();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1release(JNIEnv *env, jclass type) {
-    if (square) {
-        square->stop();
-        delete square;
-        square = nullptr;
-    }
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1init(JNIEnv *env, jclass type,
-                                                                        jobject surface, jint width,
-                                                                        jint height) {
-    if (square) {
-        delete square;
-    }
-    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    square = new Square(window);
-    square->resize(width, height);
-    square->start();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1draw(JNIEnv *env, jclass type,
-                                                                        jfloatArray matrix_) {
-    if (square == nullptr) {
-        LOGE("draw error, shape is null");
-        return;
-    }
-
-    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
-
-    square->setMatrix(matrix);
-    square->draw();
-
-    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1release(JNIEnv *env,
-                                                                           jclass type) {
-    if (square) {
-        square->stop();
-        delete square;
-        square = nullptr;
-    }
 }

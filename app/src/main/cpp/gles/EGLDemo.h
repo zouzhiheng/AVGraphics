@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/5/30 0030.
+// Created by zzh on 2018/5/30 0030.
 //
 
 #ifndef OPENGLDEMO_SHAPE_RENDERER_H

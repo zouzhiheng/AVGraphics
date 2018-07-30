@@ -19,6 +19,7 @@ add_library( gles
 
              SHARED
 
+             ${dir_gles}/gles.cpp
              ${dir_gles}/glutil.cpp
              ${dir_gles}/EGLDemo.cpp
              ${dir_gles}/EGLCore.cpp

@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/5/15 0015.
+// Created by zzh on 2018/5/15 0015.
 //
 
 #ifndef OPENGLDEMO_SQUARE_H

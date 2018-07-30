@@ -1,15 +1,9 @@
 //
-// Created by Administrator on 2018/5/14 0014.
+// Created by zzh on 2018/5/14 0014.
 //
 
-#include <jni.h>
 #include "glutil.h"
 #include "Triangle.h"
-#include <android/log.h>
-
-#define LOG_TAG "Triangle"
-#define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 const static char *VERTEX_SHADER = ""
         "#version 300 es\n"
@@ -60,37 +54,4 @@ void Triangle::draw() {
     glEnableVertexAttribArray(ATTRIB_POSITION);
     glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
     glDisableVertexAttribArray(ATTRIB_POSITION);
-}
-
-Triangle *triangle = nullptr;
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1init(JNIEnv *env, jclass type) {
-    if (triangle) {
-        delete triangle;
-    }
-    triangle = new Triangle();
-    triangle->init();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1resize(JNIEnv *env, jclass type,
-                                                                      jint width, jint height) {
-    if (!triangle) {
-        LOGE("triangle does not initialized");
-        return;
-    }
-    triangle->resize(width, height);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1draw(JNIEnv *env, jclass type) {
-    if (!triangle) {
-        LOGE("triangle does not initialized");
-        return;
-    }
-    triangle->draw();
 }

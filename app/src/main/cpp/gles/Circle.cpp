@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/5/15 0015.
+// Created by zzh on 2018/5/15 0015.
 //
 
 #include <cstring>
@@ -7,15 +7,8 @@
 #include "glutil.h"
 #include <cmath>
 #include <vector>
-#include <jni.h>
-#include <android/native_window_jni.h>
-#include <android/log.h>
 
 using namespace std;
-
-#define LOG_TAG "Circle"
-#define LOGI(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 #define PI 3.14159265359
 
@@ -103,42 +96,6 @@ Circle::~Circle() {
     if (mVertices) {
         delete mVertices;
         mVertices = nullptr;
-    }
-}
-
-Circle *circle = nullptr;
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1init(JNIEnv *env, jclass type,
-                                                                  jobject surface, jint width,
-                                                                  jint height) {
-    if (circle) {
-        delete circle;
-    }
-    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    circle = new Circle(window);
-    circle->resize(width, height);
-    circle->start();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1draw(JNIEnv *env, jclass type) {
-    if (circle == nullptr) {
-        LOGE("draw error, shape is null");
-        return;
-    }
-    circle->draw();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1release(JNIEnv *env, jclass type) {
-    if (circle) {
-        circle->stop();
-        delete circle;
-        circle = nullptr;
     }
 }
 
