@@ -25,11 +25,11 @@ const static GLushort INDICES[] = {
         0, 2, 3
 };
 
-const static int ATTRIB_POSITION = 0;
-const static int ATTRIB_TEX_COORD = 1;
-const static int VERTEX_POS_SIZE = 3;
-const static int COORDINATE_SIZE = 2;
-const static int INDEX_NUMBER = 6;
+const static GLuint ATTRIB_POSITION = 0;
+const static GLuint ATTRIB_TEX_COORD = 1;
+const static GLint VERTEX_POS_SIZE = 3;
+const static GLint COORDINATE_SIZE = 2;
+const static GLsizei INDEX_NUMBER = 6;
 
 Texture::Texture(ANativeWindow *window) : EGLDemo(window), mTexId(0), mTexWidth(0), mTexHeight(0),
                                           mMatrixLoc(0), mFilterTypeLoc(0), mFilterColorLoc(0),

@@ -44,12 +44,12 @@ const static GLushort INDICES[] = {
         0, 2, 3
 };
 
-const static int ATTRIB_POSITION = 0;
-const static int ATTRIB_COLOR = 1;
-const static int VERTEX_POS_SIZE = 3;
-const static int VERTEX_COLOR_SIZE = 4;
-const static int VERTEX_STRIDE = sizeof(GLfloat) * (VERTEX_POS_SIZE + VERTEX_COLOR_SIZE);
-const static int INDEX_NUMBER = 6;
+const static GLuint ATTRIB_POSITION = 0;
+const static GLuint ATTRIB_COLOR = 1;
+const static GLint VERTEX_POS_SIZE = 3;
+const static GLint VERTEX_COLOR_SIZE = 4;
+const static GLsizei VERTEX_STRIDE = sizeof(GLfloat) * (VERTEX_POS_SIZE + VERTEX_COLOR_SIZE);
+const static GLsizei INDEX_NUMBER = 6;
 
 Square::Square(ANativeWindow *window) : EGLDemo(window), mVaoId(0), mMatrixLoc(0) {
     memset(mVboIds, 0, sizeof(mVboIds));

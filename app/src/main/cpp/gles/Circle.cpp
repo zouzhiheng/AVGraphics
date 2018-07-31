@@ -35,9 +35,9 @@ const static GLfloat COLORS[] = {
         1.0f, 0.0f, 1.0f, 1.0f
 };
 
-const static int ATTRIB_POSITION = 0;
-const static int ATTRIB_COLOR = 1;
-const static int VERTEX_POS_SIZE = 3;
+const static GLuint ATTRIB_POSITION = 0;
+const static GLuint ATTRIB_COLOR = 1;
+const static GLint VERTEX_POS_SIZE = 3;
 
 Circle::Circle(ANativeWindow *window) : EGLDemo(window) {
     createVertices();

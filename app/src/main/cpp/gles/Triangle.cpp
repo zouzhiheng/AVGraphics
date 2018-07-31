@@ -36,7 +36,7 @@ const static GLfloat COLORS[] = {
 
 static const GLuint ATTRIB_COLOR = 0;
 static const GLuint ATTRIB_POSITION = 1;
-static const GLuint VERTEX_COUNT = 3;
+static const GLsizei VERTEX_COUNT = 3;
 
 void Triangle::init() {
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
