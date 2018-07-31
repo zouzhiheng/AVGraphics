@@ -1,15 +1,15 @@
 package com.steven.avgraphics.activity.gles;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.Utils;
 
-public class FboActivity extends AppCompatActivity {
+public class FboActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

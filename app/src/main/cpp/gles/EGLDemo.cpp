@@ -9,23 +9,27 @@
 #include "EGLDemo.h"
 #include "Triangle.h"
 
-void *startThreadCallback(void *arg);
+void *glThreadFunc(void *arg);
 
-EGLDemo::EGLDemo(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mStartThread(0),
-                                          mIsRendering(false) {
+EGLDemo::EGLDemo(ANativeWindow *window) : mWindow(window), mEGLCore(new EGLCore()), mGLThread(0),
+                                          mIsRendering(false), mIsInitialized(false) {
     pthread_mutex_init(&mMutex, nullptr);
     pthread_cond_init(&mCondition, nullptr);
 }
 
-void EGLDemo::start() {
+bool EGLDemo::start() {
     if (mWindow == nullptr || mWidth == 0 || mHeight == 0) {
         LOGE("not configured, cannot start");
-        return;
+        return false;
     }
-    pthread_create(&mStartThread, nullptr, startThreadCallback, (void *) this);
+    pthread_mutex_lock(&mMutex);
+    pthread_create(&mGLThread, nullptr, glThreadFunc, (void *) this);
+    pthread_cond_wait(&mCondition, &mMutex);
+    pthread_mutex_unlock(&mMutex);
+    return mIsInitialized;
 }
 
-void *startThreadCallback(void *arg) {
+void *glThreadFunc(void *arg) {
     EGLDemo *demo = (EGLDemo *) arg;
     if (demo->init()) {
         demo->renderLoop();
@@ -35,12 +39,14 @@ void *startThreadCallback(void *arg) {
 }
 
 bool EGLDemo::init() {
-    if (!mEGLCore->buildContext(mWindow)) {
-        LOGE("buildContext failed");
-        return false;
+    pthread_mutex_lock(&mMutex);
+    if (mEGLCore->buildContext(mWindow)) {
+        mIsInitialized = doInit();
     }
+    pthread_cond_signal(&mCondition);
+    pthread_mutex_unlock(&mMutex);
 
-    return doInit();
+    return mIsInitialized;
 }
 
 void EGLDemo::renderLoop() {
@@ -82,7 +88,7 @@ void EGLDemo::stop() {
     pthread_cond_signal(&mCondition);
     pthread_mutex_unlock(&mMutex);
 
-    pthread_join(mStartThread, 0);
+    pthread_join(mGLThread, 0);
 }
 
 EGLDemo::~EGLDemo() {

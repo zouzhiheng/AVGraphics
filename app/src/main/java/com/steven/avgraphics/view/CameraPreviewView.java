@@ -3,6 +3,7 @@ package com.steven.avgraphics.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.hardware.Camera;
@@ -12,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -46,6 +48,7 @@ public class CameraPreviewView extends FrameLayout {
     private CameraSurfaceView mSurfaceView;
     private PreviewCallback mPreviewCallback;
     public float mAspectRatio = ASPECT_RATIO_ARRAY[0];
+    private boolean mShowWithOpenGL = false;
 
     public CameraPreviewView(@NonNull Context context) {
         super(context);
@@ -87,6 +90,7 @@ public class CameraPreviewView extends FrameLayout {
     }
 
     private void addView(Context context) {
+        // 添加一个 View 占满屏幕，否则 mIvFocus 在屏幕下方显示时会被切掉一部分，原因未知
         addView(new View(context), new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
 
@@ -107,6 +111,14 @@ public class CameraPreviewView extends FrameLayout {
         mPreviewCallback = previewCallback;
     }
 
+    public void setShowWithOpenGL(boolean showWithOpenGL) {
+        mShowWithOpenGL = showWithOpenGL;
+    }
+
+    public boolean isShowWithOpenGL() {
+        return mShowWithOpenGL;
+    }
+
     public void switchCamera() {
         if (mSurfaceView != null) {
             removeView(mSurfaceView);
@@ -123,6 +135,7 @@ public class CameraPreviewView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // 屏幕空间足够就显示 16:9，否则显示 4:3
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
         int height = (int) (width / ASPECT_RATIO_ARRAY[0]);
@@ -284,6 +297,17 @@ public class CameraPreviewView extends FrameLayout {
 
         }
     }
+
+
+
+    private static native int _init(Surface surface, AssetManager manager);
+
+    private static native boolean _resize(int width, int height);
+
+    private static native void _draw(float[] matrix, float beauty, float tone, float bright,
+                                     boolean recording);
+
+    private static native void _stop();
 
 
 }

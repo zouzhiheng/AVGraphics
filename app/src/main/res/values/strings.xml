@@ -82,6 +82,7 @@
     <string name="opengl_btn_matrix_transform">矩阵变换</string>
     <string name="opengl_btn_texture">使用纹理绘制图片</string>
     <string name="opengl_btn_fbo">使用 FBO 绘制四个缓冲区</string>
+    <string name="opengl_btn_glcamera">OpenGL 相机预览</string>
 
     <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
 
@@ -107,6 +108,10 @@
     <string name="tex_btn_blur">模糊</string>
     <string name="tex_btn_cool">冷色调</string>
     <string name="tex_btn_warm">暖色调</string>
+
+
+    <!-- GLCameraActivity(glcam) -->
+    <string name="glcam_msg_open_camera_failed">打开相机设备失败</string>
 
 
 </resources>

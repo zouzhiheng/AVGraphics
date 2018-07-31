@@ -5,17 +5,17 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.Utils;
 
 import java.nio.ByteBuffer;
 
-public class TextureActivity extends AppCompatActivity {
+public class TextureActivity extends BaseActivity {
 
     private Bitmap mBitmap;
     private byte[] mPixel;

@@ -15,10 +15,11 @@ private:
     EGLCore *mEGLCore;
     ANativeWindow *mWindow;
 
-    pthread_t mStartThread;
+    pthread_t mGLThread;
     pthread_mutex_t mMutex;
     pthread_cond_t mCondition;
     bool mIsRendering;
+    bool mIsInitialized;
 
 private:
     bool init();
@@ -40,13 +41,13 @@ public:
 
     virtual ~EGLDemo();
 
-    void start();
+    bool start();
 
     void draw();
 
     virtual void stop();
 
-    friend void *startThreadCallback(void *arg);
+    friend void *glThreadFunc(void *arg);
 };
 
 #endif //OPENGLDEMO_SHAPE_RENDERER_H

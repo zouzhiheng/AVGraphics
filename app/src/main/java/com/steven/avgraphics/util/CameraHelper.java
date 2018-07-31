@@ -94,6 +94,14 @@ public class CameraHelper {
         return info.facing == Camera.CameraInfo.CAMERA_FACING_BACK;
     }
 
+    public static void releaseCamera(Camera camera) {
+        if (camera != null) {
+            camera.setPreviewCallback(null);
+            camera.stopPreview();
+            camera.release();
+        }
+    }
+
     public static void setOptimalSize(Camera camera, float aspectRatio, int maxWidth, int maxHeight) {
         Camera.Parameters parameters = camera.getParameters();
         Camera.Size size = CameraHelper.chooseOptimalSize(parameters.getSupportedPreviewSizes(),

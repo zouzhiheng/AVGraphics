@@ -12,12 +12,14 @@
 #include "Circle.h"
 #include "Texture.h"
 #include "FboRenderer.h"
+#include "GLCamera.h"
 
 Triangle *triangle = nullptr;
 Circle *circle = nullptr;
 Square *square = nullptr;
 Texture *texture = nullptr;
 FboRenderer *fboRenderer = nullptr;
+GLCamera *glCamera = nullptr;
 
 // --- JniTriangleActivity
 
@@ -282,4 +284,86 @@ Java_com_steven_avgraphics_activity_gles_FboActivity__1release(JNIEnv *env, jcla
         delete fboRenderer;
         fboRenderer = nullptr;
     }
+}
+
+
+// --- GLCameraActivity
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1init(JNIEnv *env, jclass type,
+                                                                 jobject surface, jint width,
+                                                                 jint height,
+                                                                 jobject assetManager) {
+    if (glCamera) {
+        glCamera->stop();
+        delete glCamera;
+    }
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    AAssetManager *manager = AAssetManager_fromJava(env, assetManager);
+    glCamera = new GLCamera(window);
+    glCamera->setAssetManager(manager);
+    glCamera->resize(width, height);
+
+    return glCamera->init();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1draw(JNIEnv *env, jclass type,
+                                                                 jfloatArray matrix_) {
+    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
+
+    if (!glCamera) {
+        LOGE("draw error, fboRenderer is null");
+        return;
+    }
+    glCamera->draw(matrix);
+
+    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1release(JNIEnv *env, jclass type) {
+    if (glCamera) {
+        glCamera->stop();
+        delete glCamera;
+        glCamera = nullptr;
+    }
+}
+
+
+// --- CameraPreviewView
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_steven_avgraphics_view_CameraPreviewView__1init(JNIEnv *env, jclass type, jobject surface,
+                                                         jobject manager) {
+
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_steven_avgraphics_view_CameraPreviewView__1resize(JNIEnv *env, jclass type, jint width,
+                                                           jint height) {
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_view_CameraPreviewView__1draw(JNIEnv *env, jclass type,
+                                                         jfloatArray matrix_, jfloat beauty,
+                                                         jfloat tone, jfloat bright,
+                                                         jboolean recording) {
+    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
+
+
+    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_view_CameraPreviewView__1stop(JNIEnv *env, jclass type) {
+
 }

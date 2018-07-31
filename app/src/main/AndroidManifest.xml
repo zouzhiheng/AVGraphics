@@ -44,7 +44,10 @@
         <activity android:name=".activity.gles.VaoVboActivity" />
         <activity android:name=".activity.gles.MatrixTransformActivity" />
         <activity android:name=".activity.gles.TextureActivity" />
-        <activity android:name=".activity.gles.FboActivity"></activity>
+        <activity android:name=".activity.gles.FboActivity" />
+        <activity
+            android:name=".activity.gles.GLCameraActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>
