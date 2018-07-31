@@ -42,8 +42,8 @@ public class CameraPreviewView extends FrameLayout {
     private static final float MAX_BEAUTY = 1;
     private static final float MIN_BRIGHT = 0;
     private static final float MAX_BRIGHT = 1;
-    private static final float MIN_TONE = 0;
-    private static final float MAX_TONE = 1;
+    private static final float MIN_SATURATE = 0;
+    private static final float MAX_SATURATE = 1;
 
     private ImageView mIvFocus;
     private ImageView mIvIndicator;
@@ -62,7 +62,7 @@ public class CameraPreviewView extends FrameLayout {
 
     private boolean mDrawWithOpenGL = false;
     private float mBeautyLevel = MIN_BEAUTY;
-    private float mToneLevel = MIN_TONE;
+    private float mSaturateLevel = MIN_SATURATE;
     private float mBrightLevel = MIN_BRIGHT;
     private boolean mIsRecording = false;
 
@@ -132,12 +132,8 @@ public class CameraPreviewView extends FrameLayout {
         mDrawWithOpenGL = drawWithOpenGL;
     }
 
-    public boolean isDrawWithOpenGL() {
-        return mDrawWithOpenGL;
-    }
-
     // 磨皮
-    private void setBeautyLevel(float beautyLevel) {
+    public void setBeautyLevel(float beautyLevel) {
         if (beautyLevel < MIN_BEAUTY || beautyLevel > MAX_BEAUTY) {
             Log.e(TAG, "setBeautyLevel invalid argument");
             return;
@@ -145,22 +141,26 @@ public class CameraPreviewView extends FrameLayout {
         mBeautyLevel = MIN_BEAUTY + (MAX_BEAUTY - MIN_BEAUTY) * beautyLevel;
     }
 
-    // 红润
-    private void setToneLevel(float toneLevel) {
-        if (toneLevel < MIN_TONE || toneLevel > MAX_TONE) {
-            Log.e(TAG, "setToneLevel invalid argument");
+    // 红润(饱和度)
+    public void setSaturateLevel(float saturateLevel) {
+        if (saturateLevel < MIN_SATURATE || saturateLevel > MAX_SATURATE) {
+            Log.e(TAG, "setSaturateLevel invalid argument");
             return;
         }
-        mToneLevel = MIN_TONE + (MAX_TONE - MIN_TONE) * toneLevel;
+        mSaturateLevel = MIN_SATURATE + (MAX_SATURATE - MIN_SATURATE) * saturateLevel;
     }
 
-    // 美白
-    private void setBrightLevel(float brightLevel) {
+    // 美白(亮度)
+    public void setBrightLevel(float brightLevel) {
         if (brightLevel < MIN_BRIGHT || brightLevel > MAX_BRIGHT) {
             Log.e(TAG, "setBrightLevel invalid argument");
             return;
         }
         mBrightLevel = MIN_BRIGHT + (MAX_BRIGHT - MIN_BRIGHT) * brightLevel;
+    }
+
+    public boolean isFacingBack() {
+        return CameraHelper.isFacingBack(mCameraId);
     }
 
     public void switchCamera() {
@@ -314,7 +314,7 @@ public class CameraPreviewView extends FrameLayout {
                 if (mSurfaceTexture != null) {
                     mSurfaceTexture.updateTexImage(); // 必须运行在 OpenGL 线程环境中
                     mSurfaceTexture.getTransformMatrix(mMatrix);
-                    _draw(mMatrix, mBeautyLevel, mToneLevel, mBrightLevel, mIsRecording);
+                    _draw(mMatrix, mBeautyLevel, mSaturateLevel, mBrightLevel, mIsRecording);
                 }
             });
         }

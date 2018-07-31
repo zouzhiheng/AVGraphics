@@ -53,6 +53,10 @@ Beauty::~Beauty() {
         mWindow = nullptr;
     }
 
+    if (mEGLCore) {
+        delete mEGLCore;
+        mEGLCore = nullptr;
+    }
 }
 
 int Beauty::init(AAssetManager *manager, ANativeWindow *window, int width, int height) {

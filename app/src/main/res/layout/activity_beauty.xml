@@ -10,13 +10,15 @@
         android:id="@+id/beauty_cpv_window"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:focus_height="80dp"
-        app:focus_width="80dp"
+        app:focus_height="160dp"
+        app:focus_width="160dp"
         app:draw_with_opengl="false" />
 
     <LinearLayout
+        android:id="@+id/beauty_ll_control_bar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
         android:orientation="vertical">
 
         <LinearLayout
@@ -30,7 +32,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="磨皮" />
+                android:text="@string/beauty_tv_beauty" />
 
             <SeekBar
                 android:id="@+id/beauty_sb_beauty"
@@ -50,10 +52,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="红润" />
+                android:text="@string/beauty_tv_saturate" />
 
             <SeekBar
-                android:id="@+id/beauty_sb_tone"
+                android:id="@+id/beauty_sb_saturate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp" />
@@ -70,7 +72,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="美白" />
+                android:text="@string/beauty_tv_bright" />
 
             <SeekBar
                 android:id="@+id/beauty_sb_bright"
@@ -79,5 +81,15 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/beauty_btn_switch_camera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/beauty_btn_switch_camera"/>
 
 </FrameLayout>

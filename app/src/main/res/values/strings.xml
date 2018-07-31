@@ -115,4 +115,11 @@
     <string name="glcam_msg_open_camera_failed">打开相机设备失败</string>
 
 
+    <!-- BeautyActivity(beauty) -->
+    <string name="beauty_tv_beauty">磨皮</string>
+    <string name="beauty_tv_saturate">红润</string>
+    <string name="beauty_tv_bright">美白</string>
+    <string name="beauty_btn_switch_camera">切换相机</string>
+
+
 </resources>
