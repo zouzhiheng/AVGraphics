@@ -26,7 +26,7 @@ const static char *FRAGMENT_SHADER = ""
         "  fragData0 = vec4 ( 1, 0, 0, 1 );                  \n"
         "  fragData1 = vec4 ( 0, 1, 0, 1 );                  \n"
         "  fragData2 = vec4 ( 0, 0, 1, 1 );                  \n"
-        "  fragData3 = vec4 ( 0.5, 0.5, 0.5, 1 );            \n"
+        "  fragData3 = vec4 ( 1, 1, 0, 1 );                  \n"
         "}                                                   \n";
 
 const static GLfloat VERTICES[] = {
@@ -38,6 +38,14 @@ const static GLfloat VERTICES[] = {
 
 const static GLushort INDICES[] = {
         0, 1, 2, 0, 2, 3
+};
+
+const static int BUFFER_COUNT = 4;
+const static GLenum ATTACHMENTS[BUFFER_COUNT] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2,
+        GL_COLOR_ATTACHMENT3
 };
 
 FboRenderer::FboRenderer(ANativeWindow *window) : EGLDemo(window), mFrameBuffer(0) {
@@ -52,17 +60,9 @@ bool FboRenderer::doInit() {
     mProgram = loadProgram(VERTEX_SHADER, FRAGMENT_SHADER);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-    GLuint colorTexId[4];
+    GLuint colorTexId[BUFFER_COUNT];
 
-    int i;
     GLint defaultFramebuffer = 0;
-    const GLenum attachments[4] = {
-            GL_COLOR_ATTACHMENT0,
-            GL_COLOR_ATTACHMENT1,
-            GL_COLOR_ATTACHMENT2,
-            GL_COLOR_ATTACHMENT3
-    };
-
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFramebuffer);
 
     // 设置 fbo
@@ -70,8 +70,8 @@ bool FboRenderer::doInit() {
     glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffer);
 
     // 设置四个输出 buffer 并附着到 fbo 中
-    glGenTextures(4, &colorTexId[0]);
-    for (i = 0; i < 4; ++i) {
+    glGenTextures(BUFFER_COUNT, &colorTexId[0]);
+    for (int i = 0; i < BUFFER_COUNT; ++i) {
         glBindTexture(GL_TEXTURE_2D, colorTexId[i]);
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -79,11 +79,11 @@ bool FboRenderer::doInit() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachments[i], GL_TEXTURE_2D,
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, ATTACHMENTS[i], GL_TEXTURE_2D,
                                colorTexId[i], 0);
     }
 
-    glDrawBuffers(4, attachments);
+    glDrawBuffers(BUFFER_COUNT, ATTACHMENTS);
 
     if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
         LOGE("glCheckFramebufferStatus failed");
@@ -100,16 +100,9 @@ void FboRenderer::doDraw() {
     GLint defaultFramebuffer = 0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFramebuffer);
 
-    const GLenum attachments[4] = {
-            GL_COLOR_ATTACHMENT0,
-            GL_COLOR_ATTACHMENT1,
-            GL_COLOR_ATTACHMENT2,
-            GL_COLOR_ATTACHMENT3
-    };
-
     glBindFramebuffer(GL_FRAMEBUFFER, mFrameBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawBuffers(4, attachments);
+    glDrawBuffers(BUFFER_COUNT, ATTACHMENTS);
 
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -126,25 +119,25 @@ void FboRenderer::doDraw() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, mFrameBuffer);
 
     // 复制红色缓冲区到左下角
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadBuffer(ATTACHMENTS[0]);
     glBlitFramebuffer(0, 0, mWidth, mHeight,
                       0, 0, mWidth / 2, mHeight / 2,
                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     // 复制绿色缓冲区到右下角
-    glReadBuffer(GL_COLOR_ATTACHMENT1);
+    glReadBuffer(ATTACHMENTS[1]);
     glBlitFramebuffer(0, 0, mWidth, mHeight,
                       mWidth / 2, 0, mWidth, mHeight / 2,
                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
     // 复制蓝色缓冲区到左上角
-    glReadBuffer(GL_COLOR_ATTACHMENT2);
+    glReadBuffer(ATTACHMENTS[2]);
     glBlitFramebuffer(0, 0, mWidth, mHeight,
                       0, mHeight / 2, mWidth / 2, mHeight,
                       GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-    // 复制灰色缓冲区到右上角
-    glReadBuffer(GL_COLOR_ATTACHMENT3);
+    // 复制黄色缓冲区到右上角
+    glReadBuffer(ATTACHMENTS[3]);
     glBlitFramebuffer(0, 0, mWidth, mHeight,
                       mWidth / 2, mHeight / 2, mWidth, mHeight,
                       GL_COLOR_BUFFER_BIT, GL_LINEAR);

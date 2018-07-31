@@ -96,6 +96,7 @@ bool Texture::doInit() {
     mFilterColorLoc = glGetUniformLocation(mProgram, "vFilterColor");
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     glGenTextures(1, &mTexId);
     glBindTexture(GL_TEXTURE_2D, mTexId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTexWidth, mTexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
