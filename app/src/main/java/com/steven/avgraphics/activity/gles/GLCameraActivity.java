@@ -83,22 +83,23 @@ public class GLCameraActivity extends BaseActivity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            initOpenGL(holder.getSurface(), width, height);
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            releaseOpenGL();
+        }
+
+        private void initOpenGL(Surface surface, int width, int height) {
             mExecutor.execute(() -> {
-                int textureId = _init(holder.getSurface(), width, height, getAssets());
+                int textureId = _init(surface, width, height, getAssets());
                 if (textureId < 0) {
                     Log.e(TAG, "surfaceCreated init OpenGL ES failed!");
                     return;
                 }
                 mSurfaceTexture = new SurfaceTexture(textureId);
-                mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {
-                    mExecutor.execute(() -> {
-                        if (mSurfaceTexture != null) {
-                            mSurfaceTexture.updateTexImage();
-                            mSurfaceTexture.getTransformMatrix(mMatrix);
-                            _draw(mMatrix);
-                        }
-                    });
-                });
+                mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> drawOpenGL());
                 try {
                     mCamera.setPreviewTexture(mSurfaceTexture);
                     mCamera.startPreview();
@@ -108,8 +109,17 @@ public class GLCameraActivity extends BaseActivity {
             });
         }
 
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
+        private void drawOpenGL() {
+            mExecutor.execute(() -> {
+                if (mSurfaceTexture != null) {
+                    mSurfaceTexture.updateTexImage(); // 必须运行在 OpenGL 线程环境中
+                    mSurfaceTexture.getTransformMatrix(mMatrix);
+                    _draw(mMatrix);
+                }
+            });
+        }
+
+        private void releaseOpenGL() {
             mExecutor.execute(() -> {
                 if (mSurfaceTexture != null) {
                     mSurfaceTexture.release();

@@ -13,6 +13,7 @@
 #include "Texture.h"
 #include "FboRenderer.h"
 #include "GLCamera.h"
+#include "Beauty.h"
 
 Triangle *triangle = nullptr;
 Circle *circle = nullptr;
@@ -20,6 +21,7 @@ Square *square = nullptr;
 Texture *texture = nullptr;
 FboRenderer *fboRenderer = nullptr;
 GLCamera *glCamera = nullptr;
+Beauty *beauty = nullptr;
 
 // --- JniTriangleActivity
 
@@ -339,31 +341,40 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1release(JNIEnv *env,
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_steven_avgraphics_view_CameraPreviewView__1init(JNIEnv *env, jclass type, jobject surface,
-                                                         jobject manager) {
+                                                         jint width, jint height, jobject manager) {
+    if (beauty) {
+        beauty->stop();
+        delete beauty;
+    }
+    beauty = new Beauty();
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    AAssetManager *assetManager = AAssetManager_fromJava(env, manager);
+    int textureId = beauty->init(assetManager, window, width, height);
 
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_steven_avgraphics_view_CameraPreviewView__1resize(JNIEnv *env, jclass type, jint width,
-                                                           jint height) {
-
+    return textureId;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_view_CameraPreviewView__1draw(JNIEnv *env, jclass type,
-                                                         jfloatArray matrix_, jfloat beauty,
+                                                         jfloatArray matrix_, jfloat beautyLevel,
                                                          jfloat tone, jfloat bright,
                                                          jboolean recording) {
+    if (!beauty) {
+        LOGE("draw error, beauty is null");
+        return;
+    }
     jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
-
-
+    beauty->draw(matrix, beautyLevel, tone, bright, recording);
     env->ReleaseFloatArrayElements(matrix_, matrix, 0);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_view_CameraPreviewView__1stop(JNIEnv *env, jclass type) {
-
+    if (beauty) {
+        beauty->stop();
+        delete beauty;
+        beauty = nullptr;
+    }
 }

@@ -16,7 +16,7 @@
         <attr name="focus_height" format="dimension"/>
         <attr name="indicator_width" format="dimension"/>
         <attr name="indicator_height" format="dimension"/>
-        <attr name="show_with_opengl" format="dimension"/>
+        <attr name="draw_with_opengl" format="boolean"/>
     </declare-styleable>
 
 </resources>

@@ -48,6 +48,9 @@
         <activity
             android:name=".activity.gles.GLCameraActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".activity.gles.BeautyActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>

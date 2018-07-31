@@ -5,12 +5,11 @@
 #include <string>
 #include "GLCamera.h"
 #include "glutil.h"
+#include <GLES3/gl3.h>
+#include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <cstring>
 #include <android/native_window.h>
-
-#define ATTRIB_POSITION 0
-#define ATTRIB_TEXCOORD 1
 
 const static GLfloat VERTICES[] = {
         -1.0f, 1.0f,
@@ -26,6 +25,8 @@ const static GLfloat TEX_COORDS[] = {
         1.0f, 0.0f
 };
 
+const static GLuint ATTRIB_POSITION = 0;
+const static GLuint ATTRIB_TEXCOORD = 1;
 const static GLuint VERTEX_NUM = 4;
 const static GLuint VERTEX_POS_SIZE = 2;
 const static GLuint TEX_COORD_POS_SIZE = 2;

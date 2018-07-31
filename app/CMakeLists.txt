@@ -28,7 +28,8 @@ add_library( gles
              ${dir_gles}/Square.cpp
              ${dir_gles}/Texture.cpp
              ${dir_gles}/FboRenderer.cpp
-             ${dir_gles}/GLCamera.cpp )
+             ${dir_gles}/GLCamera.cpp
+             ${dir_gles}/Beauty.cpp )
 
 
 include_directories( src/main/cpp/util )

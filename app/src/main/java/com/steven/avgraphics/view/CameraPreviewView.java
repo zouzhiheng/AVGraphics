@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,11 +28,22 @@ import com.steven.avgraphics.R;
 import com.steven.avgraphics.util.CameraHelper;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class CameraPreviewView extends FrameLayout {
 
     private static final String TAG = "CameraPreviewView";
     private static final float[] ASPECT_RATIO_ARRAY = {9.0f / 16, 3.0f / 4};
+
+    private static final float MIN_BEAUTY = 0;
+    private static final float MAX_BEAUTY = 1;
+    private static final float MIN_BRIGHT = 0;
+    private static final float MAX_BRIGHT = 1;
+    private static final float MIN_TONE = 0;
+    private static final float MAX_TONE = 1;
 
     private ImageView mIvFocus;
     private ImageView mIvIndicator;
@@ -43,12 +55,16 @@ public class CameraPreviewView extends FrameLayout {
     private int mIndicatorWidth = LayoutParams.WRAP_CONTENT;
     private int mIndicatorHeight = LayoutParams.WRAP_CONTENT;
 
-    private Camera mCamera;
     private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private CameraSurfaceView mSurfaceView;
     private PreviewCallback mPreviewCallback;
     public float mAspectRatio = ASPECT_RATIO_ARRAY[0];
-    private boolean mShowWithOpenGL = false;
+
+    private boolean mDrawWithOpenGL = false;
+    private float mBeautyLevel = MIN_BEAUTY;
+    private float mToneLevel = MIN_TONE;
+    private float mBrightLevel = MIN_BRIGHT;
+    private boolean mIsRecording = false;
 
     public CameraPreviewView(@NonNull Context context) {
         super(context);
@@ -73,6 +89,7 @@ public class CameraPreviewView extends FrameLayout {
                     LayoutParams.WRAP_CONTENT);
             mIndicatorHeight = array.getDimensionPixelSize(R.styleable.CameraPreviewView_indicator_height,
                     LayoutParams.WRAP_CONTENT);
+            mDrawWithOpenGL = array.getBoolean(R.styleable.CameraPreviewView_draw_with_opengl, false);
             array.recycle();
         }
 
@@ -111,12 +128,39 @@ public class CameraPreviewView extends FrameLayout {
         mPreviewCallback = previewCallback;
     }
 
-    public void setShowWithOpenGL(boolean showWithOpenGL) {
-        mShowWithOpenGL = showWithOpenGL;
+    public void setDrawWithOpenGL(boolean drawWithOpenGL) {
+        mDrawWithOpenGL = drawWithOpenGL;
     }
 
-    public boolean isShowWithOpenGL() {
-        return mShowWithOpenGL;
+    public boolean isDrawWithOpenGL() {
+        return mDrawWithOpenGL;
+    }
+
+    // 磨皮
+    private void setBeautyLevel(float beautyLevel) {
+        if (beautyLevel < MIN_BEAUTY || beautyLevel > MAX_BEAUTY) {
+            Log.e(TAG, "setBeautyLevel invalid argument");
+            return;
+        }
+        mBeautyLevel = MIN_BEAUTY + (MAX_BEAUTY - MIN_BEAUTY) * beautyLevel;
+    }
+
+    // 红润
+    private void setToneLevel(float toneLevel) {
+        if (toneLevel < MIN_TONE || toneLevel > MAX_TONE) {
+            Log.e(TAG, "setToneLevel invalid argument");
+            return;
+        }
+        mToneLevel = MIN_TONE + (MAX_TONE - MIN_TONE) * toneLevel;
+    }
+
+    // 美白
+    private void setBrightLevel(float brightLevel) {
+        if (brightLevel < MIN_BRIGHT || brightLevel > MAX_BRIGHT) {
+            Log.e(TAG, "setBrightLevel invalid argument");
+            return;
+        }
+        mBrightLevel = MIN_BRIGHT + (MAX_BRIGHT - MIN_BRIGHT) * brightLevel;
     }
 
     public void switchCamera() {
@@ -160,9 +204,13 @@ public class CameraPreviewView extends FrameLayout {
 
     private class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
+        private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+        private Camera mCamera;
+        private SurfaceTexture mSurfaceTexture;
+
+        private float[] mMatrix = new float[16];
         private float mClickX;
         private float mClickY;
-
         private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
 
         public CameraSurfaceView(Context context) {
@@ -197,6 +245,9 @@ public class CameraPreviewView extends FrameLayout {
                 mPreviewCallback.onPreviewStopped();
             }
             releaseCamera();
+            if (mDrawWithOpenGL) {
+                releaseOpenGL();
+            }
         }
 
         @SuppressWarnings("SuspiciousNameCombination")
@@ -211,10 +262,29 @@ public class CameraPreviewView extends FrameLayout {
 
             CameraHelper.setOptimalSize(mCamera, mAspectRatio, height, width);
             CameraHelper.setDisplayOritation((Activity) getContext(), mCamera, mCameraId);
+            startPreview(holder, width, height);
+        }
+
+        private void startPreview(SurfaceHolder holder, int width, int height) {
+            if (mDrawWithOpenGL) {
+                try {
+                    mSurfaceTexture = initOpenGL(holder.getSurface(), width, height);
+                } catch (ExecutionException | InterruptedException e) {
+                    releaseOpenGL();
+                    mDrawWithOpenGL = false;
+                    Log.e(TAG, "startPreview draw with opengl failed: " + e.getMessage());
+                }
+            }
+
             try {
-                startPreview(holder);
+                if (mDrawWithOpenGL) {
+                    mCamera.setPreviewTexture(mSurfaceTexture);
+                } else {
+                    mCamera.setPreviewDisplay(holder);
+                }
+                doStartPreview();
             } catch (IOException e) {
-                Log.e(TAG, "openCamera preview failed: " + e.getLocalizedMessage());
+                Log.e(TAG, "startPreview open camera failed: " + e.getMessage());
                 releaseCamera();
                 if (mPreviewCallback != null) {
                     mPreviewCallback.onPreviewFailed();
@@ -222,8 +292,44 @@ public class CameraPreviewView extends FrameLayout {
             }
         }
 
-        private void startPreview(SurfaceHolder holder) throws IOException {
-            mCamera.setPreviewDisplay(holder);
+        private SurfaceTexture initOpenGL(Surface surface, int width, int height)
+                throws ExecutionException, InterruptedException {
+            Future<SurfaceTexture> future = mExecutor.submit(() -> {
+                AssetManager manager = getContext().getAssets();
+                int textureId = _init(surface, width, height, manager);
+                if (textureId < 0) {
+                    Log.e(TAG, "surfaceCreated init OpenGL ES failed!");
+                    mDrawWithOpenGL = false;
+                    return null;
+                }
+                SurfaceTexture surfaceTexture = new SurfaceTexture(textureId);
+                surfaceTexture.setOnFrameAvailableListener(surfaceTexture1 -> drawOpenGL());
+                return surfaceTexture;
+            });
+            return future.get();
+        }
+
+        private void drawOpenGL() {
+            mExecutor.execute(() -> {
+                if (mSurfaceTexture != null) {
+                    mSurfaceTexture.updateTexImage(); // 必须运行在 OpenGL 线程环境中
+                    mSurfaceTexture.getTransformMatrix(mMatrix);
+                    _draw(mMatrix, mBeautyLevel, mToneLevel, mBrightLevel, mIsRecording);
+                }
+            });
+        }
+
+        private void releaseOpenGL() {
+            mExecutor.execute(() -> {
+                if (mSurfaceTexture != null) {
+                    mSurfaceTexture.release();
+                    mSurfaceTexture = null;
+                }
+                _stop();
+            });
+        }
+
+        private void doStartPreview() throws IOException {
             mCamera.startPreview();
             mIndicatorAnimation.cancel();
             mIvIndicator.startAnimation(mIndicatorAnimation);
@@ -298,11 +404,7 @@ public class CameraPreviewView extends FrameLayout {
         }
     }
 
-
-
-    private static native int _init(Surface surface, AssetManager manager);
-
-    private static native boolean _resize(int width, int height);
+    private static native int _init(Surface surface, int width, int height, AssetManager manager);
 
     private static native void _draw(float[] matrix, float beauty, float tone, float bright,
                                      boolean recording);
