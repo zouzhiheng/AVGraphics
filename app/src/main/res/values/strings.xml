@@ -81,6 +81,7 @@
     <string name="opengl_btn_vao_vbo">使用 VAO &amp; VBO 特性绘制正方形</string>
     <string name="opengl_btn_matrix_transform">矩阵变换</string>
     <string name="opengl_btn_texture">使用纹理绘制图片</string>
+    <string name="opengl_btn_fbo">使用 FBO 绘制四个缓冲区</string>
 
     <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
 

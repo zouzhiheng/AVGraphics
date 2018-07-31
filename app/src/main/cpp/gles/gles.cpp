@@ -11,12 +11,13 @@
 #include "Triangle.h"
 #include "Circle.h"
 #include "Texture.h"
+#include "FboRenderer.h"
 
 Triangle *triangle = nullptr;
 Circle *circle = nullptr;
 Square *square = nullptr;
-
 Texture *texture = nullptr;
+FboRenderer *fboRenderer = nullptr;
 
 // --- JniTriangleActivity
 
@@ -245,3 +246,40 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1release(JNIEnv *env, 
     }
 }
 
+
+// --- FboActivity
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_FboActivity__1init(JNIEnv *env, jclass type,
+                                                            jobject surface, jint width,
+                                                            jint height) {
+    if (fboRenderer) {
+        fboRenderer->stop();
+        delete fboRenderer;
+    }
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    fboRenderer = new FboRenderer(window);
+    fboRenderer->resize(width, height);
+    fboRenderer->start();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_FboActivity__1draw(JNIEnv *env, jclass type) {
+    if (!fboRenderer) {
+        LOGE("draw error, fboRenderer is null");
+        return;
+    }
+    fboRenderer->draw();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_FboActivity__1release(JNIEnv *env, jclass type) {
+    if (fboRenderer) {
+        fboRenderer->stop();
+        delete fboRenderer;
+        fboRenderer = nullptr;
+    }
+}

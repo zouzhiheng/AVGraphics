@@ -26,7 +26,8 @@ add_library( gles
              ${dir_gles}/Triangle.cpp
              ${dir_gles}/Circle.cpp
              ${dir_gles}/Square.cpp
-             ${dir_gles}/Texture.cpp )
+             ${dir_gles}/Texture.cpp
+             ${dir_gles}/FboRenderer.cpp )
 
 
 include_directories( src/main/cpp/util )

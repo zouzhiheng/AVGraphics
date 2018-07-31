@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.activity.gles.EGLCircleActivity;
+import com.steven.avgraphics.activity.gles.FboActivity;
 import com.steven.avgraphics.activity.gles.JavaTriangleActivity;
 import com.steven.avgraphics.activity.gles.JniTriangleActivity;
 import com.steven.avgraphics.activity.gles.MatrixTransformActivity;
@@ -24,18 +25,13 @@ public class OpenGLActivity extends BaseActivity {
     }
 
     private void init() {
-        findViewById(R.id.opengl_btn_java_triangle).setOnClickListener(
-                v -> startActivity(JavaTriangleActivity.class));
-        findViewById(R.id.opengl_btn_jni_triangle).setOnClickListener(
-                v -> startActivity(JniTriangleActivity.class));
-        findViewById(R.id.opengl_btn_egl_circle).setOnClickListener(
-                v -> startActivity(EGLCircleActivity.class));
-        findViewById(R.id.opengl_btn_vao_vbo).setOnClickListener(
-                v -> startActivity(VaoVboActivity.class));
-        findViewById(R.id.opengl_btn_matrix_transform).setOnClickListener(
-                v -> startActivity(MatrixTransformActivity.class));
-        findViewById(R.id.opengl_btn_texture).setOnClickListener(v ->
-                startActivity(TextureActivity.class));
+        findViewById(R.id.opengl_btn_java_triangle).setOnClickListener(v -> startActivity(JavaTriangleActivity.class));
+        findViewById(R.id.opengl_btn_jni_triangle).setOnClickListener(v -> startActivity(JniTriangleActivity.class));
+        findViewById(R.id.opengl_btn_egl_circle).setOnClickListener(v -> startActivity(EGLCircleActivity.class));
+        findViewById(R.id.opengl_btn_vao_vbo).setOnClickListener(v -> startActivity(VaoVboActivity.class));
+        findViewById(R.id.opengl_btn_matrix_transform).setOnClickListener(v -> startActivity(MatrixTransformActivity.class));
+        findViewById(R.id.opengl_btn_texture).setOnClickListener(v -> startActivity(TextureActivity.class));
+        findViewById(R.id.opengl_btn_fbo).setOnClickListener(v -> startActivity(FboActivity.class));
     }
 
     @Override
