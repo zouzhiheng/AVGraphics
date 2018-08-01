@@ -8,13 +8,6 @@
 #include "glutil.h"
 #include <GLES2/gl2ext.h>
 
-
-GLfloat *getParams(const GLfloat beauty, const GLfloat tone);
-
-GLfloat getBright(const GLfloat bright);
-
-GLfloat *getSingleStepOffset(const GLfloat width, const GLfloat height);
-
 const static GLfloat VERTICES[] = {
         -1.0f, 1.0f,
         1.0f, 1.0f,
@@ -213,17 +206,7 @@ void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat tone, GLfloat bright,
     mEGLCore->swapBuffer();
 }
 
-void Beauty::stop() {
-    glDeleteProgram(mProgram);
-    glDeleteTextures(1, &mTexOes);
-    glDeleteTextures(1, &mTex2D);
-    glDeleteBuffers(2, mPboIds);
-    glDeleteBuffers(1, &mVao);
-    glDeleteBuffers(3, mVboIds);
-    glDeleteFramebuffers(1, &mFbo);
-}
-
-GLfloat *getParams(const GLfloat beauty, const GLfloat tone) {
+GLfloat *Beauty::getParams(const GLfloat beauty, const GLfloat tone) {
     GLfloat *value = new GLfloat[4];
     value[0] = 1.6f - 1.2f * beauty;
     value[1] = 1.3f - 0.6f * beauty;
@@ -232,13 +215,23 @@ GLfloat *getParams(const GLfloat beauty, const GLfloat tone) {
     return value;
 }
 
-GLfloat getBright(const GLfloat bright) {
+GLfloat Beauty::getBright(const GLfloat bright) {
     return 0.6f * (-0.5f + bright);
 }
 
-GLfloat *getSingleStepOffset(const GLfloat width, const GLfloat height) {
+GLfloat *Beauty::getSingleStepOffset(const GLfloat width, const GLfloat height) {
     GLfloat *value = new GLfloat[2];
     value[0] = 2.0f / width;
     value[1] = 2.0f / height;
     return value;
+}
+
+void Beauty::stop() {
+    glDeleteProgram(mProgram);
+    glDeleteTextures(1, &mTexOes);
+    glDeleteTextures(1, &mTex2D);
+    glDeleteBuffers(2, mPboIds);
+    glDeleteBuffers(1, &mVao);
+    glDeleteBuffers(3, mVboIds);
+    glDeleteFramebuffers(1, &mFbo);
 }

@@ -10,16 +10,17 @@
         android:id="@+id/beauty_cpv_window"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:beauty_on_front="true"
         app:focus_height="160dp"
         app:focus_width="160dp"
-        app:draw_with_opengl="false" />
+        app:facing="front"/>
 
     <LinearLayout
         android:id="@+id/beauty_ll_control_bar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -87,9 +88,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/beauty_btn_switch_camera"/>
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:text="@string/beauty_btn_switch_camera" />
 
 </FrameLayout>

@@ -60,7 +60,8 @@ public class CameraPreviewView extends FrameLayout {
     private PreviewCallback mPreviewCallback;
     public float mAspectRatio = ASPECT_RATIO_ARRAY[0];
 
-    private boolean mDrawWithOpenGL = false;
+    private boolean mIsBeautyOpen = false;
+    private boolean mIsBeautyOnFront = false;
     private float mBeautyLevel = MIN_BEAUTY;
     private float mSaturateLevel = MIN_SATURATE;
     private float mBrightLevel = MIN_BRIGHT;
@@ -89,10 +90,12 @@ public class CameraPreviewView extends FrameLayout {
                     LayoutParams.WRAP_CONTENT);
             mIndicatorHeight = array.getDimensionPixelSize(R.styleable.CameraPreviewView_indicator_height,
                     LayoutParams.WRAP_CONTENT);
-            mDrawWithOpenGL = array.getBoolean(R.styleable.CameraPreviewView_draw_with_opengl, false);
+            mIsBeautyOnFront = array.getBoolean(R.styleable.CameraPreviewView_beauty_on_front, false);
+            mCameraId = array.getInt(R.styleable.CameraPreviewView_facing, Camera.CameraInfo.CAMERA_FACING_BACK);
             array.recycle();
         }
 
+        mIsBeautyOpen = mIsBeautyOnFront && !CameraHelper.isFacingBack(mCameraId);
         initAnimation(context);
         addView(context);
     }
@@ -126,10 +129,6 @@ public class CameraPreviewView extends FrameLayout {
 
     public void setPreviewCallback(PreviewCallback previewCallback) {
         mPreviewCallback = previewCallback;
-    }
-
-    public void setDrawWithOpenGL(boolean drawWithOpenGL) {
-        mDrawWithOpenGL = drawWithOpenGL;
     }
 
     // 磨皮
@@ -168,7 +167,8 @@ public class CameraPreviewView extends FrameLayout {
             removeView(mSurfaceView);
         }
         mCameraId = 1 - mCameraId;
-        mSurfaceView = new CameraSurfaceView(getContext(), mCameraId);
+        mIsBeautyOpen = !CameraHelper.isFacingBack(mCameraId) && mIsBeautyOnFront;
+        mSurfaceView = new CameraSurfaceView(getContext());
         addView(mSurfaceView, 0, new LayoutParams(LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
     }
@@ -211,7 +211,6 @@ public class CameraPreviewView extends FrameLayout {
         private float[] mMatrix = new float[16];
         private float mClickX;
         private float mClickY;
-        private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
 
         public CameraSurfaceView(Context context) {
             super(context);
@@ -220,12 +219,6 @@ public class CameraPreviewView extends FrameLayout {
 
         public CameraSurfaceView(Context context, AttributeSet attrs) {
             super(context, attrs);
-            getHolder().addCallback(this);
-        }
-
-        public CameraSurfaceView(Context context, int cameraId) {
-            super(context);
-            mCameraId = cameraId;
             getHolder().addCallback(this);
         }
 
@@ -245,7 +238,7 @@ public class CameraPreviewView extends FrameLayout {
                 mPreviewCallback.onPreviewStopped();
             }
             releaseCamera();
-            if (mDrawWithOpenGL) {
+            if (mIsBeautyOpen) {
                 releaseOpenGL();
             }
         }
@@ -266,18 +259,18 @@ public class CameraPreviewView extends FrameLayout {
         }
 
         private void startPreview(SurfaceHolder holder, int width, int height) {
-            if (mDrawWithOpenGL) {
+            if (mIsBeautyOpen) {
                 try {
                     mSurfaceTexture = initOpenGL(holder.getSurface(), width, height);
                 } catch (ExecutionException | InterruptedException e) {
                     releaseOpenGL();
-                    mDrawWithOpenGL = false;
+                    mIsBeautyOpen = false;
                     Log.e(TAG, "startPreview draw with opengl failed: " + e.getMessage());
                 }
             }
 
             try {
-                if (mDrawWithOpenGL) {
+                if (mIsBeautyOpen) {
                     mCamera.setPreviewTexture(mSurfaceTexture);
                 } else {
                     mCamera.setPreviewDisplay(holder);
@@ -299,7 +292,7 @@ public class CameraPreviewView extends FrameLayout {
                 int textureId = _init(surface, width, height, manager);
                 if (textureId < 0) {
                     Log.e(TAG, "surfaceCreated init OpenGL ES failed!");
-                    mDrawWithOpenGL = false;
+                    mIsBeautyOpen = false;
                     return null;
                 }
                 SurfaceTexture surfaceTexture = new SurfaceTexture(textureId);

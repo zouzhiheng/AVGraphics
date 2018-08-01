@@ -35,6 +35,7 @@ public class BeautyActivity extends AppCompatActivity {
     private void init() {
         findView();
         setListener();
+        mLlControlBar.setVisibility(mCameraPreviewView.isFacingBack() ? View.GONE : View.VISIBLE);
     }
 
     private void findView() {
@@ -53,18 +54,11 @@ public class BeautyActivity extends AppCompatActivity {
                 mCameraPreviewView.setSaturateLevel(progress));
         mSbBright.setOnSeekBarChangeListener((DefaultSeekBarChangeListener) progress ->
                 mCameraPreviewView.setBrightLevel(progress));
-        mBtnSwitchCamera.setOnClickListener(v -> switchCamera());
-    }
 
-    private void switchCamera() {
-        if (mCameraPreviewView.isFacingBack()) {
-            mLlControlBar.setVisibility(View.VISIBLE);
-            mCameraPreviewView.setDrawWithOpenGL(true);
-        } else {
-            mLlControlBar.setVisibility(View.GONE);
-            mCameraPreviewView.setDrawWithOpenGL(false);
-        }
-        mCameraPreviewView.switchCamera();
+        mBtnSwitchCamera.setOnClickListener(v -> {
+            mCameraPreviewView.switchCamera();
+            mLlControlBar.setVisibility(mCameraPreviewView.isFacingBack() ? View.GONE : View.VISIBLE);
+        });
     }
 
     private interface DefaultSeekBarChangeListener extends SeekBar.OnSeekBarChangeListener {

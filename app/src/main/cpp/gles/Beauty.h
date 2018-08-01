@@ -40,6 +40,12 @@ private:
 
     bool initFbo();
 
+    GLfloat *getParams(const GLfloat beauty, const GLfloat tone);
+
+    GLfloat getBright(const GLfloat bright);
+
+    GLfloat *getSingleStepOffset(const GLfloat width, const GLfloat height);
+
 public:
     Beauty();
 

@@ -83,7 +83,7 @@
     <string name="opengl_btn_texture">使用纹理绘制图片</string>
     <string name="opengl_btn_fbo">使用 FBO 绘制四个缓冲区</string>
     <string name="opengl_btn_glcamera">OpenGL 相机预览</string>
-    <string name="opengl_btn_beauty">美颜</string>
+    <string name="opengl_btn_beauty">美颜相机</string>
 
     <string name="opengl_msg_not_support">不支持 OpenGL ES 3</string>
 
