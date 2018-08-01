@@ -9,7 +9,7 @@
 
 class Square : public EGLDemo {
 private:
-    GLuint mVboIds[2];
+    GLuint mVboIds[3];
     GLuint mVaoId;
 
     GLint mMatrixLoc;

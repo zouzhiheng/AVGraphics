@@ -30,12 +30,15 @@ const static char *FRAGMENT_SHADER = ""
 
 const static GLfloat VERTICES[] = {
         -0.5f, 0.5f, 0.0f,
-        0.0f, 1.0f, 0.0f, 1.0f,
         -0.5f, -0.5f, 0.0f,
-        1.0f, 0.0f, 0.0f, 1.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f, 0.0f, 1.0f, 1.0f,
         0.5f, 0.5f, 0.0f,
+};
+
+const static GLfloat COLORS[]{
+        0.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, 0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f, 1.0f,
         1.0f, 0.0f, 1.0f, 1.0f
 };
 
@@ -48,7 +51,6 @@ const static GLuint ATTRIB_POSITION = 0;
 const static GLuint ATTRIB_COLOR = 1;
 const static GLint VERTEX_POS_SIZE = 3;
 const static GLint VERTEX_COLOR_SIZE = 4;
-const static GLsizei VERTEX_STRIDE = sizeof(GLfloat) * (VERTEX_POS_SIZE + VERTEX_COLOR_SIZE);
 const static GLsizei INDEX_NUMBER = 6;
 
 Square::Square(ANativeWindow *window) : EGLDemo(window), mVaoId(0), mMatrixLoc(0) {
@@ -74,31 +76,34 @@ bool Square::doInit() {
 
     mMatrixLoc = glGetUniformLocation(mProgram, "mMatrix");
 
-    glGenBuffers(2, mVboIds);
+    glGenBuffers(3, mVboIds);
     glBindBuffer(GL_ARRAY_BUFFER, mVboIds[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES), VERTICES, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIds[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, mVboIds[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(COLORS), COLORS, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIds[2]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(INDICES), INDICES, GL_STATIC_DRAW);
 
     glGenVertexArrays(1, &mVaoId);
-    // Bind the VAO and then setup the vertex attributes
     glBindVertexArray(mVaoId);
 
     glBindBuffer(GL_ARRAY_BUFFER, mVboIds[0]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIds[1]);
-
     glEnableVertexAttribArray(ATTRIB_POSITION);
-    glEnableVertexAttribArray(ATTRIB_COLOR);
-
-    GLint offset = 0;
     glVertexAttribPointer(ATTRIB_POSITION, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE,
-                          VERTEX_STRIDE, (const GLvoid *) offset);
-    offset += VERTEX_POS_SIZE * sizeof(GLfloat);
+                          sizeof(GLfloat) * VERTEX_POS_SIZE, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mVboIds[1]);
+    glEnableVertexAttribArray(ATTRIB_COLOR);
     glVertexAttribPointer(ATTRIB_COLOR, VERTEX_COLOR_SIZE, GL_FLOAT, GL_FALSE,
-                          VERTEX_STRIDE, (const GLvoid *) offset);
+                          sizeof(GLfloat) * VERTEX_COLOR_SIZE, 0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mVboIds[2]);
 
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glClearColor(ClearRed, ClearGreen, ClearBlue, ClearAlpha);
 
@@ -113,7 +118,7 @@ void Square::doDraw() {
     glUniformMatrix4fv(mMatrixLoc, 1, GL_FALSE, mMatrix);
 
     glBindVertexArray(mVaoId);
-    glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, (const GLvoid *) 0);
+    glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, 0);
     glBindVertexArray(0);
 }
 

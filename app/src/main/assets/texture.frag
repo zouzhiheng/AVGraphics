@@ -13,15 +13,15 @@ layout(location=0) out vec4 fragColor;
 void main() {
     vec4 tmpColor = texture(sTexture,  vTexCoord);
     
-    if (iFilterType == 1) {
+    if (iFilterType == 1) { // 灰度图
         float c = tmpColor.r * vFilterColor.r + tmpColor.g * vFilterColor.g + tmpColor.b * vFilterColor.b;
         fragColor = vec4(c, c, c, tmpColor.a);
-    } else if (iFilterType == 2) {
+    } else if (iFilterType == 2) { // 冷暖色
         tmpColor.r = min(1.0, tmpColor.r + vFilterColor.r);
         tmpColor.g = min(1.0, tmpColor.g + vFilterColor.g);
         tmpColor.b = min(1.0, tmpColor.b + vFilterColor.b);
         fragColor = tmpColor;
-    } else if (iFilterType == 3) {
+    } else if (iFilterType == 3) { // 模糊
         tmpColor += texture(sTexture, vec2(vTexCoord.x - vFilterColor.r,vTexCoord.y - vFilterColor.r));
         tmpColor += texture(sTexture, vec2(vTexCoord.x - vFilterColor.r,vTexCoord.y + vFilterColor.r));
         tmpColor += texture(sTexture, vec2(vTexCoord.x + vFilterColor.r,vTexCoord.y - vFilterColor.r));
