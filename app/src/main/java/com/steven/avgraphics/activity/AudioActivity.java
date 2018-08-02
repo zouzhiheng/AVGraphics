@@ -13,7 +13,7 @@ import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
-import com.steven.avgraphics.util.AudioRecorder;
+import com.steven.avgraphics.module.av.AudioRecorder;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 

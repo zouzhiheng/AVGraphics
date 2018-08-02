@@ -9,8 +9,9 @@ import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
-import com.steven.avgraphics.util.AudioRecorder;
-import com.steven.avgraphics.util.HWCodec;
+import com.steven.avgraphics.module.av.AudioRecorder;
+import com.steven.avgraphics.module.av.HWCodec;
+import com.steven.avgraphics.module.av.HWRecorderWrapper;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 import com.steven.avgraphics.view.CameraPreviewView;
@@ -28,7 +29,7 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
     private Button mBtnStartRecord;
     private Button mBtnStopRecord;
 
-    private HWCodec.RecorderWrapper mRecorder = new HWCodec.RecorderWrapper();
+    private HWRecorderWrapper mRecorder = new HWRecorderWrapper();
     private AudioRecorder mAudioRecorder = new AudioRecorder();
     private CameraPreviewView mCameraPreviewView;
     private Camera.Size mPreviewSize;
