@@ -6,8 +6,11 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.SparseIntArray;
+import android.view.Surface;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,15 +23,85 @@ public class HWCodec {
     private static final String TAG = "HWCodec";
     private static final long DEFAULT_TIMEOUT = 10 * 1000;
 
+    public static final int MEDIA_TYPE_VIDEO = 1;
+    public static final int MEDIA_TYPE_AUDIO = 2;
+    public static final int MEDIA_TYPE_UNKNOWN = 0;
+
+    public static final String MIME_TYPE_AVC = "video/avc";
+    public static final String MIME_TYPE_AAC = "audio/mp4a-latm";
+
+    public static AVInfo getAVInfo(String filePath) {
+        MediaExtractor extractor = new MediaExtractor();
+        try {
+            extractor.setDataSource(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        AVInfo info = new AVInfo();
+        for (int i = 0; i < extractor.getTrackCount(); i++) {
+            MediaFormat format = extractor.getTrackFormat(i);
+            if (getMediaType(format) == MEDIA_TYPE_VIDEO) {
+                info.vBitRate = getFormatInt(format, MediaFormat.KEY_BIT_RATE);
+                info.vDuration = getFormatLong(format, MediaFormat.KEY_DURATION);
+                info.vCodec = getFormatString(format, MediaFormat.KEY_MIME);
+                info.width = getFormatInt(format, MediaFormat.KEY_WIDTH);
+                info.height = getFormatInt(format, MediaFormat.KEY_HEIGHT);
+                info.frameRate = getFormatInt(format, MediaFormat.KEY_FRAME_RATE);
+                info.colorFormat = getFormatInt(format, MediaFormat.KEY_COLOR_FORMAT);
+            } else if (getMediaType(format) == MEDIA_TYPE_AUDIO) {
+                info.aBitRate = getFormatInt(format, MediaFormat.KEY_BIT_RATE);
+                info.aDuration = getFormatLong(format, MediaFormat.KEY_DURATION);
+                info.aCodec = getFormatString(format, MediaFormat.KEY_MIME);
+                info.channels = getFormatInt(format, MediaFormat.KEY_CHANNEL_COUNT);
+                info.sampleRate = getFormatInt(format, MediaFormat.KEY_SAMPLE_RATE);
+            }
+        }
+
+        return info;
+    }
+
+    private static int getFormatInt(MediaFormat format, String name) {
+        int result;
+        try {
+            result = format.getInteger(name);
+        } catch (Exception e) {
+            result = -1;
+        }
+        return result;
+    }
+
+    private static long getFormatLong(MediaFormat format, String name) {
+        long result;
+        try {
+            result = format.getLong(name);
+        } catch (Exception e) {
+            result = -1;
+        }
+        return result;
+    }
+
+    private static String getFormatString(MediaFormat format, String name) {
+        String result;
+        try {
+            result = format.getString(name);
+        } catch (Exception e) {
+            result = "null";
+        }
+        return result;
+    }
+
     public static boolean decode(String srcFilePath, String yuvDst, String pcmDst) {
-        boolean vsucceed = doDecode(srcFilePath, yuvDst, HWCodecCommon.MEDIA_TYPE_VIDEO);
-        boolean asucceed = doDecode(srcFilePath, pcmDst, HWCodecCommon.MEDIA_TYPE_AUDIO);
+        boolean vsucceed = doDecode(srcFilePath, yuvDst, MEDIA_TYPE_VIDEO);
+        boolean asucceed = doDecode(srcFilePath, pcmDst, MEDIA_TYPE_AUDIO);
         return vsucceed && asucceed;
     }
 
-    public static boolean decode(String srcFilePath, DecodeListener listener) {
-        boolean vsucceed = doDecode(srcFilePath, HWCodecCommon.MEDIA_TYPE_VIDEO, listener);
-        boolean asucceed = doDecode(srcFilePath, HWCodecCommon.MEDIA_TYPE_AUDIO, listener);
+    public static boolean decode(@NonNull String srcFilePath, @Nullable Surface surface,
+                                 @Nullable DecodeListener listener) {
+        boolean vsucceed = doDecode(srcFilePath, MEDIA_TYPE_VIDEO, surface, listener);
+        boolean asucceed = doDecode(srcFilePath, MEDIA_TYPE_AUDIO, surface, listener);
         return vsucceed && asucceed;
     }
 
@@ -41,7 +114,7 @@ public class HWCodec {
             return false;
         }
 
-        boolean succeed = doDecode(src, mediaType, new DecodeListener() {
+        boolean succeed = doDecode(src, mediaType, null, new DecodeListener() {
             @Override
             public void onDecodedImage(byte[] data) {
                 try {
@@ -71,7 +144,8 @@ public class HWCodec {
         return succeed;
     }
 
-    private static boolean doDecode(String src, int mediaType, DecodeListener listener) {
+    private static boolean doDecode(String src, int mediaType, Surface surface,
+                                    DecodeListener listener) {
         MediaExtractor extractor = null;
         MediaCodec decoder = null;
         boolean decodeSucceed = false;
@@ -79,7 +153,7 @@ public class HWCodec {
         try {
             extractor = new MediaExtractor();
             extractor.setDataSource(src);
-            decoder = doDecode(extractor, mediaType, listener);
+            decoder = doDecode(extractor, mediaType, surface, listener);
         } catch (IOException e) {
             Log.e(TAG, "doDecode exception: " + e);
             exceptionOccur = true;
@@ -96,7 +170,7 @@ public class HWCodec {
         return !exceptionOccur && decodeSucceed;
     }
 
-    private static MediaCodec doDecode(MediaExtractor extractor, int mediaType,
+    private static MediaCodec doDecode(MediaExtractor extractor, int mediaType, Surface surface,
                                        DecodeListener listener) throws IOException {
         MediaFormat format = selectTrack(extractor, mediaType);
         if (format == null) {
@@ -106,7 +180,7 @@ public class HWCodec {
         Log.d(TAG, "docde format: " + format.toString());
 
         MediaCodec decoder = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
-        decoder.configure(format, null, null, 0);
+        decoder.configure(format, surface, null, 0);
         decoder.start();
 
         ByteBuffer[] inputBuffers = decoder.getInputBuffers();
@@ -146,14 +220,14 @@ public class HWCodec {
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
                     byte[] data = new byte[bufferInfo.size];
                     outputBuffer.get(data);
-                    if (mediaType == HWCodecCommon.MEDIA_TYPE_VIDEO) {
+                    if (mediaType == MEDIA_TYPE_VIDEO && listener != null) {
                         listener.onDecodedImage(data);
-                    } else {
+                    } else if (listener != null) {
                         listener.onDecodedSample(data);
                     }
                 }
 
-                decoder.releaseOutputBuffer(outIndex, false);
+                decoder.releaseOutputBuffer(outIndex, surface != null);
 
                 if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     outputEof = true;
@@ -188,11 +262,11 @@ public class HWCodec {
     private static int getMediaType(MediaFormat format) {
         String mime = format.getString(MediaFormat.KEY_MIME);
         if (mime.startsWith("video/")) {
-            return HWCodecCommon.MEDIA_TYPE_VIDEO;
+            return MEDIA_TYPE_VIDEO;
         } else if (mime.startsWith("audio/")) {
-            return HWCodecCommon.MEDIA_TYPE_AUDIO;
+            return MEDIA_TYPE_AUDIO;
         }
-        return HWCodecCommon.MEDIA_TYPE_UNKNOWN;
+        return MEDIA_TYPE_UNKNOWN;
     }
 
     public static boolean transcode(String srcFilePath, String dstFilePath) {
@@ -231,7 +305,7 @@ public class HWCodec {
         SparseIntArray trackMap = new SparseIntArray(trackCount);
         for (int i = 0; i < trackCount; ++i) {
             MediaFormat format = extractor.getTrackFormat(i);
-            if (getMediaType(format) == HWCodecCommon.MEDIA_TYPE_UNKNOWN) {
+            if (getMediaType(format) == MEDIA_TYPE_UNKNOWN) {
                 trackMap.put(i, -1);
             } else {
                 int trackIndex = muxer.addTrack(format);
@@ -250,7 +324,7 @@ public class HWCodec {
             MediaFormat format = extractor.getTrackFormat(i);
             int maxBufferSize = format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
             long timeUnit = 0;
-            boolean isVideo = getMediaType(format) == HWCodecCommon.MEDIA_TYPE_VIDEO;
+            boolean isVideo = getMediaType(format) == MEDIA_TYPE_VIDEO;
             if (isVideo) {
                 int framerate = format.getInteger(MediaFormat.KEY_FRAME_RATE);
                 timeUnit = 1000 * 1000 / framerate;

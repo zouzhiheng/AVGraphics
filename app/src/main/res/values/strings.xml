@@ -9,6 +9,7 @@
     <string name="main_btn_hwcodec">硬编解码</string>
     <string name="main_btn_opensl">OpenSL 实现音频的播放及录制</string>
     <string name="main_btn_opengl">OpenGL ES</string>
+    <string name="main_btn_video_play">视频播放</string>
 
     <string name="main_msg_no_permission">权限不足，无法运行</string>
 
@@ -120,6 +121,11 @@
     <string name="beauty_tv_saturate">红润</string>
     <string name="beauty_tv_bright">美白</string>
     <string name="beauty_btn_switch_camera">切换相机</string>
+
+
+    <!-- VideoPalyActivity(vplay) -->
+    <string name="vplay_btn_start">开始播放</string>
+    <string name="vplay_btn_stop">停止播放</string>
 
 
 </resources>

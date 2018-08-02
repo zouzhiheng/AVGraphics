@@ -51,6 +51,7 @@
         <activity
             android:name=".activity.gles.BeautyActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity android:name=".activity.VideoPlayActivity" />
     </application>
 
 </manifest>

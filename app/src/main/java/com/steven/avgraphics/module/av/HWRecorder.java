@@ -37,25 +37,25 @@ public class HWRecorder {
     public void init(int width, int height, int colorFormat, int bitRate, int sampleRate,
                      int channels, String dstFilePath) throws Exception {
 
-        if (getCodecInfo(HWCodecCommon.MIME_TYPE_AVC) == null || getCodecInfo(HWCodecCommon.MIME_TYPE_AAC) == null) {
+        if (getCodecInfo(HWCodec.MIME_TYPE_AVC) == null || getCodecInfo(HWCodec.MIME_TYPE_AAC) == null) {
             throw new Exception("cannot find suitable codec");
         }
 
-        MediaFormat videoFormat = MediaFormat.createVideoFormat(HWCodecCommon.MIME_TYPE_AVC, width, height);
+        MediaFormat videoFormat = MediaFormat.createVideoFormat(HWCodec.MIME_TYPE_AVC, width, height);
         videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
         videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, DEFAULT_FRAME_RATE);
         videoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, DEFAULT_IFRAME_INTERVAL);
         videoFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
 
-        mVideoEncoder = MediaCodec.createEncoderByType(HWCodecCommon.MIME_TYPE_AVC);
+        mVideoEncoder = MediaCodec.createEncoderByType(HWCodec.MIME_TYPE_AVC);
         mVideoEncoder.configure(videoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mVideoEncoder.start();
 
-        MediaFormat audioFormat = MediaFormat.createAudioFormat(HWCodecCommon.MIME_TYPE_AAC, sampleRate, channels);
+        MediaFormat audioFormat = MediaFormat.createAudioFormat(HWCodec.MIME_TYPE_AAC, sampleRate, channels);
         audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
         audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, DEFAULT_BITRATE_AUDIO);
 
-        mAudioEncoder = MediaCodec.createEncoderByType(HWCodecCommon.MIME_TYPE_AAC);
+        mAudioEncoder = MediaCodec.createEncoderByType(HWCodec.MIME_TYPE_AAC);
         mAudioEncoder.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mAudioEncoder.start();
 
@@ -180,7 +180,7 @@ public class HWRecorder {
         int trackIndex;
         synchronized (this) {
             MediaFormat format = encoder.getOutputFormat();
-            if (getMediaType(format) == HWCodecCommon.MEDIA_TYPE_VIDEO) {
+            if (getMediaType(format) == HWCodec.MEDIA_TYPE_VIDEO) {
                 mVTrackIndex = mMuxer.addTrack(format);
                 trackIndex = mVTrackIndex;
             } else {
@@ -201,11 +201,11 @@ public class HWRecorder {
     private static int getMediaType(MediaFormat format) {
         String mime = format.getString(MediaFormat.KEY_MIME);
         if (mime.startsWith("video/")) {
-            return HWCodecCommon.MEDIA_TYPE_VIDEO;
+            return HWCodec.MEDIA_TYPE_VIDEO;
         } else if (mime.startsWith("audio/")) {
-            return HWCodecCommon.MEDIA_TYPE_AUDIO;
+            return HWCodec.MEDIA_TYPE_AUDIO;
         }
-        return HWCodecCommon.MEDIA_TYPE_UNKNOWN;
+        return HWCodec.MEDIA_TYPE_UNKNOWN;
     }
 
     public void stop() {

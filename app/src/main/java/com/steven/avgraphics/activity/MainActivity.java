@@ -40,6 +40,7 @@ public class MainActivity extends BaseActivity {
         findViewById(R.id.main_btn_hwcodec).setOnClickListener(v -> startActivity(HWCodecActivity.class));
         findViewById(R.id.main_btn_opensl).setOnClickListener(v -> startActivity(OpenSLActivity.class));
         findViewById(R.id.main_btn_opengl).setOnClickListener(v -> startActivity(OpenGLActivity.class));
+        findViewById(R.id.main_btn_video_play).setOnClickListener(v -> startActivity(VideoPlayActivity.class));
     }
 
     @Override

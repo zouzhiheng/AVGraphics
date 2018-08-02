@@ -10,6 +10,7 @@ import com.steven.avgraphics.BaseApplication;
 
 import java.io.File;
 
+@SuppressWarnings("unused")
 public class Utils {
 
     private static final String SDCARD = Environment.getExternalStorageDirectory().getAbsolutePath();
