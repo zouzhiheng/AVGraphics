@@ -1,24 +1,15 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 # --- set variable
+set(dir_cpp src/main/cpp)
 set(dir_sles src/main/cpp/sles)
 set(dir_gles src/main/cpp/gles)
 
 
 # --- add library
-add_library( sles
-
-             SHARED
-
-             ${dir_sles}/sles.cpp
-             ${dir_sles}/AssetAudioPlayer.cpp
-             ${dir_sles}/BQAudioPlayer.cpp
-             ${dir_sles}/AudioRecorder.cpp )
 
 add_library( gles
-
              SHARED
-
              ${dir_gles}/gles.cpp
              ${dir_gles}/glutil.cpp
              ${dir_gles}/EGLDemo.cpp
@@ -29,18 +20,23 @@ add_library( gles
              ${dir_gles}/Texture.cpp
              ${dir_gles}/FboRenderer.cpp
              ${dir_gles}/GLCamera.cpp
-             ${dir_gles}/Beauty.cpp )
+             ${dir_gles}/Beauty.cpp
+             ${dir_cpp}/util/Yuv.cpp
+             ${dir_gles}/YuvRenderer.cpp )
+
+add_library( sles
+             SHARED
+             ${dir_sles}/sles.cpp
+             ${dir_sles}/AssetAudioPlayer.cpp
+             ${dir_sles}/BQAudioPlayer.cpp
+             ${dir_sles}/AudioRecorder.cpp )
 
 
-include_directories( src/main/cpp/util )
+include_directories( ${dir_cpp}/util
+                     ${dir_yuv}/include )
+
 
 # --- link libraries
-target_link_libraries( sles
-
-                       android
-                       log
-                       OpenSLES )
-
 target_link_libraries( gles
 
                        EGL
@@ -48,3 +44,9 @@ target_link_libraries( gles
                        android
                        log
                        m )
+
+target_link_libraries( sles
+
+                       android
+                       log
+                       OpenSLES )

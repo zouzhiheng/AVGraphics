@@ -14,16 +14,10 @@
 #include "FboRenderer.h"
 #include "GLCamera.h"
 #include "Beauty.h"
-
-Triangle *triangle = nullptr;
-Circle *circle = nullptr;
-Square *square = nullptr;
-Texture *texture = nullptr;
-FboRenderer *fboRenderer = nullptr;
-GLCamera *glCamera = nullptr;
-Beauty *beauty = nullptr;
+#include "YuvRenderer.h"
 
 // --- JniTriangleActivity
+Triangle *triangle = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -58,6 +52,7 @@ Java_com_steven_avgraphics_activity_gles_JniTriangleActivity__1draw(JNIEnv *env,
 
 
 // --- EGLCircleActivity
+Circle *circle = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -96,6 +91,7 @@ Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1release(JNIEnv *env
 
 
 // --- VaoVboActivity
+Square *square = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -180,6 +176,7 @@ Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1release(JNIEn
 
 
 // --- TextureActivity
+Texture *texture = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -252,6 +249,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1release(JNIEnv *env, 
 
 
 // --- FboActivity
+FboRenderer *fboRenderer = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -290,6 +288,7 @@ Java_com_steven_avgraphics_activity_gles_FboActivity__1release(JNIEnv *env, jcla
 
 
 // --- GLCameraActivity
+GLCamera *glCamera = nullptr;
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -337,6 +336,7 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1release(JNIEnv *env,
 
 
 // --- CameraPreviewView
+Beauty *beauty = nullptr;
 
 extern "C"
 JNIEXPORT jint JNICALL
@@ -358,14 +358,14 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_view_CameraPreviewView__1draw(JNIEnv *env, jclass type,
                                                          jfloatArray matrix_, jfloat beautyLevel,
-                                                         jfloat tone, jfloat bright,
+                                                         jfloat saturate, jfloat bright,
                                                          jboolean recording) {
     if (!beauty) {
         LOGE("draw error, beauty is null");
         return;
     }
     jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
-    beauty->draw(matrix, beautyLevel, tone, bright, recording);
+    beauty->draw(matrix, beautyLevel, saturate, bright, recording);
     env->ReleaseFloatArrayElements(matrix_, matrix, 0);
 }
 
@@ -377,4 +377,63 @@ Java_com_steven_avgraphics_view_CameraPreviewView__1stop(JNIEnv *env, jclass typ
         delete beauty;
         beauty = nullptr;
     }
+}
+
+
+// --- VideoPlayActivity
+YuvRenderer *yuvRenderer = nullptr;
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1start(JNIEnv *env, jclass type,
+                                                              jobject surface, jint width,
+                                                              jint height, jint imgWidth,
+                                                              jint imgHeight, jobject manager) {
+    if (yuvRenderer) {
+        yuvRenderer->stop();
+        delete yuvRenderer;
+    }
+    AAssetManager *assetManager = AAssetManager_fromJava(env, manager);
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    yuvRenderer = new YuvRenderer(window);
+    yuvRenderer->setAssetManager(assetManager);
+    yuvRenderer->setTexSize(imgWidth, imgHeight);
+    yuvRenderer->resize(width, height);
+    yuvRenderer->start();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass type,
+                                                             jbyteArray pixel_, jint length,
+                                                             jint imgWidth, jint imgHeight,
+                                                             jfloatArray matrix_) {
+    if (!yuvRenderer) {
+        LOGE("yuvRenderer is null");
+        return;
+    }
+    jbyte *pixel = env->GetByteArrayElements(pixel_, NULL);
+    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
+
+    Yuv *yuv = new Yuv();
+    yuv->alloc(yuvRenderer->getTexWidth(), yuvRenderer->getTexHeight());
+    yuv->setData((uint8_t *) pixel);
+
+    yuvRenderer->setYuv(yuv);
+    yuvRenderer->setMatrix(matrix);
+    yuvRenderer->draw();
+
+    env->ReleaseByteArrayElements(pixel_, pixel, 0);
+    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1stop(JNIEnv *env, jclass type) {
+    if (yuvRenderer) {
+        yuvRenderer->stop();
+        delete yuvRenderer;
+        yuvRenderer = nullptr;
+    }
+    LOGI("video player stopped");
 }

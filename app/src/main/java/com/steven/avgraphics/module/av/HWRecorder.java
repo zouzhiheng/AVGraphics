@@ -180,7 +180,7 @@ public class HWRecorder {
         int trackIndex;
         synchronized (this) {
             MediaFormat format = encoder.getOutputFormat();
-            if (getMediaType(format) == HWCodec.MEDIA_TYPE_VIDEO) {
+            if (HWCodec.getMediaType(format) == HWCodec.MEDIA_TYPE_VIDEO) {
                 mVTrackIndex = mMuxer.addTrack(format);
                 trackIndex = mVTrackIndex;
             } else {
@@ -196,16 +196,6 @@ public class HWRecorder {
             }
         }
         return trackIndex;
-    }
-
-    private static int getMediaType(MediaFormat format) {
-        String mime = format.getString(MediaFormat.KEY_MIME);
-        if (mime.startsWith("video/")) {
-            return HWCodec.MEDIA_TYPE_VIDEO;
-        } else if (mime.startsWith("audio/")) {
-            return HWCodec.MEDIA_TYPE_AUDIO;
-        }
-        return HWCodec.MEDIA_TYPE_UNKNOWN;
     }
 
     public void stop() {

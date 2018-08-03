@@ -28,7 +28,7 @@ const static GLushort INDICES[] = {
 const static GLuint ATTRIB_POSITION = 0;
 const static GLuint ATTRIB_TEX_COORD = 1;
 const static GLint VERTEX_POS_SIZE = 3;
-const static GLint COORDINATE_SIZE = 2;
+const static GLint TEX_COORD_SIZE = 2;
 const static GLsizei INDEX_NUMBER = 6;
 
 Texture::Texture(ANativeWindow *window) : EGLDemo(window), mTexId(0), mTexWidth(0), mTexHeight(0),
@@ -121,13 +121,12 @@ void Texture::doDraw() {
     glUniform1i(mFilterTypeLoc, mFilterType);
     glUniform3fv(mFilterColorLoc, 1, mFilterColor);
 
-    GLsizei stride = sizeof(GLfloat) * (VERTEX_POS_SIZE + COORDINATE_SIZE);
-    glEnableVertexAttribArray(ATTRIB_POSITION);
-    glVertexAttribPointer(ATTRIB_POSITION, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE, stride, VERTICES);
-    glVertexAttribPointer(ATTRIB_TEX_COORD, COORDINATE_SIZE, GL_FLOAT, GL_FALSE, stride, &VERTICES[3]);
-
+    GLsizei stride = sizeof(GLfloat) * (VERTEX_POS_SIZE + TEX_COORD_SIZE);
     glEnableVertexAttribArray(ATTRIB_POSITION);
     glEnableVertexAttribArray(ATTRIB_TEX_COORD);
+    glVertexAttribPointer(ATTRIB_POSITION, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE, stride, VERTICES);
+    glVertexAttribPointer(ATTRIB_TEX_COORD, TEX_COORD_SIZE, GL_FLOAT, GL_FALSE, stride,
+                          &VERTICES[3]);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mTexId);

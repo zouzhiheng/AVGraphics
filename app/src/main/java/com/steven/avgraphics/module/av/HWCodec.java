@@ -94,14 +94,18 @@ public class HWCodec {
 
     public static boolean decode(String srcFilePath, String yuvDst, String pcmDst) {
         boolean vsucceed = doDecode(srcFilePath, yuvDst, MEDIA_TYPE_VIDEO);
+        Log.i(TAG, "decode video: " + vsucceed);
         boolean asucceed = doDecode(srcFilePath, pcmDst, MEDIA_TYPE_AUDIO);
+        Log.i(TAG, "decode audio: " + asucceed);
         return vsucceed && asucceed;
     }
 
     public static boolean decode(@NonNull String srcFilePath, @Nullable Surface surface,
-                                 @Nullable DecodeListener listener) {
+                                 @Nullable OnDecodeListener listener) {
         boolean vsucceed = doDecode(srcFilePath, MEDIA_TYPE_VIDEO, surface, listener);
-        boolean asucceed = doDecode(srcFilePath, MEDIA_TYPE_AUDIO, surface, listener);
+        Log.i(TAG, "decode video: " + vsucceed);
+        boolean asucceed = doDecode(srcFilePath, MEDIA_TYPE_AUDIO, null, listener);
+        Log.i(TAG, "decode audio: " + asucceed);
         return vsucceed && asucceed;
     }
 
@@ -114,9 +118,9 @@ public class HWCodec {
             return false;
         }
 
-        boolean succeed = doDecode(src, mediaType, null, new DecodeListener() {
+        boolean succeed = doDecode(src, mediaType, null, new OnDecodeListener() {
             @Override
-            public void onDecodedImage(byte[] data) {
+            public void onImageDecoded(byte[] data) {
                 try {
                     fos.write(data);
                 } catch (IOException e) {
@@ -125,7 +129,7 @@ public class HWCodec {
             }
 
             @Override
-            public void onDecodedSample(byte[] data) {
+            public void onSampleDecoded(byte[] data) {
                 try {
                     fos.write(data);
                 } catch (IOException e) {
@@ -145,7 +149,7 @@ public class HWCodec {
     }
 
     private static boolean doDecode(String src, int mediaType, Surface surface,
-                                    DecodeListener listener) {
+                                    OnDecodeListener listener) {
         MediaExtractor extractor = null;
         MediaCodec decoder = null;
         boolean decodeSucceed = false;
@@ -171,7 +175,7 @@ public class HWCodec {
     }
 
     private static MediaCodec doDecode(MediaExtractor extractor, int mediaType, Surface surface,
-                                       DecodeListener listener) throws IOException {
+                                       OnDecodeListener listener) throws IOException {
         MediaFormat format = selectTrack(extractor, mediaType);
         if (format == null) {
             Log.e(TAG, "doDecode no " + mediaType + " track");
@@ -221,9 +225,9 @@ public class HWCodec {
                     byte[] data = new byte[bufferInfo.size];
                     outputBuffer.get(data);
                     if (mediaType == MEDIA_TYPE_VIDEO && listener != null) {
-                        listener.onDecodedImage(data);
+                        listener.onImageDecoded(data);
                     } else if (listener != null) {
-                        listener.onDecodedSample(data);
+                        listener.onSampleDecoded(data);
                     }
                 }
 
@@ -259,7 +263,7 @@ public class HWCodec {
         return format;
     }
 
-    private static int getMediaType(MediaFormat format) {
+    public static int getMediaType(MediaFormat format) {
         String mime = format.getString(MediaFormat.KEY_MIME);
         if (mime.startsWith("video/")) {
             return MEDIA_TYPE_VIDEO;
@@ -350,10 +354,10 @@ public class HWCodec {
         }
     }
 
-    public interface DecodeListener {
-        void onDecodedImage(byte[] data);
+    public interface OnDecodeListener {
+        void onImageDecoded(byte[] data);
 
-        void onDecodedSample(byte[] data);
+        void onSampleDecoded(byte[] data);
     }
 
 

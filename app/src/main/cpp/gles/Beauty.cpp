@@ -164,7 +164,7 @@ bool Beauty::initFbo() {
     return true;
 }
 
-void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat tone, GLfloat bright, bool recording) {
+void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat saturate, GLfloat bright, bool recording) {
     const GLenum attachment = GL_COLOR_ATTACHMENT0;
 
     // 渲染离屛帧缓冲区
@@ -181,7 +181,7 @@ void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat tone, GLfloat bright,
     glUniform1i(mTexLoc, 0);
 
     glUniformMatrix4fv(mMatrixLoc, 1, GL_FALSE, matrix);
-    glUniform4fv(mParamsLoc, 1, getParams(beauty, tone));
+    glUniform4fv(mParamsLoc, 1, getParams(beauty, saturate));
     glUniform1f(mBrightnessLoc, getBright(bright));
     glUniform2fv(mSingleStepOffsetLoc, 1, getSingleStepOffset(mWidth, mHeight));
 
@@ -206,12 +206,12 @@ void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat tone, GLfloat bright,
     mEGLCore->swapBuffer();
 }
 
-GLfloat *Beauty::getParams(const GLfloat beauty, const GLfloat tone) {
+GLfloat *Beauty::getParams(const GLfloat beauty, const GLfloat saturate) {
     GLfloat *value = new GLfloat[4];
     value[0] = 1.6f - 1.2f * beauty;
     value[1] = 1.3f - 0.6f * beauty;
-    value[2] = -0.2f + 0.6f * tone;
-    value[3] = -0.2f + 0.6f * tone;
+    value[2] = -0.2f + 0.6f * saturate;
+    value[3] = -0.2f + 0.6f * saturate;
     return value;
 }
 

@@ -399,7 +399,7 @@ public class CameraPreviewView extends FrameLayout {
 
     private static native int _init(Surface surface, int width, int height, AssetManager manager);
 
-    private static native void _draw(float[] matrix, float beauty, float tone, float bright,
+    private static native void _draw(float[] matrix, float beauty, float saturate, float bright,
                                      boolean recording);
 
     private static native void _stop();

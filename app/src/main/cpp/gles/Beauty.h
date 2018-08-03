@@ -40,7 +40,7 @@ private:
 
     bool initFbo();
 
-    GLfloat *getParams(const GLfloat beauty, const GLfloat tone);
+    GLfloat *getParams(const GLfloat beauty, const GLfloat saturate);
 
     GLfloat getBright(const GLfloat bright);
 
@@ -53,7 +53,7 @@ public:
 
     int init(AAssetManager *manager, ANativeWindow *window, int width, int height);
 
-    void draw(GLfloat *matrix, GLfloat beauty, GLfloat tone, GLfloat bright, bool recording);
+    void draw(GLfloat *matrix, GLfloat beauty, GLfloat saturate, GLfloat bright, bool recording);
 
     void stop();
 };
