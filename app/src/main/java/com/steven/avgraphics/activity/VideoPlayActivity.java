@@ -71,8 +71,16 @@ public class VideoPlayActivity extends BaseActivity {
             Log.e(TAG, "start video player failed: file not found");
             return;
         }
+        setImageSize(Utils.getHWRecordOutput());
+        mBtnStop.setEnabled(true);
+        mBtnStart.setEnabled(false);
+        _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, getAssets());
+        new Thread(() -> HWCodec.decode(Utils.getHWRecordOutput(), null, new DecodeListener())).start();
+    }
+
+    private void setImageSize(String filePath) {
         mIsPlaying = true;
-        AVInfo info = HWCodec.getAVInfo(Utils.getHWRecordOutput());
+        AVInfo info = HWCodec.getAVInfo(filePath);
         mImageWidth = mSurfaceWidth;
         mImageHeight = mSurfaceHeight;
         if (info != null) {
@@ -80,12 +88,12 @@ public class VideoPlayActivity extends BaseActivity {
             mImageWidth = info.width;
             mImageHeight = info.height;
         }
-        _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, getAssets());
-        new Thread(() -> HWCodec.decode(Utils.getHWRecordOutput(), null, new DecodeListener())).start();
     }
 
     private void stop() {
         mIsPlaying = false;
+        mBtnStart.setEnabled(true);
+        mBtnStop.setEnabled(false);
         new Handler().postDelayed(VideoPlayActivity::_stop, 500);
     }
 
@@ -104,7 +112,7 @@ public class VideoPlayActivity extends BaseActivity {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-
+            _stop();
         }
 
     }

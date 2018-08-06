@@ -7,6 +7,7 @@
 #include <log.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+#include <pixfmt.h>
 #include "Square.h"
 #include "Triangle.h"
 #include "Circle.h"
@@ -15,6 +16,8 @@
 #include "GLCamera.h"
 #include "Beauty.h"
 #include "YuvRenderer.h"
+#include "../yuv/AVModel.h"
+#include "../yuv/format_util.h"
 
 // --- JniTriangleActivity
 Triangle *triangle = nullptr;
@@ -415,9 +418,14 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
     jbyte *pixel = env->GetByteArrayElements(pixel_, NULL);
     jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
 
-    Yuv *yuv = new Yuv();
-    yuv->alloc(yuvRenderer->getTexWidth(), yuvRenderer->getTexHeight());
-    yuv->setData((uint8_t *) pixel);
+    AVModel *model = new AVModel();
+    model->image = (uint8_t *) pixel;
+    model->imageLen = length;
+    model->flag = MODEL_FLAG_VIDEO;
+    model->pixelFormat = PIXEL_FORMAT_NV12;
+    model->width = imgWidth;
+    model->height = imgHeight;
+    Yuv *yuv = convertToI420(model);
 
     yuvRenderer->setYuv(yuv);
     yuvRenderer->setMatrix(matrix);
@@ -425,6 +433,8 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
 
     env->ReleaseByteArrayElements(pixel_, pixel, 0);
     env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+    delete yuv;
+    delete model;
 }
 
 extern "C"

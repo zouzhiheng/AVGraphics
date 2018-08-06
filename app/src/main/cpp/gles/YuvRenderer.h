@@ -7,7 +7,7 @@
 
 
 #include <android/asset_manager.h>
-#include <Yuv.h>
+#include "../yuv/Yuv.h"
 #include "EGLDemo.h"
 
 class YuvRenderer : public EGLDemo {

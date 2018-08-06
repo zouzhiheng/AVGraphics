@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.4.1)
 set(dir_cpp src/main/cpp)
 set(dir_sles src/main/cpp/sles)
 set(dir_gles src/main/cpp/gles)
-set(dir_yuv src/main/cpp/libyuv)
+set(dir_libyuv src/main/cpp/libyuv)
+set(dir_yuv src/main/cpp/yuv)
 set(yuv_src "src/main/cpp/libyuv/source")
 
 set( yuv_src_list
@@ -64,7 +65,10 @@ add_library( gles
 add_library( yuv
              STATIC
              ${yuv_src_list}
-             ${dir_cpp}/util/Yuv.cpp )
+             ${dir_yuv}/Yuv.cpp
+             ${dir_yuv}/AVModel.cpp
+             ${dir_yuv}/format_util.cpp
+             ${dir_yuv}/YuvProcessor.cpp )
 
 add_library( sles
              SHARED
@@ -75,7 +79,7 @@ add_library( sles
 
 
 include_directories( ${dir_cpp}/util
-                     ${dir_yuv}/include )
+                     ${dir_libyuv}/include )
 
 
 # --- link libraries
