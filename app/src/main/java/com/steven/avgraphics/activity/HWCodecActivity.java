@@ -11,6 +11,7 @@ import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.module.av.AudioRecorder;
 import com.steven.avgraphics.module.av.HWCodec;
+import com.steven.avgraphics.module.av.HWDecoder;
 import com.steven.avgraphics.module.av.HWRecorderWrapper;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
@@ -110,7 +111,7 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
         }
         disableButtons();
         Executors.newSingleThreadExecutor().execute(() -> {
-            boolean succeed = HWCodec.decode(Utils.getHWRecordOutput(), Utils.getHWDecodeYuvOutput(),
+            boolean succeed = HWDecoder.decode(Utils.getHWRecordOutput(), Utils.getHWDecodeYuvOutput(),
                     Utils.getHWDecodePcmOutput());
             ToastHelper.showOnUiThread(succeed ? R.string.hwcodec_msg_decode_succeed : R.string.hwcodec_msg_decode_failed);
             Utils.runOnUiThread(this::resetButtons);

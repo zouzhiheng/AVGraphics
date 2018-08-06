@@ -14,6 +14,7 @@ import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.module.av.AVInfo;
 import com.steven.avgraphics.module.av.HWCodec;
+import com.steven.avgraphics.module.av.HWDecoder;
 import com.steven.avgraphics.util.Utils;
 
 import java.io.File;
@@ -75,7 +76,7 @@ public class VideoPlayActivity extends BaseActivity {
         mBtnStop.setEnabled(true);
         mBtnStart.setEnabled(false);
         _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, getAssets());
-        new Thread(() -> HWCodec.decode(Utils.getHWRecordOutput(), null, new DecodeListener())).start();
+        new Thread(() -> HWDecoder.decode(Utils.getHWRecordOutput(), null, new DecodeListener())).start();
     }
 
     private void setImageSize(String filePath) {
@@ -117,7 +118,7 @@ public class VideoPlayActivity extends BaseActivity {
 
     }
 
-    private class DecodeListener implements HWCodec.OnDecodeListener {
+    private class DecodeListener implements HWDecoder.OnDecodeListener {
 
         @Override
         public void onImageDecoded(byte[] data) {
