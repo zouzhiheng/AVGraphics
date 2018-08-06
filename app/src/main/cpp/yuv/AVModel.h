@@ -15,10 +15,6 @@ public:
     uint8_t *image;
     int imageLen;
 
-    uint8_t *yBuf;
-    uint8_t *uBuf;
-    uint8_t *vBuf;
-
     uint8_t *sample;
     int sampleLen;
 

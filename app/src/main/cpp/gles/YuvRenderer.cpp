@@ -4,6 +4,7 @@
 
 #include <GLES3/gl3.h>
 #include <cstring>
+#include <log.h>
 #include "YuvRenderer.h"
 #include "glutil.h"
 
@@ -34,9 +35,9 @@ const static GLsizei INDEX_NUMBER = 6;
 
 YuvRenderer::YuvRenderer(ANativeWindow *window) : EGLDemo(window), mAssetManager(nullptr),
                                                   mTexWidth(0), mTexHeight(0),
-                                                  mVaoId(0), mMatrixLoc(0), ySamplerLoc(0),
-                                                  uSamplerLoc(0), vSamplerLoc(0),
-                                                  yuv(nullptr) {
+                                                  mVaoId(0), mMatrixLoc(0), mSamplerY(0),
+                                                  mSamplerU(0), mSamplerV(0),
+                                                  mYuv(nullptr) {
     memset(mTextures, 0, sizeof(mTextures));
     memset(mVboIds, 0, sizeof(mVboIds));
     memset(mMatrix, 0, sizeof(mMatrix));
@@ -47,10 +48,10 @@ YuvRenderer::YuvRenderer(ANativeWindow *window) : EGLDemo(window), mAssetManager
 }
 
 YuvRenderer::~YuvRenderer() {
-    if (yuv) {
-        yuv->release();
-        delete yuv;
-        yuv = nullptr;
+    if (mYuv) {
+        mYuv->release();
+        delete mYuv;
+        mYuv = nullptr;
     }
 
     mAssetManager = nullptr;
@@ -69,21 +70,17 @@ void YuvRenderer::setTexSize(int texWidth, int texHeight) {
     mTexHeight = texHeight;
 }
 
-GLint YuvRenderer::getTexWidth() const {
-    return mTexWidth;
-}
-
-GLint YuvRenderer::getTexHeight() const {
-    return mTexHeight;
-}
-
 void YuvRenderer::setYuv(Yuv *yuv) {
-    if (!this->yuv) {
-        this->yuv = yuv->clone();
+    if (!mYuv) {
+        mYuv = yuv->clone();
+    }
+    if (mYuv->width != yuv->width || mYuv->height != yuv->height) {
+        delete mYuv;
+        mYuv = yuv->clone();
     } else {
-        memcpy(this->yuv->bufY, yuv->bufY, (size_t) (mTexWidth * mTexHeight));
-        memcpy(this->yuv->bufU, yuv->bufU, (size_t) (mTexWidth * mTexHeight / 4));
-        memcpy(this->yuv->bufV, yuv->bufV, (size_t) (mTexWidth * mTexHeight / 4));
+        memcpy(mYuv->bufY, yuv->bufY, (size_t) (mTexWidth * mTexHeight));
+        memcpy(mYuv->bufU, yuv->bufU, (size_t) (mTexWidth * mTexHeight / 4));
+        memcpy(mYuv->bufV, yuv->bufV, (size_t) (mTexWidth * mTexHeight / 4));
     }
 }
 
@@ -94,9 +91,9 @@ bool YuvRenderer::doInit() {
     mProgram = loadProgram(vShader->c_str(), fShader->c_str());
 
     mMatrixLoc = glGetUniformLocation(mProgram, "mMatrix");
-    ySamplerLoc = glGetUniformLocation(mProgram, "yTexture");
-    uSamplerLoc = glGetUniformLocation(mProgram, "uTexture");
-    vSamplerLoc = glGetUniformLocation(mProgram, "vTexture");
+    mSamplerY = glGetUniformLocation(mProgram, "yTexture");
+    mSamplerU = glGetUniformLocation(mProgram, "uTexture");
+    mSamplerV = glGetUniformLocation(mProgram, "vTexture");
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -163,26 +160,27 @@ void YuvRenderer::doDraw() {
 
     glUniformMatrix4fv(mMatrixLoc, 1, GL_FALSE, mMatrix);
 
-    if (!yuv) {
+    if (!mYuv) {
+        LOGW("YuvRenderer doDraw failed: yuv data have not assigned");
         return;
     }
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, mTextures[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, mTexWidth, mTexHeight, 0, GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE, yuv->bufY);
-    glUniform1i(ySamplerLoc, 0);
+                 GL_UNSIGNED_BYTE, mYuv->bufY);
+    glUniform1i(mSamplerY, 0);
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, mTextures[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, mTexWidth / 2, mTexHeight / 2, 0, GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE, yuv->bufU);
-    glUniform1i(uSamplerLoc, 1);
+                 GL_UNSIGNED_BYTE, mYuv->bufU);
+    glUniform1i(mSamplerU, 1);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, mTextures[2]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, mTexWidth / 2, mTexHeight / 2, 0, GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE, yuv->bufV);
-    glUniform1i(vSamplerLoc, 2);
+                 GL_UNSIGNED_BYTE, mYuv->bufV);
+    glUniform1i(mSamplerV, 2);
 
     glBindVertexArray(mVaoId);
     glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, 0);

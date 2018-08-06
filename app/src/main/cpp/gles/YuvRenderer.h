@@ -22,11 +22,11 @@ private:
     GLfloat mMatrix[16];
 
     GLint mMatrixLoc;
-    GLint ySamplerLoc;
-    GLint uSamplerLoc;
-    GLint vSamplerLoc;
+    GLint mSamplerY;
+    GLint mSamplerU;
+    GLint mSamplerV;
 
-    Yuv *yuv;
+    Yuv *mYuv;
 
 private:
     bool doInit() override;
@@ -45,10 +45,6 @@ public:
     void setMatrix(GLfloat *matrix);
 
     void setTexSize(int texWidth, int texHeight);
-
-    GLint getTexWidth() const;
-
-    GLint getTexHeight() const;
 
     void setYuv(Yuv *yuv);
 };

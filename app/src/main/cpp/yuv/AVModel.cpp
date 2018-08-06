@@ -6,8 +6,7 @@
 #include "format_util.h"
 
 AVModel::AVModel() : image(nullptr), imageLen(0), sample(nullptr), sampleLen(0),
-                     width(0), height(0), pixelFormat(PIXEL_FORMAT_NONE), flag(-1), yBuf(nullptr),
-                     uBuf(nullptr), vBuf(nullptr) {
+                     width(0), height(0), pixelFormat(PIXEL_FORMAT_NONE), flag(-1) {
 
 }
 
