@@ -13,6 +13,7 @@ public:
     uint8_t *bufY;
     uint8_t *bufU;
     uint8_t *bufV;
+
     int strideY;
     int strideU;
     int strideV;
@@ -21,6 +22,8 @@ public:
     int height;
 
     Yuv();
+
+    Yuv(int width, int height);
 
     ~Yuv();
 

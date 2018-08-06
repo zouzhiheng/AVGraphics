@@ -8,13 +8,17 @@
 #include "log.h"
 
 
-Yuv::Yuv() {
-    bufY = nullptr;
-    bufU = nullptr;
-    bufV = nullptr;
-    strideY = 0;
-    strideU = 0;
-    strideV = 0;
+Yuv::Yuv() : bufY(nullptr), bufU(nullptr), bufV(nullptr), strideY(0), strideU(0), strideV(0),
+             width(0), height(0) {
+
+}
+
+Yuv::Yuv(int width, int height) : bufY(new uint8_t[width * height]),
+                                  bufU(new uint8_t[width * height / 4]),
+                                  bufV(new uint8_t[width * height / 4]),
+                                  strideY(width), strideU(width / 2), strideV(width / 2),
+                                  width(width), height(height) {
+
 }
 
 Yuv::~Yuv() {
@@ -22,12 +26,15 @@ Yuv::~Yuv() {
 }
 
 void Yuv::alloc(int width, int height) {
+    if (bufY || bufU || bufV) {
+        release();
+    }
     strideY = width;
     strideU = width / 2;
     strideV = width / 2;
-    bufY = (uint8_t *) malloc((size_t) width * height);
-    bufU = (uint8_t *) malloc((size_t) width * height / 4);
-    bufV = (uint8_t *) malloc((size_t) width * height / 4);
+    bufY = new uint8_t[width * height];
+    bufU = new uint8_t[width * height / 4];
+    bufV = new uint8_t[width * height / 4];
     this->width = width;
     this->height = height;
 }
@@ -52,19 +59,19 @@ Yuv *Yuv::clone() {
 
 void Yuv::release() {
     if (bufY != nullptr) {
-        free(bufY);
+        delete bufY;
         bufY = nullptr;
     }
     strideY = 0;
 
     if (bufU != nullptr) {
-        free(bufU);
+        delete bufU;
         bufU = nullptr;
     }
     strideU = 0;
 
     if (bufV != nullptr) {
-        free(bufV);
+        delete bufV;
         bufV = nullptr;
     }
     strideV = 0;

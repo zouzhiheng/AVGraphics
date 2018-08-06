@@ -13,8 +13,7 @@ Yuv* convertToI420(AVModel *model) {
         LOGE("convertToARGB failed: invalid argument");
         return nullptr;
     }
-    Yuv *yuv = new Yuv();
-    yuv->alloc(model->width, model->height);
+    Yuv *yuv = new Yuv(model->width, model->height);
     ConvertToI420(model->image, (size_t) model->imageLen, yuv->bufY, yuv->strideY,
                   yuv->bufU, yuv->strideU, yuv->bufV, yuv->strideV,
                   0, 0, model->width, model->height, model->width, model->height,
