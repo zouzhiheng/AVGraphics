@@ -7,6 +7,8 @@
 #include <log.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+#include <mutex>
+#include <thread>
 #include <pixfmt.h>
 #include "Square.h"
 #include "Triangle.h"
@@ -19,8 +21,11 @@
 #include "../yuv/AVModel.h"
 #include "../yuv/format_util.h"
 
+using namespace std;
+
 // --- JniTriangleActivity
 Triangle *triangle = nullptr;
+mutex gMutex;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -62,6 +67,7 @@ JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1init(JNIEnv *env, jclass type,
                                                                   jobject surface, jint width,
                                                                   jint height) {
+    unique_lock<mutex> lock(gMutex);
     if (circle) {
         circle->stop();
         delete circle;
@@ -75,6 +81,7 @@ Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1init(JNIEnv *env, j
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1draw(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (!circle) {
         LOGE("draw error, circle is null");
         return;
@@ -85,6 +92,7 @@ Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1draw(JNIEnv *env, j
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_EGLCircleActivity__1release(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (circle) {
         circle->stop();
         delete circle;
@@ -101,6 +109,7 @@ JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1init(JNIEnv *env, jclass type,
                                                                jobject surface, jint width,
                                                                jint height) {
+    unique_lock<mutex> lock(gMutex);
     if (square) {
         square->stop();
         delete square;
@@ -114,6 +123,7 @@ Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1init(JNIEnv *env, jcla
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1draw(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (!square) {
         LOGE("draw error, square is null");
         return;
@@ -124,6 +134,7 @@ Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1draw(JNIEnv *env, jcla
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_VaoVboActivity__1release(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (square) {
         square->stop();
         delete square;
@@ -139,6 +150,7 @@ JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1init(JNIEnv *env, jclass type,
                                                                         jobject surface, jint width,
                                                                         jint height) {
+    unique_lock<mutex> lock(gMutex);
     if (square) {
         square->stop();
         delete square;
@@ -153,6 +165,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1draw(JNIEnv *env, jclass type,
                                                                         jfloatArray matrix_) {
+    unique_lock<mutex> lock(gMutex);
     if (!square) {
         LOGE("draw error, square is null");
         return;
@@ -170,6 +183,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1release(JNIEnv *env,
                                                                            jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (square) {
         square->stop();
         delete square;
@@ -190,6 +204,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1init(JNIEnv *env, jcl
                                                                 jobject assetManager) {
     jbyte *pixel = env->GetByteArrayElements(pixel_, NULL);
 
+    unique_lock<mutex> lock(gMutex);
     if (texture) {
         texture->stop();
         delete texture;
@@ -211,6 +226,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_TextureActivity__1resize(JNIEnv *env, jclass type,
                                                                   jint width, jint height) {
+    unique_lock<mutex> lock(gMutex);
     if (!texture) {
         LOGE("resize error, texture is null");
         return;
@@ -224,6 +240,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1draw(JNIEnv *env, jcl
                                                                 jfloatArray matrix_,
                                                                 jint filterType,
                                                                 jfloatArray filterColor_) {
+    unique_lock<mutex> lock(gMutex);
     if (!texture) {
         LOGE("draw error, texture is null");
         return;
@@ -243,6 +260,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1draw(JNIEnv *env, jcl
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_TextureActivity__1release(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (texture) {
         texture->stop();
         delete texture;
@@ -259,6 +277,7 @@ JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_FboActivity__1init(JNIEnv *env, jclass type,
                                                             jobject surface, jint width,
                                                             jint height) {
+    unique_lock<mutex> lock(gMutex);
     if (fboRenderer) {
         fboRenderer->stop();
         delete fboRenderer;
@@ -272,6 +291,7 @@ Java_com_steven_avgraphics_activity_gles_FboActivity__1init(JNIEnv *env, jclass 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_FboActivity__1draw(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (!fboRenderer) {
         LOGE("draw error, fboRenderer is null");
         return;
@@ -282,6 +302,7 @@ Java_com_steven_avgraphics_activity_gles_FboActivity__1draw(JNIEnv *env, jclass 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_FboActivity__1release(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (fboRenderer) {
         fboRenderer->stop();
         delete fboRenderer;
@@ -299,6 +320,7 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1init(JNIEnv *env, jc
                                                                  jobject surface, jint width,
                                                                  jint height,
                                                                  jobject assetManager) {
+    unique_lock<mutex> lock(gMutex);
     if (glCamera) {
         glCamera->stop();
         delete glCamera;
@@ -318,6 +340,7 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1draw(JNIEnv *env, jc
                                                                  jfloatArray matrix_) {
     jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
 
+    unique_lock<mutex> lock(gMutex);
     if (!glCamera) {
         LOGE("draw error, fboRenderer is null");
         return;
@@ -330,6 +353,7 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1draw(JNIEnv *env, jc
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1release(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (glCamera) {
         glCamera->stop();
         delete glCamera;
@@ -345,6 +369,7 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_steven_avgraphics_view_CameraPreviewView__1init(JNIEnv *env, jclass type, jobject surface,
                                                          jint width, jint height, jobject manager) {
+    unique_lock<mutex> lock(gMutex);
     if (beauty) {
         beauty->stop();
         delete beauty;
@@ -363,6 +388,7 @@ Java_com_steven_avgraphics_view_CameraPreviewView__1draw(JNIEnv *env, jclass typ
                                                          jfloatArray matrix_, jfloat beautyLevel,
                                                          jfloat saturate, jfloat bright,
                                                          jboolean recording) {
+    unique_lock<mutex> lock(gMutex);
     if (!beauty) {
         LOGE("draw error, beauty is null");
         return;
@@ -375,6 +401,7 @@ Java_com_steven_avgraphics_view_CameraPreviewView__1draw(JNIEnv *env, jclass typ
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_view_CameraPreviewView__1stop(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (beauty) {
         beauty->stop();
         delete beauty;
@@ -392,6 +419,7 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1start(JNIEnv *env, jclas
                                                               jobject surface, jint width,
                                                               jint height, jint imgWidth,
                                                               jint imgHeight, jobject manager) {
+    unique_lock<mutex> lock(gMutex);
     if (yuvRenderer) {
         yuvRenderer->stop();
         delete yuvRenderer;
@@ -411,6 +439,7 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
                                                              jbyteArray pixel_, jint length,
                                                              jint imgWidth, jint imgHeight,
                                                              jfloatArray matrix_) {
+    unique_lock<mutex> lock(gMutex);
     if (!yuvRenderer) {
         LOGE("yuvRenderer is null");
         return;
@@ -440,6 +469,7 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_VideoPlayActivity__1stop(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
     if (yuvRenderer) {
         yuvRenderer->stop();
         delete yuvRenderer;

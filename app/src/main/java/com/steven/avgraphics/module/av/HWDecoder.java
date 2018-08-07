@@ -4,6 +4,8 @@ package com.steven.avgraphics.module.av;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,6 +15,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HWDecoder {
 
@@ -20,24 +24,104 @@ public class HWDecoder {
 
     private static final long DEFAULT_TIMEOUT = 10 * 1000;
 
-    public static boolean decode(String srcFilePath, String yuvDst, String pcmDst) {
-        boolean vsucceed = doDecode(srcFilePath, yuvDst, HWCodec.MEDIA_TYPE_VIDEO);
-        Log.i(TAG, "decode video: " + vsucceed);
-        boolean asucceed = doDecode(srcFilePath, pcmDst, HWCodec.MEDIA_TYPE_AUDIO);
-        Log.i(TAG, "decode audio: " + asucceed);
-        return vsucceed && asucceed;
+    private ExecutorService mExecutor = Executors.newCachedThreadPool();
+    private boolean mIsDecoding = false;
+    private boolean mIsEndDecodeVideo = false;
+    private boolean mIsEndDecodeAudio = false;
+    private boolean mIsDecodeVideoSucceed = false;
+    private boolean mIsDecodeAudioSucceed = false;
+    private Handler mHandler;
+
+    public void start(String srcFilePath, String yuvDst, String pcmDst) {
+        start(srcFilePath, yuvDst, pcmDst, null);
     }
 
-    public static boolean decode(@NonNull String srcFilePath, @Nullable Surface surface,
-                                 @Nullable OnDecodeListener listener) {
-        boolean vsucceed = doDecode(srcFilePath, HWCodec.MEDIA_TYPE_VIDEO, surface, listener);
-        Log.i(TAG, "decode video: " + vsucceed);
-        boolean asucceed = doDecode(srcFilePath, HWCodec.MEDIA_TYPE_AUDIO, null, listener);
-        Log.i(TAG, "decode audio: " + asucceed);
-        return vsucceed && asucceed;
+    public void start(String srcFilePath, String yuvDst, String pcmDst, OnDecodeEndListener listener) {
+        if (mIsDecoding) {
+            Log.e(TAG, "start failed, decoder is working now");
+            return;
+        }
+        mIsDecoding = true;
+        resetValues();
+        mExecutor.execute(() -> {
+            mIsDecodeVideoSucceed = doDecode(srcFilePath, yuvDst, HWCodec.MEDIA_TYPE_VIDEO);
+            mIsEndDecodeVideo = true;
+            if (mIsEndDecodeAudio) {
+                mIsDecoding = false;
+                if (listener != null) {
+                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed));
+                }
+            }
+        });
+        mExecutor.execute(() -> {
+            mIsDecodeAudioSucceed = doDecode(srcFilePath, pcmDst, HWCodec.MEDIA_TYPE_AUDIO);
+            mIsEndDecodeAudio = true;
+            if (mIsEndDecodeVideo) {
+                mIsDecoding = false;
+                if (listener != null) {
+                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed));
+                }
+            }
+        });
     }
 
-    private static boolean doDecode(String src, String dst, int mediaType) {
+    public void start(@NonNull String srcFilePath, @Nullable Surface surface) {
+        start(srcFilePath, surface, (OnDecodeListener) null);
+    }
+
+    public void start(@NonNull String srcFilePath, @Nullable Surface surface, @Nullable OnDecodeEndListener listener) {
+        start(srcFilePath, surface, (OnDecodeListener) listener);
+    }
+
+    public void start(@NonNull String srcFilePath, @NonNull OnDecodeListener listener) {
+        start(srcFilePath, null, listener);
+    }
+
+    private void start(@NonNull String srcFilePath, @Nullable Surface surface, @Nullable OnDecodeListener listener) {
+        if (mIsDecoding) {
+            Log.e(TAG, "start failed, decoder is working now");
+            return;
+        }
+        mIsDecoding = true;
+        resetValues();
+        mExecutor.execute(() -> {
+            mIsDecodeVideoSucceed = doDecode(srcFilePath, HWCodec.MEDIA_TYPE_VIDEO, surface, listener);
+            mIsEndDecodeVideo = true;
+            if (mIsEndDecodeAudio) {
+                mIsDecoding = false;
+                Log.i(TAG, "--- decoder already stopped");
+                if (listener != null) {
+                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeVideoSucceed));
+                }
+            }
+        });
+        mExecutor.execute(() -> {
+            mIsDecodeAudioSucceed = doDecode(srcFilePath, HWCodec.MEDIA_TYPE_AUDIO, null, listener);
+            mIsEndDecodeAudio = true;
+            if (mIsEndDecodeVideo) {
+                mIsDecoding = false;
+                Log.i(TAG, "--- decoder already stopped");
+                if (listener != null) {
+                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed));
+                }
+            }
+        });
+    }
+
+    private void resetValues() {
+        mIsEndDecodeVideo = false;
+        mIsEndDecodeAudio = false;
+        mIsDecodeVideoSucceed = false;
+        mIsDecodeAudioSucceed = false;
+        mHandler = new Handler(Looper.myLooper());
+    }
+
+    public void stop() {
+        Log.i(TAG, "--- decoder ready to stop");
+        mIsDecoding = false;
+    }
+
+    private boolean doDecode(String src, String dst, int mediaType) {
         FileOutputStream fos;
         try {
             fos = new FileOutputStream(dst);
@@ -46,7 +130,7 @@ public class HWDecoder {
             return false;
         }
 
-        boolean succeed = doDecode(src, mediaType, null, new OnDecodeListener() {
+        return doDecode(src, mediaType, null, new OnDecodeListener() {
             @Override
             public void onImageDecoded(byte[] data) {
                 try {
@@ -64,20 +148,21 @@ public class HWDecoder {
                     e.printStackTrace();
                 }
             }
+
+            @Override
+            public void onDecodeEnded(boolean vsucceed, boolean asucceed) {
+                try {
+                    fos.flush();
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         });
-
-        try {
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return succeed;
     }
 
-    private static boolean doDecode(String src, int mediaType, Surface surface,
-                                    OnDecodeListener listener) {
+    private boolean doDecode(String src, int mediaType, Surface surface,
+                             OnDecodeListener listener) {
         MediaExtractor extractor = null;
         MediaCodec decoder = null;
         boolean decodeSucceed = false;
@@ -102,8 +187,8 @@ public class HWDecoder {
         return !exceptionOccur && decodeSucceed;
     }
 
-    private static MediaCodec doDecode(MediaExtractor extractor, int mediaType, Surface surface,
-                                       OnDecodeListener listener) throws IOException {
+    private MediaCodec doDecode(MediaExtractor extractor, int mediaType, Surface surface,
+                                OnDecodeListener listener) throws IOException {
         MediaFormat format = selectTrack(extractor, mediaType);
         if (format == null) {
             Log.e(TAG, "doDecode no " + mediaType + " track");
@@ -122,6 +207,11 @@ public class HWDecoder {
         boolean inputEof = false;
         boolean outputEof = false;
         while (!outputEof) {
+            if (!mIsDecoding) {
+                Log.i(TAG, "decoder stopped");
+                break;
+            }
+
             if (!inputEof) {
                 int inIndex = decoder.dequeueInputBuffer(DEFAULT_TIMEOUT);
                 if (inIndex >= 0) {
@@ -195,6 +285,24 @@ public class HWDecoder {
         void onImageDecoded(byte[] data);
 
         void onSampleDecoded(byte[] data);
+
+        void onDecodeEnded(boolean vsucceed, boolean asucceed);
+    }
+
+    public interface OnDecodeEndListener extends OnDecodeListener {
+
+        @Override
+        default void onImageDecoded(byte[] data) {
+
+        }
+
+        @Override
+        default void onSampleDecoded(byte[] data) {
+
+        }
+
+        @Override
+        void onDecodeEnded(boolean vsucceed, boolean asucceed);
     }
 
 }

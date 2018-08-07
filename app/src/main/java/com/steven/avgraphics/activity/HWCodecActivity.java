@@ -111,10 +111,14 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
         }
         disableButtons();
         Executors.newSingleThreadExecutor().execute(() -> {
-            boolean succeed = HWDecoder.decode(Utils.getHWRecordOutput(), Utils.getHWDecodeYuvOutput(),
-                    Utils.getHWDecodePcmOutput());
-            ToastHelper.showOnUiThread(succeed ? R.string.hwcodec_msg_decode_succeed : R.string.hwcodec_msg_decode_failed);
-            Utils.runOnUiThread(this::resetButtons);
+            HWDecoder decoder = new HWDecoder();
+            decoder.start(Utils.getHWRecordOutput(), Utils.getHWDecodeYuvOutput(),
+                    Utils.getHWDecodePcmOutput(), (vsucceed, asucceed) -> {
+                        ToastHelper.showOnUiThread(vsucceed && asucceed
+                                ? R.string.hwcodec_msg_decode_succeed
+                                : R.string.hwcodec_msg_decode_failed);
+                        Utils.runOnUiThread(this::resetButtons);
+                    });
         });
     }
 

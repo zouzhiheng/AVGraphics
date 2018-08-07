@@ -3,7 +3,6 @@ package com.steven.avgraphics.activity;
 import android.content.res.AssetManager;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -24,7 +23,10 @@ public class VideoPlayActivity extends BaseActivity {
     private SurfaceView mSurfaceView;
     private Button mBtnStart;
     private Button mBtnStop;
+
     private Surface mSurface;
+    private HWDecoder mDecoder = new HWDecoder();
+    private DecodeListener mDecodeListener;
 
     private int mSurfaceWidth;
     private int mSurfaceHeight;
@@ -41,6 +43,7 @@ public class VideoPlayActivity extends BaseActivity {
     }
 
     private void init() {
+        mDecodeListener = new DecodeListener();
         Matrix.setIdentityM(mMatrix, 0);
         findView();
         layoutSurfaceView();
@@ -76,7 +79,7 @@ public class VideoPlayActivity extends BaseActivity {
         mBtnStop.setEnabled(true);
         mBtnStart.setEnabled(false);
         _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, getAssets());
-        new Thread(() -> HWDecoder.decode(Utils.getHWRecordOutput(), null, new DecodeListener())).start();
+        mDecoder.start(Utils.getHWRecordOutput(), mDecodeListener);
     }
 
     private void setImageSize(String filePath) {
@@ -95,7 +98,16 @@ public class VideoPlayActivity extends BaseActivity {
         mIsPlaying = false;
         mBtnStart.setEnabled(true);
         mBtnStop.setEnabled(false);
-        new Handler().postDelayed(VideoPlayActivity::_stop, 500);
+        mDecoder.stop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mIsPlaying = false;
+        mDecodeListener = null;
+        mDecoder.stop();
+        _stop();
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -113,7 +125,7 @@ public class VideoPlayActivity extends BaseActivity {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            _stop();
+
         }
 
     }
@@ -130,6 +142,14 @@ public class VideoPlayActivity extends BaseActivity {
         @Override
         public void onSampleDecoded(byte[] data) {
 
+        }
+
+        @Override
+        public void onDecodeEnded(boolean vsucceed, boolean asucceed) {
+            mIsPlaying = false;
+            _stop();
+            mBtnStart.setEnabled(true);
+            mBtnStop.setEnabled(false);
         }
     }
 
