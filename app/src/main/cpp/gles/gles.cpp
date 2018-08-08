@@ -23,6 +23,9 @@
 
 using namespace std;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+
 // --- JniTriangleActivity
 Triangle *triangle = nullptr;
 mutex gMutex;
@@ -479,3 +482,5 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1stop(JNIEnv *env, jclass
     }
     LOGI("video player stopped");
 }
+
+#pragma clang diagnostic pop

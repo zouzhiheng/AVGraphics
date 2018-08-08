@@ -1,6 +1,9 @@
 package com.steven.avgraphics.activity;
 
 import android.content.res.AssetManager;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -23,6 +26,7 @@ import java.io.File;
 public class VideoPlayActivity extends BaseActivity {
 
     private static final int DEFAULT_FRAME_RATE = 24;
+    public static final int DEFAULT_SAMPLE_RATE = 48000;
 
     private SurfaceView mSurfaceView;
     private Button mBtnStart;
@@ -33,6 +37,7 @@ public class VideoPlayActivity extends BaseActivity {
     private Surface mSurface;
     private HWDecoder mDecoder = new HWDecoder();
     private DecodeListener mDecodeListener;
+    private AudioTrack mAudioTrack;
     private AVInfo mAVInfo;
     private CountDownTimer mCountDownTimer;
 
@@ -41,6 +46,8 @@ public class VideoPlayActivity extends BaseActivity {
     private int mImageWidth;
     private int mImageHeight;
     private int mFrameRate = DEFAULT_FRAME_RATE;
+    private int mChannels;
+    private int mSampleRate;
     private float[] mMatrix = new float[16];
     private boolean mIsPlaying = false;
 
@@ -85,25 +92,42 @@ public class VideoPlayActivity extends BaseActivity {
             Log.e(TAG, "start video player failed: file not found");
             return;
         }
-        mIsPlaying = true;
-        mDecodeListener = new DecodeListener();
-        mAVInfo = HWCodec.getAVInfo(Utils.getHWRecordOutput());
-        assert mAVInfo != null;
-        setVideoParams();
+
+        setupData();
         showAVInfo();
+
         mBtnStop.setEnabled(true);
         mBtnStart.setEnabled(false);
+
+        int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
+        // 获取 sample format 的 API 要求高，这里默认为 ENCODING_PCM_16BIT
+        int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT);
+        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, channelConfig,
+                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+
+        mDecodeListener = new DecodeListener();
         mDecoder.setFrameRate(mFrameRate);
         mDecoder.start(Utils.getHWRecordOutput(), mDecodeListener);
+
         _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, mFrameRate,
                 getAssets());
+
         startCounDownTimer();
     }
 
-    private void setVideoParams() {
+    private void setupData() {
+        mIsPlaying = true;
+        mAVInfo = HWCodec.getAVInfo(Utils.getHWRecordOutput());
+        assert mAVInfo != null;
+        setupVideoParams();
+    }
+
+    private void setupVideoParams() {
         mImageWidth = mAVInfo != null && mAVInfo.width > 0 ? mAVInfo.width : mSurfaceWidth;
         mImageHeight = mAVInfo != null && mAVInfo.height > 0 ? mAVInfo.height : mSurfaceHeight;
         mFrameRate = mAVInfo != null && mAVInfo.frameRate > 0 ? mAVInfo.frameRate : DEFAULT_FRAME_RATE;
+        mChannels = mAVInfo != null && mAVInfo.channels == 2 ? 2 : 1;
+        mSampleRate = mAVInfo != null && mAVInfo.sampleRate > 0 ? mAVInfo.sampleRate : DEFAULT_SAMPLE_RATE;
         Log.i(TAG, "frame rate: " + mFrameRate);
     }
 
@@ -141,6 +165,15 @@ public class VideoPlayActivity extends BaseActivity {
         mBtnStop.setEnabled(false);
         mDecoder.stop();
         mCountDownTimer.cancel();
+        releaseAudioTrack();
+    }
+
+    private void releaseAudioTrack() {
+        if (mAudioTrack != null) {
+            mAudioTrack.stop();
+            mAudioTrack.release();
+            mAudioTrack = null;
+        }
     }
 
     @Override
@@ -175,6 +208,7 @@ public class VideoPlayActivity extends BaseActivity {
 
     }
 
+
     private class DecodeListener implements HWDecoder.OnDecodeListener {
 
         @Override
@@ -186,13 +220,15 @@ public class VideoPlayActivity extends BaseActivity {
 
         @Override
         public void onSampleDecoded(byte[] data) {
-
+            mAudioTrack.write(data, 0, data.length);
+            mAudioTrack.play();
         }
 
         @Override
         public void onDecodeEnded(boolean vsucceed, boolean asucceed) {
             mIsPlaying = false;
             _stop();
+            releaseAudioTrack();
             Utils.runOnUiThread(() -> {
                 mBtnStart.setEnabled(true);
                 mBtnStop.setEnabled(false);
