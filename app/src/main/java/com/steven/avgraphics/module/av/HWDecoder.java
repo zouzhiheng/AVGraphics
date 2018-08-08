@@ -4,8 +4,6 @@ package com.steven.avgraphics.module.av;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -30,7 +28,12 @@ public class HWDecoder {
     private boolean mIsEndDecodeAudio = false;
     private boolean mIsDecodeVideoSucceed = false;
     private boolean mIsDecodeAudioSucceed = false;
-    private Handler mHandler;
+
+    private long mInterval = 0;
+
+    public void setFrameRate(long frameRate) {
+        mInterval = 1000 / frameRate;
+    }
 
     public void start(String srcFilePath, String yuvDst, String pcmDst) {
         start(srcFilePath, yuvDst, pcmDst, null);
@@ -49,7 +52,7 @@ public class HWDecoder {
             if (mIsEndDecodeAudio) {
                 mIsDecoding = false;
                 if (listener != null) {
-                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed));
+                    listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed);
                 }
             }
         });
@@ -59,7 +62,7 @@ public class HWDecoder {
             if (mIsEndDecodeVideo) {
                 mIsDecoding = false;
                 if (listener != null) {
-                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed));
+                    listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed);
                 }
             }
         });
@@ -89,9 +92,8 @@ public class HWDecoder {
             mIsEndDecodeVideo = true;
             if (mIsEndDecodeAudio) {
                 mIsDecoding = false;
-                Log.i(TAG, "--- decoder already stopped");
                 if (listener != null) {
-                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeVideoSucceed));
+                    listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeVideoSucceed);
                 }
             }
         });
@@ -100,9 +102,8 @@ public class HWDecoder {
             mIsEndDecodeAudio = true;
             if (mIsEndDecodeVideo) {
                 mIsDecoding = false;
-                Log.i(TAG, "--- decoder already stopped");
                 if (listener != null) {
-                    mHandler.post(() -> listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed));
+                    listener.onDecodeEnded(mIsDecodeVideoSucceed, mIsDecodeAudioSucceed);
                 }
             }
         });
@@ -113,11 +114,9 @@ public class HWDecoder {
         mIsEndDecodeAudio = false;
         mIsDecodeVideoSucceed = false;
         mIsDecodeAudioSucceed = false;
-        mHandler = new Handler(Looper.myLooper());
     }
 
     public void stop() {
-        Log.i(TAG, "--- decoder ready to stop");
         mIsDecoding = false;
     }
 
@@ -171,7 +170,7 @@ public class HWDecoder {
             extractor = new MediaExtractor();
             extractor.setDataSource(src);
             decoder = doDecode(extractor, mediaType, surface, listener);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             Log.e(TAG, "doDecode exception: " + e);
             exceptionOccur = true;
         } finally {
@@ -188,7 +187,7 @@ public class HWDecoder {
     }
 
     private MediaCodec doDecode(MediaExtractor extractor, int mediaType, Surface surface,
-                                OnDecodeListener listener) throws IOException {
+                                OnDecodeListener listener) throws IOException, InterruptedException {
         MediaFormat format = selectTrack(extractor, mediaType);
         if (format == null) {
             Log.e(TAG, "doDecode no " + mediaType + " track");
@@ -203,6 +202,10 @@ public class HWDecoder {
         ByteBuffer[] inputBuffers = decoder.getInputBuffers();
         ByteBuffer[] outputBuffers = decoder.getOutputBuffers();
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+
+        long lastTime = 0;
+        long current;
+        long pass;
 
         boolean inputEof = false;
         boolean outputEof = false;
@@ -242,6 +245,18 @@ public class HWDecoder {
                     outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
                     byte[] data = new byte[bufferInfo.size];
                     outputBuffer.get(data);
+
+                    if (lastTime == 0) {
+                        lastTime = System.currentTimeMillis();
+                    } else {
+                        current = System.currentTimeMillis();
+                        pass = current - lastTime;
+                        if (pass < mInterval && mediaType == HWCodec.MEDIA_TYPE_VIDEO) {
+                            Thread.sleep(mInterval - pass);
+                        }
+                        lastTime = current;
+                    }
+
                     if (mediaType == HWCodec.MEDIA_TYPE_VIDEO && listener != null) {
                         listener.onImageDecoded(data);
                     } else if (listener != null) {

@@ -19,7 +19,7 @@
 #include "Beauty.h"
 #include "YuvRenderer.h"
 #include "../yuv/AVModel.h"
-#include "../yuv/format_util.h"
+#include "../yuv/util.h"
 
 using namespace std;
 
@@ -418,7 +418,8 @@ JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_VideoPlayActivity__1start(JNIEnv *env, jclass type,
                                                               jobject surface, jint width,
                                                               jint height, jint imgWidth,
-                                                              jint imgHeight, jobject manager) {
+                                                              jint imgHeight, jint frameRate,
+                                                              jobject manager) {
     unique_lock<mutex> lock(gMutex);
     if (yuvRenderer) {
         yuvRenderer->stop();

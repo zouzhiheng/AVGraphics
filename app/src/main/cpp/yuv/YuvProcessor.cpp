@@ -4,7 +4,7 @@
 
 #include "YuvProcessor.h"
 #include "log.h"
-#include "format_util.h"
+#include "util.h"
 #include <libyuv/convert.h>
 #include <malloc.h>
 #include <string.h>

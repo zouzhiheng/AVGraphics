@@ -67,7 +67,7 @@ add_library( yuv
              ${yuv_src_list}
              ${dir_yuv}/Yuv.cpp
              ${dir_yuv}/AVModel.cpp
-             ${dir_yuv}/format_util.cpp
+             ${dir_yuv}/util.cpp
              ${dir_yuv}/YuvProcessor.cpp )
 
 add_library( sles
