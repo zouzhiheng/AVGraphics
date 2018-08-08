@@ -59,19 +59,19 @@ Yuv *Yuv::clone() {
 
 void Yuv::release() {
     if (bufY != nullptr) {
-        delete bufY;
+        delete[] bufY;
         bufY = nullptr;
     }
     strideY = 0;
 
     if (bufU != nullptr) {
-        delete bufU;
+        delete[] bufU;
         bufU = nullptr;
     }
     strideU = 0;
 
     if (bufV != nullptr) {
-        delete bufV;
+        delete[] bufV;
         bufV = nullptr;
     }
     strideV = 0;

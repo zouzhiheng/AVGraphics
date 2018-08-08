@@ -150,7 +150,9 @@ public class VideoPlayActivity extends BaseActivity {
         mDecodeListener = null;
         mDecoder.stop();
         _stop();
-        mCountDownTimer.cancel();
+        if (mCountDownTimer != null) {
+            mCountDownTimer.cancel();
+        }
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {

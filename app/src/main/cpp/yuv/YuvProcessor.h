@@ -7,7 +7,7 @@
 
 #include <libyuv.h>
 #include <string>
-#include "avmodel.h"
+#include "AVModel.h"
 #include "Yuv.h"
 
 class YuvProcessor {
