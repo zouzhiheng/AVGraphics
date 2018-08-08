@@ -52,7 +52,6 @@ public class VideoPlayActivity extends BaseActivity {
     }
 
     private void init() {
-        mDecodeListener = new DecodeListener();
         Matrix.setIdentityM(mMatrix, 0);
         findView();
         layoutSurfaceView();
@@ -87,6 +86,7 @@ public class VideoPlayActivity extends BaseActivity {
             return;
         }
         mIsPlaying = true;
+        mDecodeListener = new DecodeListener();
         mAVInfo = HWCodec.getAVInfo(Utils.getHWRecordOutput());
         assert mAVInfo != null;
         setVideoParams();

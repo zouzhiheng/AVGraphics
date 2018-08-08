@@ -464,6 +464,7 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
     env->ReleaseByteArrayElements(pixel_, pixel, 0);
     env->ReleaseFloatArrayElements(matrix_, matrix, 0);
     delete yuv;
+    model->image = nullptr;
     delete model;
 }
 
