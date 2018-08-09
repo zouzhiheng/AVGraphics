@@ -10,10 +10,11 @@
 #include <SLES/OpenSLES_Android.h>
 #include "AudioEngine.h"
 
+#define SAMPLE_FORMAT_8 8
+#define SAMPLE_FORMAT_16 16
+
 class BQAudioPlayer {
 private:
-    FILE *mFile;
-
     AudioEngine *mAudioEngine;
     SLObjectItf mPlayerObj;
     SLPlayItf mPlayer;
@@ -21,30 +22,27 @@ private:
     SLEffectSendItf mEffectSend;
     SLVolumeItf mVolume;
     SLmilliHertz mSampleRate;
+    int mSampleFormat;
+    int mChannels;
 
     short *mBuffers[2];
     SLuint32 mBufSize;
     int mIndex;
     bool mIsPlaying;
-
     pthread_mutex_t mMutex;
-    pthread_t mPlayThread;
 
-private:
-    void initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize);
+public:
+    BQAudioPlayer(int sampleRate, int sampleFormat, int channels);
+
+    BQAudioPlayer(int sampleRate, int sampleFormat, int channels, int bufSize);
+
+    void init();
+
+    void enqueueSample(void *data, size_t length);
 
     void release();
 
-public:
-    BQAudioPlayer(const char *filePath);
-
-    void start();
-
-    void stop();
-
     ~BQAudioPlayer();
-
-    friend void *playThread(void *arg);
 
     friend void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 };

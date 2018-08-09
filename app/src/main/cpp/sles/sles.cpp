@@ -5,14 +5,13 @@
 #include <jni.h>
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
+#include <pthread.h>
 #include "AssetAudioPlayer.h"
 #include "AudioRecorder.h"
 #include "log.h"
 #include "BQAudioPlayer.h"
 
 AssetAudioPlayer *assetAudioPlayer = nullptr;
-BQAudioPlayer *bqAudioPlayer = nullptr;
-AudioRecorder *audioRecorder = nullptr;
 
 extern "C"
 JNIEXPORT jboolean JNICALL
@@ -60,6 +59,8 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1stopPlayMp3(JNIEnv *env, jc
     assetAudioPlayer = nullptr;
 }
 
+AudioRecorder *audioRecorder = nullptr;
+
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_steven_avgraphics_activity_OpenSLActivity__1startRecord(JNIEnv *env, jclass type,
@@ -88,6 +89,12 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1stopRecord(JNIEnv *env, jcl
     audioRecorder = nullptr;
 }
 
+BQAudioPlayer *bqAudioPlayer = nullptr;
+bool isPlaying = false;
+FILE *pcmFile = nullptr;
+
+void *playThreadFunc(void *arg);
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_OpenSLActivity__1startPlayPcm(JNIEnv *env, jclass type,
@@ -95,22 +102,44 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1startPlayPcm(JNIEnv *env, j
     const char *filePath = env->GetStringUTFChars(filePath_, 0);
 
     if (bqAudioPlayer) {
-        bqAudioPlayer->stop();
+        bqAudioPlayer->release();
         delete bqAudioPlayer;
     }
-    bqAudioPlayer = new BQAudioPlayer(filePath);
-    bqAudioPlayer->start();
+    bqAudioPlayer = new BQAudioPlayer(48000, SAMPLE_FORMAT_16, 1);
+    bqAudioPlayer->init();
+    pcmFile = fopen(filePath, "r");
+    isPlaying = true;
+    pthread_t playThread;
+    pthread_create(&playThread, nullptr, playThreadFunc, 0);
 
     env->ReleaseStringUTFChars(filePath_, filePath);
+}
+
+void *playThreadFunc(void *arg) {
+    LOGI("BQAudioPlayer started");
+    const int bufferSize = 2048;
+    short buffer[bufferSize];
+    while (isPlaying && !feof(pcmFile)) {
+        fread(buffer, 1, bufferSize, pcmFile);
+        bqAudioPlayer->enqueueSample(buffer, bufferSize);
+    }
+    LOGI("BQAudioPlayer stopped");
+
+    return 0;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_steven_avgraphics_activity_OpenSLActivity__1stopPlayPcm(JNIEnv *env, jclass type) {
-    if (!bqAudioPlayer) {
-        return;
+    isPlaying = false;
+    if (bqAudioPlayer) {
+        bqAudioPlayer->release();
+        delete bqAudioPlayer;
+        bqAudioPlayer = nullptr;
     }
-    bqAudioPlayer->stop();
-    delete bqAudioPlayer;
-    bqAudioPlayer = nullptr;
+
+    if (pcmFile) {
+        fclose(pcmFile);
+        pcmFile = nullptr;
+    }
 }

@@ -7,32 +7,26 @@
 #include "log.h"
 #include <pthread.h>
 
-#define SAMPLE_RATE 48000
-#define BUFFER_SIZE 2048
-
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
-void* playThread(void *arg);
+BQAudioPlayer::BQAudioPlayer(int sampleRate, int sampleFormat, int channels)
+        : BQAudioPlayer(sampleRate, sampleFormat, channels,
+                        (SLuint32) (1024 * channels * sampleFormat / 8)) {
 
-BQAudioPlayer::BQAudioPlayer(const char *filePath)
-        : mAudioEngine(new AudioEngine()), mFile(fopen(filePath, "r")), mPlayerObj(nullptr),
-          mPlayer(nullptr), mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr),
-          mSampleRate(0), mIndex(0), mBufSize(0), mIsPlaying(false) {
-    initPlayer(SAMPLE_RATE, BUFFER_SIZE);
+}
+
+BQAudioPlayer::BQAudioPlayer(int sampleRate, int sampleFormat, int channels, int bufSize)
+        : mAudioEngine(new AudioEngine()), mPlayerObj(nullptr), mPlayer(nullptr),
+          mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr),
+          mSampleRate((SLmilliHertz) sampleRate * 1000), mSampleFormat(sampleFormat),
+          mChannels(channels), mBufSize((SLuint32) bufSize), mIndex(0), mIsPlaying(false) {
     mBuffers[0] = new short[mBufSize];
     mBuffers[1] = new short[mBufSize];
     mMutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
-void BQAudioPlayer::initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize) {
+void BQAudioPlayer::init() {
     SLresult result;
-
-    if (sampleRate > 0 && bufSize > 0) {
-        mSampleRate = (SLmilliHertz) (sampleRate * 1000);
-        mBufSize = bufSize;
-    }
-    LOGI("sample rate: %d, buf size: %d, bq sample rate: %d, bq buf size: %d", sampleRate, bufSize,
-         mSampleRate, mBufSize);
 
     SLDataLocator_AndroidSimpleBufferQueue locBufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
     SLDataFormat_PCM formatPcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_48,
@@ -93,40 +87,21 @@ void BQAudioPlayer::initPlayer(SLmilliHertz sampleRate, SLuint32 bufSize) {
     result = (*mPlayer)->SetPlayState(mPlayer, SL_PLAYSTATE_PLAYING);
     assert(result == SL_RESULT_SUCCESS);
     (void) result;
-
 }
 
 // 一帧音频播放完毕后就会回调这个函数
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     BQAudioPlayer *player = (BQAudioPlayer *) context;
+    assert(bq == player->mBufferQueue);
     pthread_mutex_unlock(&player->mMutex);
 }
 
-void BQAudioPlayer::start() {
-    if (!mIsPlaying) {
-        mIsPlaying = true;
-        pthread_create(&mPlayThread, nullptr, playThread, this);
-    }
-}
-
-void* playThread(void *arg) {
-    BQAudioPlayer *player = (BQAudioPlayer*)arg;
-    LOGI("BQAudioPlayer started");
-    while (player->mIsPlaying && !feof(player->mFile)) {
-        fread(player->mBuffers[player->mIndex], 1, player->mBufSize,player-> mFile);
-        // 必须等待一帧音频播放完毕后才可以 Enqueue 第二帧音频
-        pthread_mutex_lock(&player->mMutex);
-        (*player->mBufferQueue)->Enqueue(player->mBufferQueue, player->mBuffers[player->mIndex],
-                                         player->mBufSize);
-        player->mIndex = 1 - player->mIndex;
-    }
-    LOGI("BQAudioPlayer stopped");
-
-    return 0;
-}
-
-void BQAudioPlayer::stop() {
-    mIsPlaying = false;
+void BQAudioPlayer::enqueueSample(void *data, size_t length) {
+    // 必须等待一帧音频播放完毕后才可以 Enqueue 第二帧音频
+    pthread_mutex_lock(&mMutex);
+    memcpy(mBuffers[mIndex], data, length);
+    (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], mBufSize);
+    mIndex = 1 - mIndex;
 }
 
 BQAudioPlayer::~BQAudioPlayer() {
@@ -156,11 +131,6 @@ void BQAudioPlayer::release() {
     if (mBuffers[1]) {
         delete[] mBuffers[1];
         mBuffers[1] = nullptr;
-    }
-
-    if (mFile) {
-        fclose(mFile);
-        mFile = nullptr;
     }
 
     pthread_mutex_destroy(&mMutex);
