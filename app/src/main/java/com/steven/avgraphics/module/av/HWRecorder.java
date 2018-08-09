@@ -30,6 +30,8 @@ public class HWRecorder {
     private boolean mIsInitialized = false;
     private long mVStartTime;
     private long mAStartTime;
+    private long mVLastPts;
+    private long mALastPts;
     private int mVTrackIndex;
     private int mATrackIndex;
     private volatile boolean mMuxerStarted;
@@ -70,6 +72,8 @@ public class HWRecorder {
         mATrackIndex = -1;
         mVStartTime = -1;
         mAStartTime = -1;
+        mVLastPts = -1;
+        mALastPts = -1;
 
         mVBufferInfo = new MediaCodec.BufferInfo();
         mABufferInfo = new MediaCodec.BufferInfo();
@@ -103,6 +107,10 @@ public class HWRecorder {
         } else {
             pts = (System.nanoTime() - mVStartTime) / 1000;
         }
+        if (pts <= mVLastPts) {
+            pts += (mVLastPts - pts) + 1000;
+        }
+        mVLastPts = pts;
         doRecord(mVideoEncoder, mVBufferInfo, image, pts);
     }
 
@@ -115,6 +123,10 @@ public class HWRecorder {
         } else {
             pts = (System.nanoTime() - mAStartTime) / 1000;
         }
+        if (pts <= mALastPts) {
+            pts += (mALastPts - pts) + 1000;
+        }
+        mALastPts = pts;
         doRecord(mAudioEncoder, mABufferInfo, sample, pts);
     }
 

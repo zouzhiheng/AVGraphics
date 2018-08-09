@@ -18,7 +18,6 @@ import com.steven.avgraphics.util.Utils;
 import com.steven.avgraphics.view.CameraPreviewView;
 
 import java.io.File;
-import java.util.concurrent.Executors;
 
 public class HWCodecActivity extends BaseActivity implements View.OnClickListener,
         Camera.PreviewCallback, CameraPreviewView.PreviewCallback, AudioRecorder.AudioRecordCallback {
@@ -110,7 +109,7 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
             return;
         }
         disableButtons();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        new Thread(() -> {
             HWDecoder decoder = new HWDecoder();
             decoder.start(Utils.getHWRecordOutput(), Utils.getHWDecodeYuvOutput(),
                     Utils.getHWDecodePcmOutput(), (vsucceed, asucceed) -> {
@@ -119,7 +118,7 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
                                 : R.string.hwcodec_msg_decode_failed);
                         Utils.runOnUiThread(this::resetButtons);
                     });
-        });
+        }).start();
     }
 
     private void transcode() {
@@ -128,11 +127,11 @@ public class HWCodecActivity extends BaseActivity implements View.OnClickListene
             return;
         }
         disableButtons();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        new Thread(() -> {
             boolean succeed = HWCodec.transcode(Utils.getHWRecordOutput(), Utils.getHWTranscodeOutput());
             ToastHelper.showOnUiThread(succeed ? R.string.hwcodec_msg_transcode_succeed : R.string.hwcodec_msg_transcode_failed);
             Utils.runOnUiThread(this::resetButtons);
-        });
+        }).start();
     }
 
     private void startRecord() {

@@ -19,6 +19,7 @@ import com.steven.avgraphics.R;
 import com.steven.avgraphics.module.av.AVInfo;
 import com.steven.avgraphics.module.av.HWCodec;
 import com.steven.avgraphics.module.av.HWDecoder;
+import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 
 import java.io.File;
@@ -90,6 +91,7 @@ public class VideoPlayActivity extends BaseActivity {
         File file = new File(Utils.getHWRecordOutput());
         if (!file.exists()) {
             Log.e(TAG, "start video player failed: file not found");
+            ToastHelper.show(R.string.vplay_msg_no_file);
             return;
         }
 

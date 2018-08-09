@@ -130,4 +130,6 @@
     <string name="vplay_tv_time_hint">播放:  </string>
     <string name="vplay_tv_time">0s</string>
 
+    <string name="vplay_msg_no_file">播放失败，找不到文件!</string>
+
 </resources>
