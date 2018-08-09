@@ -93,25 +93,15 @@ public class VideoPlayActivity extends BaseActivity {
             return;
         }
 
-        setupData();
-        showAVInfo();
-
         mBtnStop.setEnabled(true);
         mBtnStart.setEnabled(false);
 
-        int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
-        // 获取 sample format 的 API 要求高，这里默认为 ENCODING_PCM_16BIT
-        int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT);
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, channelConfig,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
-
-        mDecodeListener = new DecodeListener();
-        mDecoder.setFrameRate(mFrameRate);
-        mDecoder.start(Utils.getHWRecordOutput(), mDecodeListener);
-
+        setupData();
+        showAVInfo();
+        setupAudioTrack();
+        startDecode();
         _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, mFrameRate,
                 getAssets());
-
         startCounDownTimer();
     }
 
@@ -128,15 +118,29 @@ public class VideoPlayActivity extends BaseActivity {
         mFrameRate = mAVInfo != null && mAVInfo.frameRate > 0 ? mAVInfo.frameRate : DEFAULT_FRAME_RATE;
         mChannels = mAVInfo != null && mAVInfo.channels == 2 ? 2 : 1;
         mSampleRate = mAVInfo != null && mAVInfo.sampleRate > 0 ? mAVInfo.sampleRate : DEFAULT_SAMPLE_RATE;
-        Log.i(TAG, "frame rate: " + mFrameRate);
     }
 
     private void showAVInfo() {
         if (mAVInfo != null) {
             String str = "width: " + mAVInfo.width + ", height: " + mAVInfo.height + "\nframe rate: "
-                    + mAVInfo.frameRate + ", duration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
+                    + mAVInfo.frameRate + "\nsample rate: " + mSampleRate + ", channels: "
+                    + mChannels + "\nduration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
             mTvAVInfo.setText(str);
         }
+    }
+
+    private void setupAudioTrack() {
+        int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
+        // 获取 sample format 的 API 要求高，这里默认为 ENCODING_PCM_16BIT
+        int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT);
+        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, channelConfig,
+                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+    }
+
+    private void startDecode() {
+        mDecodeListener = new DecodeListener();
+        mDecoder.setDecodeWithPts(true);
+        mDecoder.start(Utils.getHWRecordOutput(), mDecodeListener);
     }
 
     private void startCounDownTimer() {
@@ -164,11 +168,12 @@ public class VideoPlayActivity extends BaseActivity {
         mBtnStart.setEnabled(true);
         mBtnStop.setEnabled(false);
         mDecoder.stop();
-        mCountDownTimer.cancel();
-        releaseAudioTrack();
+        if (mCountDownTimer != null) {
+            mCountDownTimer.cancel();
+        }
     }
 
-    private void releaseAudioTrack() {
+    private synchronized void releaseAudioTrack() {
         if (mAudioTrack != null) {
             mAudioTrack.stop();
             mAudioTrack.release();
@@ -179,13 +184,10 @@ public class VideoPlayActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        mIsPlaying = false;
         mDecodeListener = null;
-        mDecoder.stop();
+        stop();
+        releaseAudioTrack();
         _stop();
-        if (mCountDownTimer != null) {
-            mCountDownTimer.cancel();
-        }
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -208,7 +210,6 @@ public class VideoPlayActivity extends BaseActivity {
 
     }
 
-
     private class DecodeListener implements HWDecoder.OnDecodeListener {
 
         @Override
@@ -220,19 +221,18 @@ public class VideoPlayActivity extends BaseActivity {
 
         @Override
         public void onSampleDecoded(byte[] data) {
-            mAudioTrack.write(data, 0, data.length);
-            mAudioTrack.play();
+            synchronized (VideoPlayActivity.this) {
+                mAudioTrack.write(data, 0, data.length);
+                mAudioTrack.play();
+            }
         }
 
         @Override
         public void onDecodeEnded(boolean vsucceed, boolean asucceed) {
-            mIsPlaying = false;
-            _stop();
-            releaseAudioTrack();
             Utils.runOnUiThread(() -> {
-                mBtnStart.setEnabled(true);
-                mBtnStop.setEnabled(false);
-                mCountDownTimer.cancel();
+                stop();
+                releaseAudioTrack();
+                _stop();
             });
         }
     }

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class HWDecoder {
 
@@ -29,10 +30,11 @@ public class HWDecoder {
     private boolean mIsDecodeVideoSucceed = false;
     private boolean mIsDecodeAudioSucceed = false;
 
-    private long mInterval = 0;
+    private boolean mIsDecodeWithPts = false;
 
-    public void setFrameRate(long frameRate) {
-        mInterval = 1000 / frameRate;
+    @SuppressWarnings("SameParameterValue")
+    public void setDecodeWithPts(boolean decodeWithPts) {
+        mIsDecodeWithPts = decodeWithPts;
     }
 
     public void start(String srcFilePath, String yuvDst, String pcmDst) {
@@ -203,15 +205,14 @@ public class HWDecoder {
         ByteBuffer[] outputBuffers = decoder.getOutputBuffers();
         MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
 
-        long lastTime = 0;
-        long current;
-        long pass;
+        long passTime;
+        long startTime = 0;
 
         boolean inputEof = false;
         boolean outputEof = false;
         while (!outputEof) {
             if (!mIsDecoding) {
-                Log.i(TAG, "decoder stopped");
+                Log.i(TAG, (mediaType == HWCodec.MEDIA_TYPE_VIDEO ? "video" : "audio") + " decoder stopped");
                 break;
             }
 
@@ -246,15 +247,15 @@ public class HWDecoder {
                     byte[] data = new byte[bufferInfo.size];
                     outputBuffer.get(data);
 
-                    if (lastTime == 0) {
-                        lastTime = System.currentTimeMillis();
-                    } else {
-                        current = System.currentTimeMillis();
-                        pass = current - lastTime;
-                        if (pass < mInterval && mediaType == HWCodec.MEDIA_TYPE_VIDEO) {
-                            Thread.sleep(mInterval - pass);
+                    if (mIsDecodeWithPts) {
+                        if (startTime == 0) {
+                            startTime = System.nanoTime();
+                        } else {
+                            passTime = (System.nanoTime() - startTime) / 1000;
+                            if (passTime < bufferInfo.presentationTimeUs) {
+                                TimeUnit.MICROSECONDS.sleep(bufferInfo.presentationTimeUs - passTime);
+                            }
                         }
-                        lastTime = current;
                     }
 
                     if (mediaType == HWCodec.MEDIA_TYPE_VIDEO && listener != null) {
