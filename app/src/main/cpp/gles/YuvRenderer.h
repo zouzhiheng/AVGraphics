@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/8/2 0002.
+// Created by zzh on 2018/8/2 0002.
 //
 
 #ifndef AVGRAPHICS_VIDEOPLAYER_H

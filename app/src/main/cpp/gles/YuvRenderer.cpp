@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/8/2 0002.
+// Created by zzh on 2018/8/2 0002.
 //
 
 #include <GLES3/gl3.h>
@@ -85,8 +85,8 @@ void YuvRenderer::setYuv(Yuv *yuv) {
 }
 
 bool YuvRenderer::doInit() {
-    std::string *vShader = readShaderFromAsset(mAssetManager, "video_player.vert");
-    std::string *fShader = readShaderFromAsset(mAssetManager, "video_player.frag");
+    std::string *vShader = readShaderFromAsset(mAssetManager, "yuv_renderer.vert");
+    std::string *fShader = readShaderFromAsset(mAssetManager, "yuv_renderer.frag");
 
     mProgram = loadProgram(vShader->c_str(), fShader->c_str());
 

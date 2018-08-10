@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/4/13 0013.
+// Created by zzh on 2018/4/13 0013.
 //
 
 #ifndef VIDEOEDITOR_YUV_PROCESSER_H

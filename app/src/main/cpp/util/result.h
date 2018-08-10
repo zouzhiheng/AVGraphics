@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/8/6 0006.
+// Created by zzh on 2018/8/6 0006.
 //
 
 #ifndef AVGRAPHICS_RESULT_H
