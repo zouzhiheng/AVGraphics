@@ -418,11 +418,11 @@ YuvRenderer *yuvRenderer = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_VideoPlayActivity__1start(JNIEnv *env, jclass type,
-                                                              jobject surface, jint width,
-                                                              jint height, jint imgWidth,
-                                                              jint imgHeight, jint frameRate,
-                                                              jobject manager) {
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1startGL(JNIEnv *env, jclass type,
+                                                                jobject surface, jint width,
+                                                                jint height, jint imgWidth,
+                                                                jint imgHeight, jint frameRate,
+                                                                jobject manager) {
     unique_lock<mutex> lock(gMutex);
     if (yuvRenderer) {
         yuvRenderer->stop();
@@ -439,10 +439,11 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1start(JNIEnv *env, jclas
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass type,
-                                                             jbyteArray pixel_, jint length,
-                                                             jint imgWidth, jint imgHeight,
-                                                             jfloatArray matrix_) {
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1drawGL(JNIEnv *env, jclass type,
+                                                               jbyteArray pixel_, jint length,
+                                                               jint imgWidth, jint imgHeight,
+                                                               jint pixelFormat,
+                                                               jfloatArray matrix_) {
     unique_lock<mutex> lock(gMutex);
     if (!yuvRenderer) {
         LOGE("yuvRenderer is null");
@@ -455,14 +456,16 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
     model->image = (uint8_t *) pixel;
     model->imageLen = length;
     model->flag = MODEL_FLAG_VIDEO;
-    model->pixelFormat = PIXEL_FORMAT_NV12;
+    model->pixelFormat = pixelFormat;
     model->width = imgWidth;
     model->height = imgHeight;
     Yuv *yuv = convertToI420(model);
 
-    yuvRenderer->setYuv(yuv);
-    yuvRenderer->setMatrix(matrix);
-    yuvRenderer->draw();
+    if (yuv) {
+        yuvRenderer->setYuv(yuv);
+        yuvRenderer->setMatrix(matrix);
+        yuvRenderer->draw();
+    }
 
     env->ReleaseByteArrayElements(pixel_, pixel, 0);
     env->ReleaseFloatArrayElements(matrix_, matrix, 0);
@@ -473,7 +476,7 @@ Java_com_steven_avgraphics_activity_VideoPlayActivity__1draw(JNIEnv *env, jclass
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_VideoPlayActivity__1stop(JNIEnv *env, jclass type) {
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1stopGL(JNIEnv *env, jclass type) {
     unique_lock<mutex> lock(gMutex);
     if (yuvRenderer) {
         yuvRenderer->stop();

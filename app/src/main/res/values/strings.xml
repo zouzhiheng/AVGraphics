@@ -126,8 +126,8 @@
     <!-- VideoPalyActivity(vplay) -->
     <string name="vplay_btn_start">开始播放</string>
     <string name="vplay_btn_stop">停止播放</string>
-    <string name="vplay_tv_avinfo_hint">媒体文件信息: </string>
-    <string name="vplay_tv_time_hint">播放:  </string>
+    <string name="vplay_tv_avinfo_hint">媒体文件信息:</string>
+    <string name="vplay_tv_time_hint">播放:&#160;</string>
     <string name="vplay_tv_time">0s</string>
 
     <string name="vplay_msg_no_file">播放失败，找不到文件!</string>

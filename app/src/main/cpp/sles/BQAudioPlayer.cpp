@@ -10,28 +10,28 @@
 void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context);
 
 BQAudioPlayer::BQAudioPlayer(int sampleRate, int sampleFormat, int channels)
-        : BQAudioPlayer(sampleRate, sampleFormat, channels,
-                        (SLuint32) (1024 * channels * sampleFormat / 8)) {
-
-}
-
-BQAudioPlayer::BQAudioPlayer(int sampleRate, int sampleFormat, int channels, int bufSize)
         : mAudioEngine(new AudioEngine()), mPlayerObj(nullptr), mPlayer(nullptr),
           mBufferQueue(nullptr), mEffectSend(nullptr), mVolume(nullptr),
           mSampleRate((SLmilliHertz) sampleRate * 1000), mSampleFormat(sampleFormat),
-          mChannels(channels), mBufSize((SLuint32) bufSize), mIndex(0), mIsPlaying(false) {
-    mBuffers[0] = new short[mBufSize];
-    mBuffers[1] = new short[mBufSize];
+          mChannels(channels), mBufSize(0), mIndex(0) {
     mMutex = PTHREAD_MUTEX_INITIALIZER;
+    mBuffers[0] = nullptr;
+    mBuffers[1] = nullptr;
 }
 
-void BQAudioPlayer::init() {
+BQAudioPlayer::~BQAudioPlayer() {
+
+}
+
+bool BQAudioPlayer::init() {
     SLresult result;
 
     SLDataLocator_AndroidSimpleBufferQueue locBufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
-    SLDataFormat_PCM formatPcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_48,
-                                  SL_PCMSAMPLEFORMAT_FIXED_16, SL_PCMSAMPLEFORMAT_FIXED_16,
-                                  SL_SPEAKER_FRONT_CENTER, SL_BYTEORDER_LITTLEENDIAN};
+    // channelMask: 位数和 channel 相等，0 代表 SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT
+    SLDataFormat_PCM formatPcm = {SL_DATAFORMAT_PCM, (SLuint32) mChannels, mSampleRate,
+                                  (SLuint32) mSampleFormat, (SLuint32) mSampleFormat,
+                                  mChannels == 2 ? 0 : SL_SPEAKER_FRONT_CENTER,
+                                  SL_BYTEORDER_LITTLEENDIAN};
     /*
      * Enable Fast Audio when possible:  once we set the same rate to be the native, fast audio path
      * will be triggered
@@ -54,39 +54,57 @@ void BQAudioPlayer::init() {
     result = (*mAudioEngine->engine)->CreateAudioPlayer(mAudioEngine->engine, &mPlayerObj,
                                                         &audioSrc, &audioSink,
                                                         mSampleRate ? 2 : 3, ids, req);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("CreateAudioPlayer failed: %d", result);
+        return false;
+    }
 
     result = (*mPlayerObj)->Realize(mPlayerObj, SL_BOOLEAN_FALSE);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("mPlayerObj Realize failed: %d", result);
+        return false;
+    }
 
     result = (*mPlayerObj)->GetInterface(mPlayerObj, SL_IID_PLAY, &mPlayer);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("mPlayerObj GetInterface failed: %d", result);
+        return false;
+    }
 
     result = (*mPlayerObj)->GetInterface(mPlayerObj, SL_IID_BUFFERQUEUE, &mBufferQueue);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("mPlayerObj GetInterface failed: %d", result);
+        return false;
+    }
 
     result = (*mBufferQueue)->RegisterCallback(mBufferQueue, playerCallback, this);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("mPlayerObj RegisterCallback failed: %d", result);
+        return false;
+    }
 
     mEffectSend = nullptr;
     if (mSampleRate == 0) {
         result = (*mPlayerObj)->GetInterface(mPlayerObj, SL_IID_EFFECTSEND, &mEffectSend);
-        assert(result == SL_RESULT_SUCCESS);
-        (void) result;
+        if (result != SL_RESULT_SUCCESS) {
+            LOGE("mPlayerObj GetInterface failed: %d", result);
+            return false;
+        }
     }
 
     result = (*mPlayerObj)->GetInterface(mPlayerObj, SL_IID_VOLUME, &mVolume);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("mPlayerObj GetInterface failed: %d", result);
+        return false;
+    }
 
     result = (*mPlayer)->SetPlayState(mPlayer, SL_PLAYSTATE_PLAYING);
-    assert(result == SL_RESULT_SUCCESS);
-    (void) result;
+    if (result != SL_RESULT_SUCCESS) {
+        LOGE("mPlayerObj SetPlayState failed: %d", result);
+        return false;
+    }
+
+    return true;
 }
 
 // 一帧音频播放完毕后就会回调这个函数
@@ -99,16 +117,24 @@ void playerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 void BQAudioPlayer::enqueueSample(void *data, size_t length) {
     // 必须等待一帧音频播放完毕后才可以 Enqueue 第二帧音频
     pthread_mutex_lock(&mMutex);
+    if (mBufSize < length) {
+        mBufSize = length;
+        if (mBuffers[0]) {
+            delete[] mBuffers[0];
+        }
+        if (mBuffers[1]) {
+            delete[] mBuffers[1];
+        }
+        mBuffers[0] = new uint8_t[mBufSize];
+        mBuffers[1] = new uint8_t[mBufSize];
+    }
     memcpy(mBuffers[mIndex], data, length);
-    (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], mBufSize);
+    (*mBufferQueue)->Enqueue(mBufferQueue, mBuffers[mIndex], length);
     mIndex = 1 - mIndex;
 }
 
-BQAudioPlayer::~BQAudioPlayer() {
-    release();
-}
-
 void BQAudioPlayer::release() {
+    pthread_mutex_lock(&mMutex);
     if (mPlayerObj) {
         (*mPlayerObj)->Destroy(mPlayerObj);
         mPlayerObj = nullptr;
@@ -133,5 +159,6 @@ void BQAudioPlayer::release() {
         mBuffers[1] = nullptr;
     }
 
+    pthread_mutex_unlock(&mMutex);
     pthread_mutex_destroy(&mMutex);
 }

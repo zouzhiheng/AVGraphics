@@ -25,18 +25,15 @@ private:
     int mSampleFormat;
     int mChannels;
 
-    short *mBuffers[2];
+    uint8_t *mBuffers[2];
     SLuint32 mBufSize;
     int mIndex;
-    bool mIsPlaying;
     pthread_mutex_t mMutex;
 
 public:
     BQAudioPlayer(int sampleRate, int sampleFormat, int channels);
 
-    BQAudioPlayer(int sampleRate, int sampleFormat, int channels, int bufSize);
-
-    void init();
+    bool init();
 
     void enqueueSample(void *data, size_t length);
 

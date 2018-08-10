@@ -143,3 +143,42 @@ Java_com_steven_avgraphics_activity_OpenSLActivity__1stopPlayPcm(JNIEnv *env, jc
         pcmFile = nullptr;
     }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1startSL(JNIEnv *env, jclass type,
+                                                                jint sampleRate, jint samleFormat,
+                                                                jint channels) {
+    if (bqAudioPlayer) {
+        bqAudioPlayer->release();
+        delete bqAudioPlayer;
+    }
+    bqAudioPlayer = new BQAudioPlayer(sampleRate, samleFormat, channels);
+    if (!bqAudioPlayer->init()) {
+        bqAudioPlayer->release();
+        delete bqAudioPlayer;
+        bqAudioPlayer = nullptr;
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1writeSL(JNIEnv *env, jclass type,
+                                                                jbyteArray data_, jint length) {
+    if (!bqAudioPlayer) {
+        return;
+    }
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+    bqAudioPlayer->enqueueSample(data, (size_t) length);
+    env->ReleaseByteArrayElements(data_, data, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_VideoPlayActivity__1stopSL(JNIEnv *env, jclass type) {
+    if (bqAudioPlayer) {
+        bqAudioPlayer->release();
+        delete bqAudioPlayer;
+        bqAudioPlayer = nullptr;
+    }
+}

@@ -4,6 +4,7 @@ import android.content.res.AssetManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.MediaCodecInfo;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -27,7 +28,9 @@ import java.io.File;
 public class VideoPlayActivity extends BaseActivity {
 
     private static final int DEFAULT_FRAME_RATE = 24;
-    public static final int DEFAULT_SAMPLE_RATE = 48000;
+    private static final int DEFAULT_PIXEL_FORMAT = 1; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_NV12
+    private static final int DEFAULT_SAMPLE_RATE = 48000;
+    private static final int DEFAULT_SAMPLE_FORMAT = 16;
 
     private SurfaceView mSurfaceView;
     private Button mBtnStart;
@@ -47,8 +50,9 @@ public class VideoPlayActivity extends BaseActivity {
     private int mImageWidth;
     private int mImageHeight;
     private int mFrameRate = DEFAULT_FRAME_RATE;
-    private int mChannels;
+    private int mPixelFormat = DEFAULT_PIXEL_FORMAT;
     private int mSampleRate;
+    private int mChannels;
     private float[] mMatrix = new float[16];
     private boolean mIsPlaying = false;
 
@@ -61,7 +65,9 @@ public class VideoPlayActivity extends BaseActivity {
 
     private void init() {
         Matrix.setIdentityM(mMatrix, 0);
+        mAVInfo = HWCodec.getAVInfo(Utils.getHWRecordOutput());
         findView();
+        showAVInfo();
         layoutSurfaceView();
         setListener();
     }
@@ -74,11 +80,27 @@ public class VideoPlayActivity extends BaseActivity {
         mTvTime = findViewById(R.id.vplay_tv_time);
     }
 
+    private void showAVInfo() {
+        if (mAVInfo != null) {
+            String str = "file: " + Utils.getHWRecordOutput().replace("stra", "") + "\n" +
+                    "width: " + mAVInfo.width + ", height: " + mAVInfo.height + "\nframe rate: "
+                    + mAVInfo.frameRate + "\nsample rate: " + mSampleRate + ", channels: "
+                    + mChannels + "\nduration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
+            mTvAVInfo.setText(str);
+        }
+    }
+
     private void layoutSurfaceView() {
-        AVInfo info = HWCodec.getAVInfo(Utils.getHWRecordOutput());
-        mSurfaceView.getLayoutParams().width = Utils.getScreenWidth();
-        mSurfaceView.getLayoutParams().height = info == null ? Utils.getScreenWidth()
-                : Utils.getScreenWidth() * info.height / info.width;
+        double ratio = mAVInfo == null ? 1 : 1.0 * mAVInfo.height / mAVInfo.width;
+        int width = Utils.getScreenWidth();
+        int heigth = Utils.getScreenWidth();
+        if (ratio > 1) {
+            width = (int) (heigth / ratio);
+        } else {
+            heigth = (int) (width * ratio);
+        }
+        mSurfaceView.getLayoutParams().width = width;
+        mSurfaceView.getLayoutParams().height = heigth;
     }
 
     private void setListener() {
@@ -95,23 +117,17 @@ public class VideoPlayActivity extends BaseActivity {
             return;
         }
 
+        mIsPlaying = true;
         mBtnStop.setEnabled(true);
         mBtnStart.setEnabled(false);
 
-        setupData();
-        showAVInfo();
-        setupAudioTrack();
+        setupVideoParams();
         startDecode();
-        _start(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, mFrameRate,
+        setupAudioTrack();
+//        _startSL(mSampleRate, DEFAULT_SAMPLE_FORMAT, mChannels);
+        _startGL(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, mFrameRate,
                 getAssets());
         startCounDownTimer();
-    }
-
-    private void setupData() {
-        mIsPlaying = true;
-        mAVInfo = HWCodec.getAVInfo(Utils.getHWRecordOutput());
-        assert mAVInfo != null;
-        setupVideoParams();
     }
 
     private void setupVideoParams() {
@@ -120,20 +136,25 @@ public class VideoPlayActivity extends BaseActivity {
         mFrameRate = mAVInfo != null && mAVInfo.frameRate > 0 ? mAVInfo.frameRate : DEFAULT_FRAME_RATE;
         mChannels = mAVInfo != null && mAVInfo.channels == 2 ? 2 : 1;
         mSampleRate = mAVInfo != null && mAVInfo.sampleRate > 0 ? mAVInfo.sampleRate : DEFAULT_SAMPLE_RATE;
-    }
-
-    private void showAVInfo() {
-        if (mAVInfo != null) {
-            String str = "width: " + mAVInfo.width + ", height: " + mAVInfo.height + "\nframe rate: "
-                    + mAVInfo.frameRate + "\nsample rate: " + mSampleRate + ", channels: "
-                    + mChannels + "\nduration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
-            mTvAVInfo.setText(str);
+        // MediaCodec 难以获取准确的 pixel format
+        if (mAVInfo != null && mAVInfo.colorFormat > 0) {
+            switch (mAVInfo.colorFormat) {
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
+                    mPixelFormat = 1; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_NV12
+                    break;
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
+                    mPixelFormat = 4; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_YUV420P
+                    break;
+                default:
+                    mPixelFormat = 1; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_NV12
+                    break;
+            }
         }
     }
 
     private void setupAudioTrack() {
         int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
-        // 获取 sample format 的 API 要求高，这里默认为 ENCODING_PCM_16BIT
+        // 获取 sample format 的 API 要求高，这里默认使用 ENCODING_PCM_16BIT
         int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT);
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, channelConfig,
                 AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
@@ -189,7 +210,8 @@ public class VideoPlayActivity extends BaseActivity {
         mDecodeListener = null;
         stop();
         releaseAudioTrack();
-        _stop();
+//        _stopSL();
+        _stopGL();
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -217,16 +239,19 @@ public class VideoPlayActivity extends BaseActivity {
         @Override
         public void onImageDecoded(byte[] data) {
             if (mIsPlaying) {
-                _draw(data, data.length, mImageWidth, mImageHeight, mMatrix);
+                _drawGL(data, data.length, mImageWidth, mImageHeight, mPixelFormat, mMatrix);
             }
         }
 
         @Override
         public void onSampleDecoded(byte[] data) {
             synchronized (VideoPlayActivity.this) {
-                mAudioTrack.write(data, 0, data.length);
-                mAudioTrack.play();
+                if (mIsPlaying) {
+                    mAudioTrack.write(data, 0, data.length);
+                    mAudioTrack.play();
+                }
             }
+//            _writeSL(data, data.length);
         }
 
         @Override
@@ -234,17 +259,24 @@ public class VideoPlayActivity extends BaseActivity {
             Utils.runOnUiThread(() -> {
                 stop();
                 releaseAudioTrack();
-                _stop();
+                _stopGL();
+//                _stopSL();
             });
         }
     }
 
-    private static native void _start(Surface surface, int width, int height, int imgWidth,
-                                      int imgHeight, int frameRate, AssetManager manager);
+    private static native void _startGL(Surface surface, int width, int height, int imgWidth,
+                                        int imgHeight, int frameRate, AssetManager manager);
 
-    private static native void _draw(byte[] pixel, int length, int imgWidth, int imgHeight,
-                                     float[] matrix);
+    private static native void _drawGL(byte[] pixel, int length, int imgWidth, int imgHeight,
+                                       int pixelFormat, float[] matrix);
 
-    private static native void _stop();
+    private static native void _stopGL();
+
+//    private static native void _startSL(int sampleRate, int samleFormat, int channels);
+//
+//    private static native void _writeSL(byte[] data, int length);
+//
+//    private static native void _stopSL();
 
 }
