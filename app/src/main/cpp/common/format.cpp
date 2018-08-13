@@ -6,7 +6,7 @@
 #include "AVModel.h"
 #include "Yuv.h"
 #include "log.h"
-#include "pixfmt.h"
+#include "format.h"
 
 using namespace libyuv;
 

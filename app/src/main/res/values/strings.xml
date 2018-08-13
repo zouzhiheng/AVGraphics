@@ -136,6 +136,12 @@
 
     <!-- FFmepgActivity(ff) -->
     <string name="ff_btn_decode">解码</string>
+    <string name="ff_btn_start_record">开始录制</string>
+    <string name="ff_btn_stop_record">结束录制</string>
+
+    <string name="ff_msg_preview_failed">相机预览开启失败</string>
+    <string name="ff_msg_record_ok">视频录制已完成!</string>
+    <string name="ff_msg_init_recorder_failed">视频录制器初始化失败!</string>
 
 
 </resources>

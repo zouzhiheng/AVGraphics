@@ -53,8 +53,10 @@ add_library ( ffcodec
               SHARED
               ${dir_ffcodec}/ffcodec.cpp
               ${dir_ffcodec}/Decoder.cpp
+              ${dir_ffcodec}/Encoder.cpp
+              ${dir_ffcodec}/FrameFilter.cpp
               ${dir_common}/AVModel.cpp
-              ${dir_common}/pixfmt.cpp
+              ${dir_common}/format.cpp
               ${dir_common}/Yuv.cpp
               ${dir_common}/YuvProcessor.cpp )
 
@@ -77,7 +79,7 @@ add_library( gles
              ${dir_gles}/Beauty.cpp
              ${dir_gles}/YuvRenderer.cpp
              ${dir_common}/AVModel.cpp
-             ${dir_common}/pixfmt.cpp
+             ${dir_common}/format.cpp
              ${dir_common}/Yuv.cpp
              ${dir_common}/YuvProcessor.cpp )
 

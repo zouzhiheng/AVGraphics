@@ -58,7 +58,8 @@ public class AudioRecorder {
     public boolean start() {
         try {
             int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_IN_MONO : AudioFormat.CHANNEL_OUT_STEREO;
-            mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, channelConfig, mPcmFormat);
+//            mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, channelConfig, mPcmFormat);
+            mBufferSize = getAudioBufferSize(channelConfig, mPcmFormat);
             mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, mSampleRate,
                     channelConfig, mPcmFormat, mBufferSize);
         } catch (Exception e) {
@@ -75,6 +76,32 @@ public class AudioRecorder {
         mHandler = new Handler(Looper.myLooper());
 
         return true;
+    }
+
+    // 16BIT 格式兼容性更好
+    // 单声道效率更高
+    private int getAudioBufferSize(int channelLayout, int pcmFormat) {
+        int bufferSize = 1024;
+
+        switch (channelLayout) {
+            case AudioFormat.CHANNEL_IN_MONO:
+                bufferSize *= 1;
+                break;
+            case AudioFormat.CHANNEL_IN_STEREO:
+                bufferSize *= 2;
+                break;
+        }
+
+        switch (pcmFormat) {
+            case AudioFormat.ENCODING_PCM_8BIT:
+                bufferSize *= 1;
+                break;
+            case AudioFormat.ENCODING_PCM_16BIT:
+                bufferSize *= 2;
+                break;
+        }
+
+        return bufferSize;
     }
 
     private void record() {

@@ -19,7 +19,7 @@
 #include "Beauty.h"
 #include "YuvRenderer.h"
 #include "AVModel.h"
-#include "pixfmt.h"
+#include "format.h"
 
 using namespace std;
 

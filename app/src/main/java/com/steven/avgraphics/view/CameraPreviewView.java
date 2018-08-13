@@ -55,6 +55,7 @@ public class CameraPreviewView extends FrameLayout {
     private int mIndicatorWidth = LayoutParams.WRAP_CONTENT;
     private int mIndicatorHeight = LayoutParams.WRAP_CONTENT;
 
+    private Camera mCamera;
     private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private CameraSurfaceView mSurfaceView;
     private PreviewCallback mPreviewCallback;
@@ -162,6 +163,19 @@ public class CameraPreviewView extends FrameLayout {
         return CameraHelper.isFacingBack(mCameraId);
     }
 
+    // 前置摄像头启用了美颜功能，传给 OpenGL 的宽高为 surface 的宽高
+    public int getImageWidth() {
+        return mIsBeautyOpen
+                ? mSurfaceView.getSurfaceWidth()
+                : mCamera.getParameters().getPreviewSize().width;
+    }
+
+    public int getImageHeight() {
+        return mIsBeautyOpen
+                ? mSurfaceView.getSurfaceHeight()
+                : mCamera.getParameters().getPreviewSize().height;
+    }
+
     public void switchCamera() {
         if (mSurfaceView != null) {
             removeView(mSurfaceView);
@@ -205,12 +219,14 @@ public class CameraPreviewView extends FrameLayout {
     private class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
         private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-        private Camera mCamera;
         private SurfaceTexture mSurfaceTexture;
 
         private float[] mMatrix = new float[16];
         private float mClickX;
         private float mClickY;
+
+        private int mSurfaceWidth;
+        private int mSurfaceHeight;
 
         public CameraSurfaceView(Context context) {
             super(context);
@@ -222,6 +238,14 @@ public class CameraPreviewView extends FrameLayout {
             getHolder().addCallback(this);
         }
 
+        public int getSurfaceWidth() {
+            return mSurfaceWidth;
+        }
+
+        public int getSurfaceHeight() {
+            return mSurfaceHeight;
+        }
+
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
 
@@ -230,6 +254,8 @@ public class CameraPreviewView extends FrameLayout {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             openCamera(holder, width, height);
+            mSurfaceWidth = width;
+            mSurfaceHeight = height;
         }
 
         @Override

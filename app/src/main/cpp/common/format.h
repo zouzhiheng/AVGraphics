@@ -6,18 +6,23 @@
 #define AVGRAPHICS_PIXEL_FORMAT_H
 
 #include <libyuv.h>
+#include <libavutil/samplefmt.h>
 #include "Yuv.h"
 #include "AVModel.h"
+extern "C" {
+#include <libavutil/pixfmt.h>
+};
 
 static const int PIXEL_FORMAT_NONE = 0;
-
-static const int PIXEL_FORMAT_NV12 = 1;
-static const int PIXEL_FORMAT_NV21 = 2;
-static const int PIXEL_FORMAT_YV12 = 3;
+static const int PIXEL_FORMAT_NV21 = 1;
+static const int PIXEL_FORMAT_YV12 = 2;
+static const int PIXEL_FORMAT_NV12 = 3;
 static const int PIXEL_FORMAT_YUV420P = 4;
-
 static const int PIXEL_FORMAT_ARGB = 5;
 static const int PIXEL_FORMAT_ABGR = 6;
+
+static const int SAMPLE_FORMAT_8BIT = 1;
+static const int SAMPLE_FORMAT_16BIT = 2;
 
 inline libyuv::FourCC getFourCC(int pixelFormat) {
     if (pixelFormat == PIXEL_FORMAT_NV12) {
@@ -34,6 +39,28 @@ inline libyuv::FourCC getFourCC(int pixelFormat) {
         return libyuv::FOURCC_ARGB;
     }
     return libyuv::FOURCC_ANY;
+}
+
+inline AVPixelFormat getPixelFormat(int flag) {
+    AVPixelFormat pixelFormat = AV_PIX_FMT_NONE;
+    if (flag == PIXEL_FORMAT_NV21) {
+        pixelFormat = AV_PIX_FMT_NV21;
+    } else if (flag == PIXEL_FORMAT_YV12 || flag == PIXEL_FORMAT_YUV420P) {
+        pixelFormat = AV_PIX_FMT_YUV420P;
+    } else if (flag == PIXEL_FORMAT_ABGR) {
+        pixelFormat = AV_PIX_FMT_ABGR;
+    }
+    return pixelFormat;
+}
+
+inline AVSampleFormat getSampleFormat(int flag) {
+    AVSampleFormat sampleFormat = AV_SAMPLE_FMT_NONE;
+    if (flag == SAMPLE_FORMAT_8BIT) {
+        sampleFormat = AV_SAMPLE_FMT_U8;
+    } else if (flag == SAMPLE_FORMAT_16BIT) {
+        sampleFormat = AV_SAMPLE_FMT_S16;
+    }
+    return sampleFormat;
 }
 
 Yuv* convertToI420(AVModel *model);

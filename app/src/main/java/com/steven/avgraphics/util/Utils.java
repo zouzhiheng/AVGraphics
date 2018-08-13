@@ -29,6 +29,7 @@ public class Utils {
 
     private static final String OPENSL_OUTPUT = APP_DIR + "/opensl.pcm";
 
+    private static final String FFRECORD_OUTPUT = APP_DIR + "/ffrecord.mp4";
     private static final String FFDECODE_YUV_OUTPUT = APP_DIR + "/ffdecode.yuv";
     private static final String FFDECODE_PCM_OUTPUT = APP_DIR + "/ffdecode.pcm";
 
@@ -91,6 +92,10 @@ public class Utils {
 
     public static String getFFDecodePcmOutput() {
         return FFDECODE_PCM_OUTPUT;
+    }
+
+    public static String getFfrecordOutput() {
+        return FFRECORD_OUTPUT;
     }
 
     public static void runOnUiThread(Runnable action) {
