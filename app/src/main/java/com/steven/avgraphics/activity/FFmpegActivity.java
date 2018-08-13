@@ -8,6 +8,8 @@ import android.widget.Button;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
+import com.steven.avgraphics.module.av.FFCodec;
+import com.steven.avgraphics.util.Utils;
 import com.steven.avgraphics.view.CameraPreviewView;
 
 public class FFmpegActivity extends BaseActivity implements View.OnClickListener {
@@ -51,7 +53,8 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void decode() {
-        
+        FFCodec._decode(Utils.getHWRecordOutput(), Utils.getFFDecodeYuvOutput(),
+                Utils.getFFDecodePcmOutput());
     }
 
 

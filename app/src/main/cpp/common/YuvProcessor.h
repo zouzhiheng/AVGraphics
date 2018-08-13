@@ -2,8 +2,8 @@
 // Created by zzh on 2018/4/13 0013.
 //
 
-#ifndef VIDEOEDITOR_YUV_PROCESSER_H
-#define VIDEOEDITOR_YUV_PROCESSER_H
+#ifndef AVGRAPHICS_YUV_PROCESSER_H
+#define AVGRAPHICS_YUV_PROCESSER_H
 
 #include <libyuv.h>
 #include <string>
@@ -81,4 +81,4 @@ public:
     int getOutputHeight();
 };
 
-#endif //VIDEOEDITOR_YUV_PROCESSER_H
+#endif //AVGRAPHICS_YUV_PROCESSER_H

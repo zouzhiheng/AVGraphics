@@ -5,7 +5,6 @@
 #ifndef AVGRAPHICS_YUV_H
 #define AVGRAPHICS_YUV_H
 
-
 #include <cstdint>
 
 class Yuv {

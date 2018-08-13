@@ -2,8 +2,8 @@
 // Created by zzh on 2018/3/2 0002.
 //
 
-#ifndef VIDEOEDITOR_FRAME_H
-#define VIDEOEDITOR_FRAME_H
+#ifndef AVGRAPHICS_AVMODEL_H
+#define AVGRAPHICS_AVMODEL_H
 
 #include <cstdint>
 
@@ -21,6 +21,7 @@ public:
     int width;
     int height;
     int pixelFormat;
+    int64_t pts; // time in millisecond
     int flag; // 0 for audio data, 1 for video data
 
     AVModel();
@@ -34,4 +35,4 @@ public:
     void freeSample();
 };
 
-#endif //VIDEOEDITOR_FRAME_H
+#endif //AVGRAPHICS_AVMODEL_H

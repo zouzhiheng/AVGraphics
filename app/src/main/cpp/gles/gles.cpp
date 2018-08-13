@@ -1,4 +1,5 @@
 //
+//
 // Created by zzh on 2018/7/27 0002.
 //
 
@@ -9,7 +10,6 @@
 #include <android/asset_manager_jni.h>
 #include <mutex>
 #include <thread>
-#include <pixfmt.h>
 #include "Square.h"
 #include "Triangle.h"
 #include "Circle.h"
@@ -18,8 +18,8 @@
 #include "GLCamera.h"
 #include "Beauty.h"
 #include "YuvRenderer.h"
-#include "../yuv/AVModel.h"
-#include "../yuv/format_util.h"
+#include "AVModel.h"
+#include "pixfmt.h"
 
 using namespace std;
 

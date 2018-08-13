@@ -6,9 +6,10 @@
     <string name="main_btn_camera">相机预览获取 NV21 数据</string>
     <string name="main_btn_camera2">使用 Camera2 拍照</string>
     <string name="main_btn_audio">Android API 实现音频的播放及录制</string>
-    <string name="main_btn_hwcodec">硬编解码</string>
     <string name="main_btn_opensl">OpenSL 实现音频的播放及录制</string>
     <string name="main_btn_opengl">OpenGL ES</string>
+    <string name="main_btn_hwcodec">MediaCodec 编解码</string>
+    <string name="main_btn_ffcodec">FFmpeg 编解码</string>
     <string name="main_btn_video_play">视频播放</string>
 
     <string name="main_msg_no_permission">权限不足，无法运行</string>

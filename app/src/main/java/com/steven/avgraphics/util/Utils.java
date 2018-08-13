@@ -85,6 +85,14 @@ public class Utils {
         return HWTRANSCODE_OUTPUT;
     }
 
+    public static String getFFDecodeYuvOutput() {
+        return FFDECODE_YUV_OUTPUT;
+    }
+
+    public static String getFFDecodePcmOutput() {
+        return FFDECODE_PCM_OUTPUT;
+    }
+
     public static void runOnUiThread(Runnable action) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             action.run();

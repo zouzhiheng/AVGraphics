@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.4.1)
 # --- set variable
 set(libs "${CMAKE_SOURCE_DIR}/libs")
 set(dir_cpp src/main/cpp)
+set(dir_common src/main/cpp/common)
 set(dir_ffcodec src/main/cpp/ffcodec)
 set(dir_sles src/main/cpp/sles)
 set(dir_gles src/main/cpp/gles)
 set(dir_libyuv src/main/cpp/libyuv)
-set(dir_yuv src/main/cpp/yuv)
 set(yuv_src "src/main/cpp/libyuv/source")
 
 set( yuv_src_list
@@ -51,7 +51,12 @@ endif()
 
 add_library ( ffcodec
               SHARED
-              ${dir_ffcodec}/ffcodec.cpp )
+              ${dir_ffcodec}/ffcodec.cpp
+              ${dir_ffcodec}/Decoder.cpp
+              ${dir_common}/AVModel.cpp
+              ${dir_common}/pixfmt.cpp
+              ${dir_common}/Yuv.cpp
+              ${dir_common}/YuvProcessor.cpp )
 
 add_library( ffmpeg
              SHARED
@@ -70,15 +75,15 @@ add_library( gles
              ${dir_gles}/FboRenderer.cpp
              ${dir_gles}/GLCamera.cpp
              ${dir_gles}/Beauty.cpp
-             ${dir_gles}/YuvRenderer.cpp )
+             ${dir_gles}/YuvRenderer.cpp
+             ${dir_common}/AVModel.cpp
+             ${dir_common}/pixfmt.cpp
+             ${dir_common}/Yuv.cpp
+             ${dir_common}/YuvProcessor.cpp )
 
 add_library( yuv
              STATIC
-             ${yuv_src_list}
-             ${dir_yuv}/Yuv.cpp
-             ${dir_yuv}/AVModel.cpp
-             ${dir_yuv}/format_util.cpp
-             ${dir_yuv}/YuvProcessor.cpp )
+             ${yuv_src_list} )
 
 add_library( sles
              SHARED
@@ -87,12 +92,11 @@ add_library( sles
              ${dir_sles}/BQAudioPlayer.cpp
              ${dir_sles}/AudioRecorder.cpp )
 
-
 set_target_properties( ffmpeg
                        PROPERTIES IMPORTED_LOCATION
                        ${libs}/armeabi-v7a/libffmpeg.so )
 
-include_directories( ${dir_cpp}/util
+include_directories( ${dir_cpp}/common
                      ${dir_libyuv}/include
                      ${dir_cpp}/ffmpeg/include )
 

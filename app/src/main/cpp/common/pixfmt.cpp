@@ -1,10 +1,12 @@
 //
-// Created by zzh on 2018/8/2 0002.
+// Created by Administrator on 2018/8/13 0013.
 //
 
-#include <sys/time.h>
-#include "format_util.h"
+#include <libyuv.h>
+#include "AVModel.h"
+#include "Yuv.h"
 #include "log.h"
+#include "pixfmt.h"
 
 using namespace libyuv;
 
@@ -21,4 +23,3 @@ Yuv* convertToI420(AVModel *model) {
                   kRotate0, getFourCC(model->pixelFormat));
     return yuv;
 }
-
