@@ -24,58 +24,48 @@ Decoder::Decoder() {
 }
 
 void Decoder::reset() {
-    videoStreamIdx = -1;
-    audioStreamIdx = -1;
-    srcFilePath = nullptr;
+    mVideoStreamIdx = -1;
+    mAudioStreamIdx = -1;
+    mSrcFilePath = nullptr;
 
-    formatCtx = nullptr;
-    videoCodecCtx = nullptr;
-    audioCodecCtx = nullptr;
-    videoStream = nullptr;
-    audioStream = nullptr;
-    frame = nullptr;
+    mFormatCtx = nullptr;
+    mVideoCodecCtx = nullptr;
+    mAudioCodecCtx = nullptr;
+    mFrame = nullptr;
     for (int i = 0; i < 4; i++) {
-        videoBuffer[i] = nullptr;
+        mVideoBuffers[i] = nullptr;
     }
 
-    yuvFile = nullptr;
-    pcmFile = nullptr;
+    mYuvFile = nullptr;
+    mPcmFile = nullptr;
 }
 
 int Decoder::decode(const char *srcFilePath, const char *dstVideoPath, const char *dstAudioPath) {
-    yuvFile = fopen(dstVideoPath, "wb");
-    pcmFile = fopen(dstAudioPath, "wb");
+    mYuvFile = fopen(dstVideoPath, "wb");
+    mPcmFile = fopen(dstAudioPath, "wb");
     return doDecode(srcFilePath);
 }
 
 int Decoder::doDecode(const char *srcFilePath) {
-    this->srcFilePath = srcFilePath;
+    this->mSrcFilePath = srcFilePath;
 
-    int ret, gotFrame;
     if (openInputFile() < 0) {
         LOGE("open input file failed!");
         return FAILED;
     }
 
     LOGI("Decoder init succeed, decoding now...");
-    while (av_read_frame(formatCtx, &packet) >= 0) {
-        AVPacket origin = packet;
-        do {
-            if ((ret = decodePacket(packet, &gotFrame)) < 0) {
-                break;
-            }
-            packet.data += ret;
-            packet.size -= ret;
-        } while (packet.size > 0);
-        av_packet_unref(&origin);
+    while (av_read_frame(mFormatCtx, &mPacket) >= 0) {
+        decodePacket(mPacket, nullptr);
+        av_packet_unref(&mPacket);
     }
 
     LOGI("Flushing decoder");
-    // flush cached frames
-    packet.data = nullptr;
-    packet.size = 0;
+    mPacket.data = nullptr;
+    mPacket.size = 0;
+    int gotFrame;
     do {
-        decodePacket(packet, &gotFrame);
+        decodePacket(mPacket, &gotFrame);
     } while (gotFrame);
 
     release();
@@ -90,40 +80,42 @@ int Decoder::openInputFile() {
     av_register_all();
     av_log_set_callback(androidLog);
 
-    if (avformat_open_input(&formatCtx, srcFilePath, nullptr, nullptr) < 0) {
-        LOGE("Could not open source file: %s", srcFilePath);
+    if (avformat_open_input(&mFormatCtx, mSrcFilePath, nullptr, nullptr) < 0) {
+        LOGE("Could not open source file: %s", mSrcFilePath);
         return FAILED;
     }
 
-    if (avformat_find_stream_info(formatCtx, nullptr) < 0) {
+    if (avformat_find_stream_info(mFormatCtx, nullptr) < 0) {
         LOGE("Could not find stream info");
         return FAILED;
     }
 
-    if (openCodecCtx(&videoStreamIdx, &videoCodecCtx, formatCtx, AVMEDIA_TYPE_VIDEO) == SUCCEED) {
-        videoStream = formatCtx->streams[videoStreamIdx];
-        width = videoCodecCtx->width;
-        height = videoCodecCtx->height;
-        pixelFormat = videoCodecCtx->pix_fmt;
-        frameRate = (int) av_q2d(av_guess_frame_rate(formatCtx, videoStream, nullptr));
-        videoCodecCtx->time_base = av_inv_q(av_d2q(frameRate, 100000));
-        ret = av_image_alloc(videoBuffer, videoLinesize, width, height, pixelFormat, 1);
+    AVStream *videoStream = nullptr;
+    AVStream *audioStream = nullptr;
+
+    if (openCodecCtx(&mVideoStreamIdx, &mVideoCodecCtx, mFormatCtx, AVMEDIA_TYPE_VIDEO) ==
+        SUCCEED) {
+        videoStream = mFormatCtx->streams[mVideoStreamIdx];
+        mWidth = mVideoCodecCtx->width;
+        mHeight = mVideoCodecCtx->height;
+        mPixelFormat = mVideoCodecCtx->pix_fmt;
+        int frameRate = (int) av_q2d(av_guess_frame_rate(mFormatCtx, videoStream, nullptr));
+        mVideoCodecCtx->time_base = av_inv_q(av_d2q(frameRate, 100000));
+        ret = av_image_alloc(mVideoBuffers, mVideoLinesize, mWidth, mHeight, mPixelFormat, 1);
         if (ret < 0) {
             LOGE("Could not allocate raw video buffer");
             release();
             return FAILED;
         }
-        videoBufferSize = ret;
+        mVideoBufferSize = ret;
     }
 
-    if (openCodecCtx(&audioStreamIdx, &audioCodecCtx, formatCtx, AVMEDIA_TYPE_AUDIO) == SUCCEED) {
-        audioStream = formatCtx->streams[audioStreamIdx];
-        sampleFormat = audioCodecCtx->sample_fmt;
-        sampleRate = audioCodecCtx->sample_rate;
-        channels = audioCodecCtx->channels;
+    if (openCodecCtx(&mAudioStreamIdx, &mAudioCodecCtx, mFormatCtx, AVMEDIA_TYPE_AUDIO) ==
+        SUCCEED) {
+        audioStream = mFormatCtx->streams[mAudioStreamIdx];
     }
 
-    av_dump_format(formatCtx, 0, srcFilePath, 0);
+    av_dump_format(mFormatCtx, 0, mSrcFilePath, 0);
 
     if (!audioStream && !videoStream) {
         LOGE("Could not find audio or video stream in the input, aborting");
@@ -131,16 +123,16 @@ int Decoder::openInputFile() {
         return FAILED;
     }
 
-    frame = av_frame_alloc();
-    if (!frame) {
-        LOGE("Could not allocate frame");
+    mFrame = av_frame_alloc();
+    if (!mFrame) {
+        LOGE("Could not allocate mFrame");
         release();
         return FAILED;
     }
 
-    av_init_packet(&packet);
-    packet.data = nullptr;
-    packet.size = 0;
+    av_init_packet(&mPacket);
+    mPacket.data = nullptr;
+    mPacket.size = 0;
 
     return SUCCEED;
 }
@@ -154,7 +146,7 @@ int Decoder::openCodecCtx(int *streamIdx, AVCodecContext **codecCtx, AVFormatCon
     ret = av_find_best_stream(formatContext, mediaType, -1, -1, nullptr, 0);
     if (ret < 0) {
         LOGE("Could not find %s stream in input file '%s', result: %s",
-             av_get_media_type_string(mediaType), srcFilePath, av_err2str(ret));
+             av_get_media_type_string(mediaType), mSrcFilePath, av_err2str(ret));
         return FAILED;
     } else {
         index = ret;
@@ -188,73 +180,85 @@ int Decoder::openCodecCtx(int *streamIdx, AVCodecContext **codecCtx, AVFormatCon
     return SUCCEED;
 }
 
-int Decoder::decodePacket(AVPacket packet, int *gotFrame) {
-
+void Decoder::decodePacket(AVPacket packet, int *gotFrame) {
     int ret = 0;
-    int decoded = packet.size;
+    int localGotFrame;
+    if (!gotFrame)
+        gotFrame = &localGotFrame;
 
     *gotFrame = 0;
-    if (packet.stream_index == videoStreamIdx) {
-        ret = avcodec_decode_video2(videoCodecCtx, frame, gotFrame, &packet);
+    if (packet.stream_index == mVideoStreamIdx) {
+        ret = avcodec_send_packet(mVideoCodecCtx, &packet);
         if (ret < 0) {
-            LOGE("Error decoding video frame: %s", av_err2str(ret));
-            return FAILED;
+            LOGE("Error decoding video mFrame: %s", av_err2str(ret));
+            return;
         }
 
-        if (*gotFrame) {
-            av_image_copy(videoBuffer, videoLinesize, (const uint8_t **) frame->data,
-                          frame->linesize, pixelFormat, width, height);
+        while (ret >= 0) {
+            ret = avcodec_receive_frame(mVideoCodecCtx, mFrame);
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                break;
+            } else if (ret < 0) {
+                LOGE("Error during decoding: %s", av_err2str(ret));
+                break;
+            }
 
-            frame->pts = frame->best_effort_timestamp;
+            av_image_copy(mVideoBuffers, mVideoLinesize, (const uint8_t **) mFrame->data,
+                          mFrame->linesize, mPixelFormat, mWidth, mHeight);
+            fwrite(mVideoBuffers[0], 1, (size_t) mVideoBufferSize, mYuvFile);
 
-            fwrite(videoBuffer[0], 1, (size_t) videoBufferSize, yuvFile);
+            *gotFrame = 1;
         }
-    } else if (packet.stream_index == audioStreamIdx) {
-        ret = avcodec_decode_audio4(audioCodecCtx, frame, gotFrame, &packet);
+    } else if (packet.stream_index == mAudioStreamIdx) {
+        ret = avcodec_send_packet(mAudioCodecCtx, &packet);
         if (ret < 0) {
-            LOGE("Error decoding audio frame: %s", av_err2str(ret));
-            return FAILED;
+            LOGE("Error decoding video mFrame: %s", av_err2str(ret));
+            return;
         }
-        /* Some audio decoders decode only part of the packet, and have to be
-         * called again with the remainder of the packet data.
-         * Also, some decoders might over-read the packet. */
-        decoded = FFMIN(ret, packet.size);
 
-        if (*gotFrame) {
-            int unpaddingLinesize =
-                    frame->nb_samples * av_get_bytes_per_sample(AVSampleFormat(frame->format));
-            fwrite(frame->extended_data[0], 1, (size_t) unpaddingLinesize, pcmFile);
+        while (ret >= 0) {
+            ret = avcodec_receive_frame(mAudioCodecCtx, mFrame);
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+                break;
+            } else if (ret < 0) {
+                LOGE("Error during decoding: %s", av_err2str(ret));
+                break;
+            }
+
+            int dataSize =
+                    mFrame->nb_samples * av_get_bytes_per_sample(AVSampleFormat(mFrame->format));
+            fwrite(mFrame->data[0], 1, (size_t) dataSize, mPcmFile);
+
+            *gotFrame = 1;
         }
     }
 
     if (*gotFrame) {
-        av_frame_unref(frame);
+        av_frame_unref(mFrame);
     }
-
-    return decoded;
 }
 
 int Decoder::release() {
-    if (videoCodecCtx != nullptr) {
-        avcodec_free_context(&videoCodecCtx);
+    if (mVideoCodecCtx != nullptr) {
+        avcodec_free_context(&mVideoCodecCtx);
     }
-    if (audioCodecCtx != nullptr) {
-        avcodec_free_context(&audioCodecCtx);
+    if (mAudioCodecCtx != nullptr) {
+        avcodec_free_context(&mAudioCodecCtx);
     }
-    if (formatCtx != nullptr) {
-        avformat_close_input(&formatCtx);
+    if (mFormatCtx != nullptr) {
+        avformat_close_input(&mFormatCtx);
     }
-    if (frame != nullptr) {
-        av_frame_free(&frame);
+    if (mFrame != nullptr) {
+        av_frame_free(&mFrame);
     }
-    if (videoBuffer[0] != nullptr) {
-        av_free(videoBuffer[0]);
+    if (mVideoBuffers[0] != nullptr) {
+        av_free(mVideoBuffers[0]);
     }
-    if (pcmFile != nullptr) {
-        fclose(pcmFile);
+    if (mPcmFile != nullptr) {
+        fclose(mPcmFile);
     }
-    if (yuvFile != nullptr) {
-        fclose(yuvFile);
+    if (mYuvFile != nullptr) {
+        fclose(mYuvFile);
     }
     reset();
     LOGI("Decoder released");

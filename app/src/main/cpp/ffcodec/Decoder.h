@@ -11,30 +11,24 @@
 
 class Decoder {
 private:
-    const char *srcFilePath;
-    FILE *pcmFile;
-    FILE *yuvFile;
-    int width;
-    int height;
-    int videoStreamIdx;
-    int audioStreamIdx;
-    int frameRate;
-    int sampleRate;
-    int channels;
-    AVPixelFormat pixelFormat;
-    AVSampleFormat sampleFormat;
+    const char *mSrcFilePath;
+    FILE *mPcmFile;
+    FILE *mYuvFile;
+    int mWidth;
+    int mHeight;
+    int mVideoStreamIdx;
+    int mAudioStreamIdx;
+    AVPixelFormat mPixelFormat;
 
-    uint8_t *videoBuffer[4];
-    int videoLinesize[4];
-    int videoBufferSize;
+    uint8_t *mVideoBuffers[4];
+    int mVideoLinesize[4];
+    int mVideoBufferSize;
 
-    AVFormatContext *formatCtx;
-    AVCodecContext *videoCodecCtx;
-    AVCodecContext *audioCodecCtx;
-    AVStream *videoStream;
-    AVStream *audioStream;
-    AVFrame *frame;
-    AVPacket packet;
+    AVFormatContext *mFormatCtx;
+    AVCodecContext *mVideoCodecCtx;
+    AVCodecContext *mAudioCodecCtx;
+    AVFrame *mFrame;
+    AVPacket mPacket;
 
     void reset();
 
@@ -45,7 +39,7 @@ private:
     int openCodecCtx(int *streamIdx, AVCodecContext **codecCtx, AVFormatContext *formatContext,
                      AVMediaType mediaType);
 
-    int decodePacket(AVPacket packet, int *gotFrame);
+    void decodePacket(AVPacket packet, int *gotFrame);
 
     int release();
 
