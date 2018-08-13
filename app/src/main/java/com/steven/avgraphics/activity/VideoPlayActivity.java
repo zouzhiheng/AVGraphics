@@ -273,6 +273,7 @@ public class VideoPlayActivity extends BaseActivity {
 
     private static native void _stopGL();
 
+    // 如果要使用 OpenSL，可以取消下面的注释
 //    private static native void _startSL(int sampleRate, int samleFormat, int channels);
 //
 //    private static native void _writeSL(byte[] data, int length);

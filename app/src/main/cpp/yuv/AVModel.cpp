@@ -3,7 +3,7 @@
 //
 
 #include "AVModel.h"
-#include "util.h"
+#include "format_util.h"
 
 AVModel::AVModel() : image(nullptr), imageLen(0), sample(nullptr), sampleLen(0),
                      width(0), height(0), pixelFormat(PIXEL_FORMAT_NONE), flag(-1) {

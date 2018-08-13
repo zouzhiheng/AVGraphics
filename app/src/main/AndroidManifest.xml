@@ -52,6 +52,9 @@
             android:name=".activity.gles.BeautyActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity android:name=".activity.VideoPlayActivity" />
+        <activity
+            android:name=".activity.FFmpegActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>

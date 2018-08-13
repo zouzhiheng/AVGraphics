@@ -112,7 +112,9 @@ public class MainActivity extends BaseActivity {
     }
 
     static {
-        System.loadLibrary("sles");
+        System.loadLibrary("ffmpeg");
+        System.loadLibrary("ffcodec");
         System.loadLibrary("gles");
+        System.loadLibrary("sles");
     }
 }

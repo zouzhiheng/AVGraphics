@@ -19,7 +19,7 @@
 #include "Beauty.h"
 #include "YuvRenderer.h"
 #include "../yuv/AVModel.h"
-#include "../yuv/util.h"
+#include "../yuv/format_util.h"
 
 using namespace std;
 

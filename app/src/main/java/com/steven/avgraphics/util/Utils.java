@@ -29,6 +29,9 @@ public class Utils {
 
     private static final String OPENSL_OUTPUT = APP_DIR + "/opensl.pcm";
 
+    private static final String FFDECODE_YUV_OUTPUT = APP_DIR + "/ffdecode.yuv";
+    private static final String FFDECODE_PCM_OUTPUT = APP_DIR + "/ffdecode.pcm";
+
     private static Handler sHandler = new Handler(Looper.getMainLooper());
 
     static {

@@ -27,8 +27,6 @@ inline libyuv::FourCC getFourCC(int pixelFormat) {
     return libyuv::FOURCC_ANY;
 }
 
-uint64_t getCurrentTimeMs();
-
 Yuv* convertToI420(AVModel *model);
 
 

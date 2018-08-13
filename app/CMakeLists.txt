@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 # --- set variable
+set(libs "${CMAKE_SOURCE_DIR}/libs")
 set(dir_cpp src/main/cpp)
+set(dir_ffcodec src/main/cpp/ffcodec)
 set(dir_sles src/main/cpp/sles)
 set(dir_gles src/main/cpp/gles)
 set(dir_libyuv src/main/cpp/libyuv)
@@ -47,6 +49,14 @@ endif()
 
 # --- add library
 
+add_library ( ffcodec
+              SHARED
+              ${dir_ffcodec}/ffcodec.cpp )
+
+add_library( ffmpeg
+             SHARED
+             IMPORTED )
+
 add_library( gles
              SHARED
              ${dir_gles}/gles.cpp
@@ -67,7 +77,7 @@ add_library( yuv
              ${yuv_src_list}
              ${dir_yuv}/Yuv.cpp
              ${dir_yuv}/AVModel.cpp
-             ${dir_yuv}/util.cpp
+             ${dir_yuv}/format_util.cpp
              ${dir_yuv}/YuvProcessor.cpp )
 
 add_library( sles
@@ -78,11 +88,23 @@ add_library( sles
              ${dir_sles}/AudioRecorder.cpp )
 
 
+set_target_properties( ffmpeg
+                       PROPERTIES IMPORTED_LOCATION
+                       ${libs}/armeabi-v7a/libffmpeg.so )
+
 include_directories( ${dir_cpp}/util
-                     ${dir_libyuv}/include )
+                     ${dir_libyuv}/include
+                     ${dir_cpp}/ffmpeg/include )
 
 
 # --- link libraries
+
+target_link_libraries( ffcodec
+
+                       ffmpeg
+                       yuv
+                       log )
+
 target_link_libraries( gles
 
                        EGL
@@ -91,10 +113,6 @@ target_link_libraries( gles
                        android
                        log
                        m )
-
-target_link_libraries( yuv
-
-                       log )
 
 target_link_libraries( sles
 

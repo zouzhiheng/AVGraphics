@@ -3,17 +3,10 @@
 //
 
 #include <sys/time.h>
-#include "util.h"
+#include "format_util.h"
 #include "log.h"
 
 using namespace libyuv;
-
-uint64_t getCurrentTimeMs() {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    uint64_t us = (uint64_t) (tv.tv_sec) * 1000 * 1000 + (uint64_t) (tv.tv_usec);
-    return us / 1000;
-}
 
 Yuv* convertToI420(AVModel *model) {
     if (!model || model->imageLen <= 0 || model->flag != MODEL_FLAG_VIDEO || model->width <= 0

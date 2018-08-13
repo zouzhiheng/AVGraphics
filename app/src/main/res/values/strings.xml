@@ -132,4 +132,9 @@
 
     <string name="vplay_msg_no_file">播放失败，找不到文件!</string>
 
+
+    <!-- FFmepgActivity(ff) -->
+    <string name="ff_btn_decode">解码</string>
+
+
 </resources>
