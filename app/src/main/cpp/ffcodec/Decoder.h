@@ -6,6 +6,7 @@
 #define AVGRAPHICS_DECODER_H
 
 #include <cstdint>
+#include <AVInfo.h>
 #include "ffheader.h"
 #include "../common/AVModel.h"
 
@@ -16,9 +17,12 @@ private:
     FILE *mYuvFile;
     int mWidth;
     int mHeight;
+    int mFrameRate;
+    int mSampleRate;
     int mVideoStreamIdx;
     int mAudioStreamIdx;
     AVPixelFormat mPixelFormat;
+    AVSampleFormat mSampleFormat;
 
     uint8_t *mVideoBuffers[4];
     int mVideoLinesize[4];
@@ -45,6 +49,8 @@ private:
 
 public:
     Decoder();
+
+    AVInfo* getAVInfo(const char *srcFilePath);
 
     int decode(const char *srcFilePath, const char *dstVideoPath, const char *dstAudioPath);
 };

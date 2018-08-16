@@ -18,8 +18,10 @@ import android.widget.TextView;
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.module.av.AVInfo;
-import com.steven.avgraphics.module.av.HWCodec;
+import com.steven.avgraphics.module.av.FFCodec;
+import com.steven.avgraphics.module.av.Format;
 import com.steven.avgraphics.module.av.HWDecoder;
+import com.steven.avgraphics.module.av.OnDecodeListener;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 
@@ -28,9 +30,9 @@ import java.io.File;
 public class VideoPlayActivity extends BaseActivity {
 
     private static final int DEFAULT_FRAME_RATE = 24;
-    private static final int DEFAULT_PIXEL_FORMAT = 1; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_NV12
+    private static final int DEFAULT_PIXEL_FORMAT = Format.PIXEL_FORMAT_NV12;
     private static final int DEFAULT_SAMPLE_RATE = 48000;
-    private static final int DEFAULT_SAMPLE_FORMAT = 16;
+    private static final int DEFAULT_SAMPLE_FORMAT = Format.SAMPLE_FORMAT_16BIT;
 
     private SurfaceView mSurfaceView;
     private Button mBtnStart;
@@ -44,6 +46,7 @@ public class VideoPlayActivity extends BaseActivity {
     private AudioTrack mAudioTrack;
     private AVInfo mAVInfo;
     private CountDownTimer mCountDownTimer;
+    private File mFile;
 
     private int mSurfaceWidth;
     private int mSurfaceHeight;
@@ -52,6 +55,7 @@ public class VideoPlayActivity extends BaseActivity {
     private int mFrameRate = DEFAULT_FRAME_RATE;
     private int mPixelFormat = DEFAULT_PIXEL_FORMAT;
     private int mSampleRate;
+    private int mSampleFormat;
     private int mChannels;
     private float[] mMatrix = new float[16];
     private boolean mIsPlaying = false;
@@ -65,7 +69,8 @@ public class VideoPlayActivity extends BaseActivity {
 
     private void init() {
         Matrix.setIdentityM(mMatrix, 0);
-        mAVInfo = HWCodec.getAVInfo(Utils.getHWRecordOutput());
+        mFile = new File(Utils.getFFRecordOutput());
+        mAVInfo = FFCodec.getAVInfo(mFile.getAbsolutePath());
         findView();
         showAVInfo();
         layoutSurfaceView();
@@ -82,10 +87,13 @@ public class VideoPlayActivity extends BaseActivity {
 
     private void showAVInfo() {
         if (mAVInfo != null) {
-            String str = "file: " + Utils.getHWRecordOutput().replace("stra", "") + "\n" +
-                    "width: " + mAVInfo.width + ", height: " + mAVInfo.height + "\nframe rate: "
-                    + mAVInfo.frameRate + "\nsample rate: " + mSampleRate + ", channels: "
-                    + mChannels + "\nduration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
+            String str = "file: " + mFile.getAbsolutePath() + "\n"
+                    + "width: " + mAVInfo.width + ", height: " + mAVInfo.height + "\n"
+                    + "frame rate: " + mAVInfo.frameRate + ", pixel format: "
+                    + Format.getPixelFormatName(mAVInfo.pixelFommat) + "\n"
+                    + "sample rate: " + mAVInfo.sampleRate + ", channels: " + mAVInfo.channels
+                    + ", sample format: " + Format.getSampleFormatName(mAVInfo.sampleFormat) + "\n"
+                    + "duration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
             mTvAVInfo.setText(str);
         }
     }
@@ -110,8 +118,7 @@ public class VideoPlayActivity extends BaseActivity {
     }
 
     private void start() {
-        File file = new File(Utils.getHWRecordOutput());
-        if (!file.exists()) {
+        if (!mFile.exists()) {
             Log.e(TAG, "start video player failed: file not found");
             ToastHelper.show(R.string.vplay_msg_no_file);
             return;
@@ -136,34 +143,23 @@ public class VideoPlayActivity extends BaseActivity {
         mFrameRate = mAVInfo != null && mAVInfo.frameRate > 0 ? mAVInfo.frameRate : DEFAULT_FRAME_RATE;
         mChannels = mAVInfo != null && mAVInfo.channels == 2 ? 2 : 1;
         mSampleRate = mAVInfo != null && mAVInfo.sampleRate > 0 ? mAVInfo.sampleRate : DEFAULT_SAMPLE_RATE;
-        // MediaCodec 难以获取准确的 pixel format
-        if (mAVInfo != null && mAVInfo.colorFormat > 0) {
-            switch (mAVInfo.colorFormat) {
-                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
-                    mPixelFormat = 1; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_NV12
-                    break;
-                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
-                    mPixelFormat = 4; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_YUV420P
-                    break;
-                default:
-                    mPixelFormat = 1; // 对应于 pixfmt.h 中的 PIXEL_FORMAT_NV12
-                    break;
-            }
-        }
+        // MediaCodec 解码出来的基本都是 NV12
+        mPixelFormat = DEFAULT_PIXEL_FORMAT;
+        mSampleFormat = mAVInfo != null && mAVInfo.sampleFormat > 0 ? mAVInfo.sampleFormat : DEFAULT_SAMPLE_FORMAT;
     }
 
     private void setupAudioTrack() {
         int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
-        // 获取 sample format 的 API 要求高，这里默认使用 ENCODING_PCM_16BIT
-        int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig, AudioFormat.ENCODING_PCM_16BIT);
+        int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig,
+                Format.getAudioFormat(mSampleFormat));
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, channelConfig,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+                Format.getAudioFormat(mSampleFormat), bufferSize, AudioTrack.MODE_STREAM);
     }
 
     private void startDecode() {
         mDecodeListener = new DecodeListener();
         mDecoder.setDecodeWithPts(true);
-        mDecoder.start(Utils.getHWRecordOutput(), mDecodeListener);
+        mDecoder.start(mFile.getAbsolutePath(), mDecodeListener);
     }
 
     private void startCounDownTimer() {
@@ -234,7 +230,7 @@ public class VideoPlayActivity extends BaseActivity {
 
     }
 
-    private class DecodeListener implements HWDecoder.OnDecodeListener {
+    private class DecodeListener implements OnDecodeListener {
 
         @Override
         public void onImageDecoded(byte[] data) {

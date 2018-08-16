@@ -297,14 +297,6 @@ public class HWDecoder {
         return format;
     }
 
-    public interface OnDecodeListener {
-        void onImageDecoded(byte[] data);
-
-        void onSampleDecoded(byte[] data);
-
-        void onDecodeEnded(boolean vsucceed, boolean asucceed);
-    }
-
     public interface OnDecodeEndListener extends OnDecodeListener {
 
         @Override

@@ -16,6 +16,7 @@ import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.module.av.AudioRecorder;
 import com.steven.avgraphics.module.av.FFCodec;
+import com.steven.avgraphics.module.av.Format;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 import com.steven.avgraphics.view.CameraPreviewView;
@@ -125,7 +126,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
             ToastHelper.show(R.string.ff_msg_no_file);
             return;
         }
-        FFCodec._decode(Utils.getFFRecordOutput(), Utils.getFFDecodeYuvOutput(),
+        FFCodec.decode(Utils.getFFRecordOutput(), Utils.getFFDecodeYuvOutput(),
                 Utils.getFFDecodePcmOutput());
         disableButtons();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -158,9 +159,10 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
 
         FFCodec.RecordParams params = new FFCodec.RecordParams(Utils.getFFRecordOutput(),
                 mImageWidth, mImageHeight, 24, mAudioRecorder.getSampleRate(),
-                FFCodec.PIXEL_FORMAT_NV21, FFCodec.SAMPLE_FORMAT_16BIT,
+                Format.PIXEL_FORMAT_NV21, Format.SAMPLE_FORMAT_16BIT,
                 mAudioRecorder.getChannels());
         FFCodec.FilterParams filter = new FFCodec.FilterParams();
+        // 由于 OpenGL 和 Android 坐标系的不同，使用美颜时需要倒转 180 度才能得到正确的画面
         filter.setRotate(mCameraPreviewView.isFacingBack() ? 90 : 180);
         params.setFilterParams(filter);
         mIsReocrding = FFCodec.initRecorder(params,
@@ -220,7 +222,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     public void onPreviewFrame(byte[] data, Camera camera) {
         if (mIsReocrding && !mCameraPreviewView.isBeautyOpen()) {
             FFCodec.recordImage(data, data.length, mImageWidth, mImageHeight,
-                    FFCodec.PIXEL_FORMAT_NV21);
+                    Format.PIXEL_FORMAT_NV21);
         }
     }
 

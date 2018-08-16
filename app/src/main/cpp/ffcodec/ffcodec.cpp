@@ -119,8 +119,69 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 }
 
 extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_steven_avgraphics_module_av_FFCodec__1getAVInfo(JNIEnv *env, jclass type,
+                                                         jstring filePath_) {
+    const char *filePath = env->GetStringUTFChars(filePath_, 0);
+
+    Decoder *decoder = new Decoder();
+    AVInfo *info = decoder->getAVInfo(filePath);
+
+    jclass clz = env->FindClass("com/steven/avgraphics/module/av/AVInfo");
+    jmethodID constructor = env->GetMethodID(clz, "<init>", "()V");
+    jobject result = env->NewObject(clz, constructor);
+
+    if (info == nullptr) {
+        env->ReleaseStringUTFChars(filePath_, filePath);
+        return result;
+    }
+
+    jfieldID width = env->GetFieldID(clz, "width", "I");
+    env->SetIntField(result, width, info->width);
+    jfieldID height = env->GetFieldID(clz, "height", "I");
+    env->SetIntField(result, height, info->height);
+    jfieldID duration = env->GetFieldID(clz, "vDuration", "J");
+    env->SetLongField(result, duration, info->duration);
+    jfieldID bitrate = env->GetFieldID(clz, "vBitRate", "I");
+    env->SetIntField(result, bitrate, (jint) info->bitRate);
+    jfieldID frameRate = env->GetFieldID(clz, "frameRate", "I");
+    env->SetIntField(result, frameRate, info->frameRate);
+    jfieldID pixelFormat = env->GetFieldID(clz, "pixelFommat", "I");
+    int pixelFormatValue = 0;
+    if (info->pixelFormat == AV_PIX_FMT_NV12) {
+        pixelFormatValue = PIXEL_FORMAT_NV12;
+    } else if (info->pixelFormat == AV_PIX_FMT_NV21) {
+        pixelFormatValue = PIXEL_FORMAT_NV21;
+    } else if (info->pixelFormat == AV_PIX_FMT_YUV420P) {
+        pixelFormatValue = PIXEL_FORMAT_YUV420P;
+    }
+    env->SetIntField(result, pixelFormat, pixelFormatValue);
+
+    jfieldID sampleRate = env->GetFieldID(clz, "sampleRate", "I");
+    env->SetIntField(result, sampleRate, info->sampleRate);
+    jfieldID channels = env->GetFieldID(clz, "channels", "I");
+    env->SetIntField(result, channels, info->channels);
+    jfieldID sampleFormat = env->GetFieldID(clz, "sampleFormat", "I");
+    int sampleFormatValue = 0;
+    if (info->sampleFormat == AV_SAMPLE_FMT_S16 || info->sampleFormat == AV_SAMPLE_FMT_S16P) {
+        sampleFormatValue = SAMPLE_FORMAT_16BIT;
+    } else if (info->sampleFormat == AV_SAMPLE_FMT_U8 || info->sampleFormat == AV_SAMPLE_FMT_U8P) {
+        sampleFormatValue = SAMPLE_FORMAT_8BIT;
+    } else if (info->sampleFormat == AV_SAMPLE_FMT_FLT || info->sampleFormat == AV_SAMPLE_FMT_FLTP) {
+        sampleFormatValue = SAMPLE_FORMAT_FLOAT;
+    }
+    env->SetIntField(result, sampleFormat, sampleFormatValue);
+
+    delete decoder;
+    delete info;
+    env->ReleaseStringUTFChars(filePath_, filePath);
+
+    return result;
+}
+
+extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_module_av_FFCodec__1decode(JNIEnv *env, jclass type, jstring srcFile_,
+Java_com_steven_avgraphics_module_av_FFCodec__1decodeToFile(JNIEnv *env, jclass type, jstring srcFile_,
                                                       jstring yuvDst_, jstring pcmDst_) {
     const char *srcFile = env->GetStringUTFChars(srcFile_, 0);
     const char *yuvDst = env->GetStringUTFChars(yuvDst_, 0);
@@ -149,6 +210,15 @@ void *decodeThreadFunc(void *arg) {
     delete param;
 
     return (void *) 1;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_module_av_FFCodec__1decodeToData(JNIEnv *env, jclass type,
+                                                            jstring srcFile_) {
+    const char *srcFile = env->GetStringUTFChars(srcFile_, 0);
+
+    env->ReleaseStringUTFChars(srcFile_, srcFile);
 }
 
 extern "C"

@@ -21,8 +21,9 @@ static const int PIXEL_FORMAT_YUV420P = 4;
 static const int PIXEL_FORMAT_ARGB = 5;
 static const int PIXEL_FORMAT_ABGR = 6;
 
-static const int SAMPLE_FORMAT_8BIT = 1;
-static const int SAMPLE_FORMAT_16BIT = 2;
+static const int SAMPLE_FORMAT_8BIT = 8;
+static const int SAMPLE_FORMAT_16BIT = 16;
+static const int SAMPLE_FORMAT_FLOAT = 24;
 
 inline libyuv::FourCC getFourCC(int pixelFormat) {
     if (pixelFormat == PIXEL_FORMAT_NV12) {
@@ -59,6 +60,8 @@ inline AVSampleFormat getSampleFormat(int flag) {
         sampleFormat = AV_SAMPLE_FMT_U8;
     } else if (flag == SAMPLE_FORMAT_16BIT) {
         sampleFormat = AV_SAMPLE_FMT_S16;
+    } else if (flag == SAMPLE_FORMAT_FLOAT) {
+        sampleFormat = AV_SAMPLE_FMT_FLT;
     }
     return sampleFormat;
 }

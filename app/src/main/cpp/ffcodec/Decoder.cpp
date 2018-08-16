@@ -40,6 +40,37 @@ void Decoder::reset() {
     mPcmFile = nullptr;
 }
 
+AVInfo *Decoder::getAVInfo(const char *srcFilePath) {
+    AVInfo *info = new AVInfo();
+    mSrcFilePath = srcFilePath;
+    if (openInputFile() < 0) {
+        LOGE("open input file failed!");
+        return info;
+    }
+
+    if (mVideoCodecCtx != nullptr) {
+        info->width = mWidth;
+        info->height = mHeight;
+        info->pixelFormat = mPixelFormat;
+        info->frameRate = mFrameRate;
+        info->videoCodecID = mVideoCodecCtx->codec_id;
+        info->haveVideo = true;
+    }
+
+    if (mAudioCodecCtx != nullptr) {
+        info->sampleRate = mAudioCodecCtx->sample_rate;
+        info->audioCodecID = mAudioCodecCtx->codec_id;
+        info->channels = mAudioCodecCtx->channels;
+        info->sampleFormat = mAudioCodecCtx->sample_fmt;
+        info->haveAudio = true;
+    }
+    info->duration = mFormatCtx->duration;
+    info->bitRate = mFormatCtx->bit_rate;
+    release();
+
+    return info;
+}
+
 int Decoder::decode(const char *srcFilePath, const char *dstVideoPath, const char *dstAudioPath) {
     mYuvFile = fopen(dstVideoPath, "wb");
     mPcmFile = fopen(dstAudioPath, "wb");
@@ -47,7 +78,7 @@ int Decoder::decode(const char *srcFilePath, const char *dstVideoPath, const cha
 }
 
 int Decoder::doDecode(const char *srcFilePath) {
-    this->mSrcFilePath = srcFilePath;
+    mSrcFilePath = srcFilePath;
 
     if (openInputFile() < 0) {
         LOGE("open input file failed!");
@@ -99,8 +130,8 @@ int Decoder::openInputFile() {
         mWidth = mVideoCodecCtx->width;
         mHeight = mVideoCodecCtx->height;
         mPixelFormat = mVideoCodecCtx->pix_fmt;
-        int frameRate = (int) av_q2d(av_guess_frame_rate(mFormatCtx, videoStream, nullptr));
-        mVideoCodecCtx->time_base = av_inv_q(av_d2q(frameRate, 100000));
+        mFrameRate = (int) av_q2d(av_guess_frame_rate(mFormatCtx, videoStream, nullptr));
+        mVideoCodecCtx->time_base = av_inv_q(av_d2q(mFrameRate, 100000));
         ret = av_image_alloc(mVideoBuffers, mVideoLinesize, mWidth, mHeight, mPixelFormat, 1);
         if (ret < 0) {
             LOGE("Could not allocate raw video buffer");
@@ -113,6 +144,7 @@ int Decoder::openInputFile() {
     if (openCodecCtx(&mAudioStreamIdx, &mAudioCodecCtx, mFormatCtx, AVMEDIA_TYPE_AUDIO) ==
         SUCCEED) {
         audioStream = mFormatCtx->streams[mAudioStreamIdx];
+        mSampleRate = mAudioCodecCtx->sample_rate;
     }
 
     av_dump_format(mFormatCtx, 0, mSrcFilePath, 0);

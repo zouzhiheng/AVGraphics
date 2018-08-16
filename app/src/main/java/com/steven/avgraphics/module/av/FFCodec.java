@@ -5,21 +5,48 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
+@SuppressWarnings("unused")
 public class FFCodec {
-
-    public static final int PIXEL_FORMAT_NONE = 0;
-    public static final int PIXEL_FORMAT_NV21 = 1;
-    public static final int PIXEL_FORMAT_YV12 = 2;
-
-    public static final int SAMPLE_FORMAT_NONE = 0;
-    public static final int SAMPLE_FORMAT_8BIT = 1;
-    public static final int SAMPLE_FORMAT_16BIT = 2;
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private RecordListener mRecordListener;
     private TranscodeListener mTranscodeListener;
+    private OnDecodeListener mDecodeListener;
 
-    public static native void _decode(String srcFile, String yuvDst, String pcmDst);
+    public static AVInfo getAVInfo(@NonNull String filePath) {
+        return _getAVInfo(filePath);
+    }
+
+    private static native AVInfo _getAVInfo(String filePath);
+
+    public static void decode(String srcFile, String yuvDst, String pcmDst) {
+        _decodeToFile(srcFile, yuvDst, pcmDst);
+    }
+
+    private static native void _decodeToFile(String srcFile, String yuvDst, String pcmDst);
+
+    public static void decode(String srcFile, OnDecodeListener listener) {
+        new FFCodec().doDecode(srcFile, listener);
+    }
+
+    private void doDecode(String srcFile, OnDecodeListener listener) {
+        mDecodeListener = listener;
+        _decodeToData(srcFile);
+    }
+
+    private static native void _decodeToData(String srcFile);
+
+    private void getDecodedImageFromNative(byte[] image) {
+        mDecodeListener.onImageDecoded(image);
+    }
+
+    private void getDecodedSampleFromNative(byte[] sample) {
+        mDecodeListener.onSampleDecoded(sample);
+    }
+
+    private void getDecodeResultFromNative(boolean vsucceed, boolean asucceed) {
+        mDecodeListener.onDecodeEnded(vsucceed, asucceed);
+    }
 
     public static boolean transcode(TranscodeParams params, TranscodeListener listener) {
         return new FFCodec().doTranscode(params, listener);
@@ -32,6 +59,14 @@ public class FFCodec {
         int result = _transcode(params.mSrcFile, params.mDstFile, params.mStart, params.mDuration,
                 videoFilter, audioFilter, params.mMaxBitRate, params.mQuality, params.mIsReencode);
         return result >= 0;
+    }
+
+    private native int _transcode(String srcFile, String dstFile, long start, long duration,
+                                  String videoFilter, String audioFilter, long maxBitRate,
+                                  int quality, boolean reencode);
+
+    private void getTranscodeResultFromNative(final boolean succeed) {
+        mHandler.post(() -> mTranscodeListener.onTranscodeCompleted(succeed));
     }
 
     public static boolean initRecorder(RecordParams params, RecordListener listener) {
@@ -78,14 +113,6 @@ public class FFCodec {
     private static native int _recordSamples(byte[] data, int length);
 
     private static native void _stopRecord();
-
-    private native int _transcode(String srcFile, String dstFile, long start, long duration,
-                                  String videoFilter, String audioFilter, long maxBitRate,
-                                  int quality, boolean reencode);
-
-    private void getTranscodeResultFromNative(final boolean succeed) {
-        mHandler.post(() -> mTranscodeListener.onTranscodeCompleted(succeed));
-    }
 
     private void getRecordResultFromNative(final boolean succeed) {
         mHandler.post(() -> mRecordListener.onRecordCompleted(succeed));

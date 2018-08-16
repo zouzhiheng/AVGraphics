@@ -12,7 +12,7 @@ public class AVInfo {
     public int width;
     public int height;
     public int frameRate;
-    public int colorFormat;
+    public int pixelFommat;
 
     // audio
     public String aCodec;
@@ -30,7 +30,7 @@ public class AVInfo {
                 "[width: " + width + "], " +
                 "[height: " + height + "], " +
                 "[frameRate: " + frameRate + "], " +
-                "[colorFormat: " + colorFormat + "]" +
+                "[pixelFommat: " + pixelFommat + "]" +
                 "}\n" +
                 "{audio: [codec: " + aCodec + "], " +
                 "[duration: " + aDuration + "], " +

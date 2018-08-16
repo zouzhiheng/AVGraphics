@@ -2,6 +2,7 @@ package com.steven.avgraphics.module.av;
 
 
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
@@ -43,7 +44,12 @@ public class HWCodec {
                 info.width = getFormatInt(format, MediaFormat.KEY_WIDTH);
                 info.height = getFormatInt(format, MediaFormat.KEY_HEIGHT);
                 info.frameRate = getFormatInt(format, MediaFormat.KEY_FRAME_RATE);
-                info.colorFormat = getFormatInt(format, MediaFormat.KEY_COLOR_FORMAT);
+                int pixelFormat = getFormatInt(format, MediaFormat.KEY_COLOR_FORMAT);
+                if (pixelFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
+                    info.pixelFommat = Format.PIXEL_FORMAT_NV12;
+                } else if (pixelFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) {
+                    info.pixelFommat = Format.PIXEL_FORMAT_YUV420P;
+                }
             } else if (getMediaType(format) == MEDIA_TYPE_AUDIO) {
                 info.aBitRate = getFormatInt(format, MediaFormat.KEY_BIT_RATE);
                 info.aDuration = getFormatLong(format, MediaFormat.KEY_DURATION);
