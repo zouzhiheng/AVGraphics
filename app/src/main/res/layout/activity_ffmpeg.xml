@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,41 +9,120 @@
     <com.steven.avgraphics.view.CameraPreviewView
         android:id="@+id/ff_cpv_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:beauty_on_front="true" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/ff_ll_seekbar_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ff_tv_beauty" />
+
+            <SeekBar
+                android:id="@+id/ff_sb_beauty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ff_tv_saturate" />
+
+            <SeekBar
+                android:id="@+id/ff_sb_saturate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ff_tv_bright" />
+
+            <SeekBar
+                android:id="@+id/ff_sb_bright"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_marginBottom="@dimen/margin_normal"
-        android:orientation="horizontal">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/ff_btn_decode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ff_btn_decode" />
+
+            <Button
+                android:id="@+id/ff_btn_transcode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ff_btn_transcode" />
+
+            <Button
+                android:id="@+id/ff_btn_start_record"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ff_btn_start_record" />
+
+            <Button
+                android:id="@+id/ff_btn_stop_record"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/ff_btn_stop_record" />
+
+        </LinearLayout>
 
         <Button
-            android:id="@+id/ff_btn_decode"
-            android:layout_width="wrap_content"
-            android:layout_marginStart="@dimen/margin_normal"
-            android:layout_height="wrap_content"
-            android:text="@string/ff_btn_decode" />
-
-        <Button
-            android:id="@+id/ff_btn_transcode"
+            android:id="@+id/ff_btn_switch_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ff_btn_transcode" />
-
-        <Button
-            android:id="@+id/ff_btn_start_record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/ff_btn_start_record"/>
-
-        <Button
-            android:id="@+id/ff_btn_stop_record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text="@string/ff_btn_stop_record"/>
-
+            android:text="@string/ff_btn_switch_camera" />
     </LinearLayout>
 
 

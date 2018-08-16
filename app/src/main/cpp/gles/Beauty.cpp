@@ -6,7 +6,9 @@
 #include <log.h>
 #include "Beauty.h"
 #include "glutil.h"
+#include "../ffcodec/ffcodec.h"
 #include <GLES2/gl2ext.h>
+#include <format.h>
 
 const static GLfloat VERTICES[] = {
         -1.0f, 1.0f,
@@ -33,9 +35,9 @@ const static GLuint VERTEX_POS_SIZE = 2;
 const static GLuint INDEX_NUMBER = 6;
 const static GLuint TEX_COORD_POS_SIZE = 2;
 
-Beauty::Beauty() : mEGLCore(new EGLCore), mWindow(nullptr), mTexOes(0), mTex2D(0), mFbo(0),
-                   mMatrixLoc(0), mTexLoc(0), mParamsLoc(0), mBrightnessLoc(0),
-                   mSingleStepOffsetLoc(0), mVao(0), mPboReadIndex(0), nPboMapIndex(-1) {
+Beauty::Beauty() : mEGLCore(new EGLCore), mWindow(nullptr), mTexOes(0), mMatrixLoc(0), mTexLoc(0),
+                   mParamsLoc(0), mBrightnessLoc(0), mSingleStepOffsetLoc(0), mVao(0),
+                   mPboReadIndex(0), mPboMapIndex(-1) {
     memset(mVboIds, 0, sizeof(mVboIds));
     memset(mPboIds, 0, sizeof(mPboIds));
 }
@@ -82,9 +84,6 @@ int Beauty::init(AAssetManager *manager, ANativeWindow *window, int width, int h
     initVbo();
     initVao();
     initPbo();
-    if (!initFbo()) {
-        return -1;
-    }
 
     mMatrixLoc = glGetUniformLocation(mProgram, "mMatrix");
     mTexLoc = glGetUniformLocation(mProgram, "sTexture");
@@ -135,49 +134,14 @@ void Beauty::initPbo() {
     glBufferData(GL_PIXEL_PACK_BUFFER, mWidth * mHeight * 4, nullptr, GL_DYNAMIC_COPY);
 }
 
-bool Beauty::initFbo() {
-    const GLenum attachment = GL_COLOR_ATTACHMENT0;
-
-    // 设置离屛帧缓冲区纹理
-    glGenTextures(1, &mTex2D);
-    glBindTexture(GL_TEXTURE_2D, mTex2D);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glGenFramebuffers(1, &mFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, mTex2D, 0);
-    glDrawBuffers(1, &attachment);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOGE("glCheckFramebufferStatus failed: %d", glGetError());
-        return false;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return true;
-}
-
-void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat saturate, GLfloat bright, bool recording) {
-    const GLenum attachment = GL_COLOR_ATTACHMENT0;
-
-    // 渲染离屛帧缓冲区
-    glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawBuffers(1, &attachment);
-
+void
+Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat saturate, GLfloat bright, bool recording) {
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(mProgram);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, mTex2D);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTexOes);
     glUniform1i(mTexLoc, 0);
 
     glUniformMatrix4fv(mMatrixLoc, 1, GL_FALSE, matrix);
@@ -190,17 +154,25 @@ void Beauty::draw(GLfloat *matrix, GLfloat beauty, GLfloat saturate, GLfloat bri
     glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, 0);
     glBindVertexArray(0);
 
-    // 渲染默认缓冲区
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, mFbo);
-
-    glReadBuffer(attachment);
-    glBlitFramebuffer(0, 0, mWidth, mHeight,
-                      0, 0, mWidth, mHeight,
-                      GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    if (recording) {
+        int rgbSize = mWidth * mHeight * 4;
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, mPboIds[mPboReadIndex]);
+        // 从默认帧缓冲区读取数据到 PBO 中
+        glReadPixels(0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        if (mPboMapIndex >= 0) {
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, mPboIds[mPboMapIndex]);
+            uint8_t *mapData = (uint8_t *) glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, rgbSize,
+                                                            GL_MAP_READ_BIT);
+            uint8_t *rgb = new uint8_t[rgbSize];
+            memcpy(rgb, mapData, (size_t) rgbSize);
+            recordImage(rgb, rgbSize, mWidth, mHeight, PIXEL_FORMAT_ABGR);
+            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+        }
+        mPboMapIndex = mPboReadIndex;
+        mPboReadIndex = 1 - mPboReadIndex;
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    }
 
     glFlush();
     mEGLCore->swapBuffer();
@@ -229,9 +201,7 @@ GLfloat *Beauty::getSingleStepOffset(const GLfloat width, const GLfloat height) 
 void Beauty::stop() {
     glDeleteProgram(mProgram);
     glDeleteTextures(1, &mTexOes);
-    glDeleteTextures(1, &mTex2D);
     glDeleteBuffers(2, mPboIds);
     glDeleteBuffers(1, &mVao);
     glDeleteBuffers(3, mVboIds);
-    glDeleteFramebuffers(1, &mFbo);
 }

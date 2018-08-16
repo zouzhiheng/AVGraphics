@@ -116,6 +116,7 @@ target_link_libraries( gles
 
                        EGL
                        GLESv3
+                       ffcodec
                        yuv
                        android
                        log

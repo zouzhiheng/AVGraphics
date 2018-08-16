@@ -159,8 +159,16 @@ public class CameraPreviewView extends FrameLayout {
         mBrightLevel = MIN_BRIGHT + (MAX_BRIGHT - MIN_BRIGHT) * brightLevel;
     }
 
+    public void setRecording(boolean recording) {
+        mIsRecording = recording;
+    }
+
     public boolean isFacingBack() {
         return CameraHelper.isFacingBack(mCameraId);
+    }
+
+    public boolean isBeautyOpen() {
+        return mIsBeautyOpen;
     }
 
     // 前置摄像头启用了美颜功能，传给 OpenGL 的宽高为 surface 的宽高

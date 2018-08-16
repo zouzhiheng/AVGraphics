@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
@@ -29,6 +31,11 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     private Button mBtnTranscode;
     private Button mBtnStartRecord;
     private Button mBtnStopRecord;
+    private Button mBtnSwitch;
+    private LinearLayout mLlSeerBarContainer;
+    private SeekBar mSbBeauty;
+    private SeekBar mSbSaturate;
+    private SeekBar mSbBright;
 
     private AudioRecorder mAudioRecorder = new AudioRecorder();
     private int mImageWidth;
@@ -57,6 +64,11 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         mBtnTranscode = findViewById(R.id.ff_btn_transcode);
         mBtnStartRecord = findViewById(R.id.ff_btn_start_record);
         mBtnStopRecord = findViewById(R.id.ff_btn_stop_record);
+        mBtnSwitch = findViewById(R.id.ff_btn_switch_camera);
+        mLlSeerBarContainer = findViewById(R.id.ff_ll_seekbar_container);
+        mSbBeauty = findViewById(R.id.ff_sb_beauty);
+        mSbSaturate = findViewById(R.id.ff_sb_saturate);
+        mSbBright = findViewById(R.id.ff_sb_bright);
     }
 
     private void setListener() {
@@ -64,7 +76,15 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         mBtnTranscode.setOnClickListener(this);
         mBtnStartRecord.setOnClickListener(this);
         mBtnStopRecord.setOnClickListener(this);
+        mBtnSwitch.setOnClickListener(this);
         mCameraPreviewView.setPreviewCallback(this);
+
+        mSbBeauty.setOnSeekBarChangeListener((DefaultSeekBarChangeListener) progress
+                -> mCameraPreviewView.setBeautyLevel(progress));
+        mSbSaturate.setOnSeekBarChangeListener((DefaultSeekBarChangeListener) progress
+                -> mCameraPreviewView.setSaturateLevel(progress));
+        mSbBright.setOnSeekBarChangeListener((DefaultSeekBarChangeListener) progress
+                -> mCameraPreviewView.setBrightLevel(progress));
     }
 
     @Override
@@ -76,6 +96,9 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.ff_btn_switch_camera:
+                switchCamera();
+                break;
             case R.id.ff_btn_decode:
                 decode();
                 break;
@@ -89,6 +112,11 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
                 stopRecord();
                 break;
         }
+    }
+
+    private void switchCamera() {
+        mCameraPreviewView.switchCamera();
+        mLlSeerBarContainer.setVisibility(mCameraPreviewView.isFacingBack() ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void decode() {
@@ -133,12 +161,13 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
                 FFCodec.PIXEL_FORMAT_NV21, FFCodec.SAMPLE_FORMAT_16BIT,
                 mAudioRecorder.getChannels());
         FFCodec.FilterParams filter = new FFCodec.FilterParams();
-        filter.setRotate(90);
+        filter.setRotate(mCameraPreviewView.isFacingBack() ? 90 : 180);
         params.setFilterParams(filter);
         mIsReocrding = FFCodec.initRecorder(params,
                 succeed -> ToastHelper.showOnUiThread(R.string.ff_msg_record_ok));
         if (mIsReocrding) {
             mAudioRecorder.start();
+            mCameraPreviewView.setRecording(true);
             disableButtons();
             Handler handler = new Handler(Looper.getMainLooper());
             // 最少录制 3s 视频
@@ -151,6 +180,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     private void stopRecord() {
         mIsReocrding = false;
         mAudioRecorder.stop();
+        mCameraPreviewView.setRecording(false);
         FFCodec.stopRecord();
         resetButtons();
     }
@@ -160,6 +190,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         mBtnTranscode.setEnabled(false);
         mBtnStartRecord.setEnabled(false);
         mBtnStopRecord.setEnabled(false);
+        mBtnSwitch.setEnabled(false);
     }
 
     private void resetButtons() {
@@ -167,6 +198,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         mBtnTranscode.setEnabled(true);
         mBtnStartRecord.setEnabled(true);
         mBtnStopRecord.setEnabled(false);
+        mBtnSwitch.setEnabled(true);
     }
 
     @Override
@@ -186,7 +218,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        if (mIsReocrding) {
+        if (mIsReocrding && !mCameraPreviewView.isBeautyOpen()) {
             FFCodec.recordImage(data, data.length, mImageWidth, mImageHeight,
                     FFCodec.PIXEL_FORMAT_NV21);
         }
@@ -196,6 +228,26 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     public void onRecordSample(byte[] data) {
         if (mIsReocrding) {
             FFCodec.recordSample(data, data.length);
+        }
+    }
+
+    private interface DefaultSeekBarChangeListener extends SeekBar.OnSeekBarChangeListener {
+
+        void onProgressChanged(float progress);
+
+        @Override
+        default void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            onProgressChanged(1.0f * progress / 100);
+        }
+
+        @Override
+        default void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        default void onStopTrackingTouch(SeekBar seekBar) {
+
         }
     }
 

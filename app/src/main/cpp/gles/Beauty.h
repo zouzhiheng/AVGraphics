@@ -16,14 +16,12 @@ private:
     ANativeWindow *mWindow;
 
     GLuint mTexOes;
-    GLuint mTex2D;
-    GLuint mFbo;
     GLuint mVboIds[3];
     GLuint mVao;
 
     GLuint mPboIds[2];
     GLint mPboReadIndex;
-    GLint nPboMapIndex;
+    GLint mPboMapIndex;
 
     GLint mMatrixLoc;
     GLint mTexLoc;
@@ -37,8 +35,6 @@ private:
     void initVao();
 
     void initPbo();
-
-    bool initFbo();
 
     GLfloat *getParams(const GLfloat beauty, const GLfloat saturate);
 
