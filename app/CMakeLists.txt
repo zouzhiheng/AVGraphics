@@ -55,6 +55,7 @@ add_library ( ffcodec
               ${dir_ffcodec}/Decoder.cpp
               ${dir_ffcodec}/Encoder.cpp
               ${dir_ffcodec}/FrameFilter.cpp
+              ${dir_ffcodec}/Transcoder.cpp
               ${dir_common}/AVModel.cpp
               ${dir_common}/format.cpp
               ${dir_common}/Yuv.cpp

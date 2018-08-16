@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2017/12/28 0028.
+// Created by zzh on 2017/12/28 0028.
 //
 
 #ifndef FFMEDIA_ZZH_THREADSAFEQUEUE_H

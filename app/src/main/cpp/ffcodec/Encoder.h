@@ -21,7 +21,7 @@ public:
         int sampleRate;
         AVPixelFormat pixelFormat;
         AVSampleFormat sampleFormat;
-        int channels; // for audio only
+        int channels;
         AVCodecID videoCodecID;
         AVCodecID audioCodecID;
         int64_t maxBitRate;
@@ -60,41 +60,41 @@ public:
     };
 
 private:
-    const char *dstFilePath;
-    int width;
-    int height;
-    int frameRate;
-    int sampleRate;
-    int channels; // for audio only
-    AVPixelFormat pixelFormat;
-    AVSampleFormat sampleFormat;
-    AVCodecID videoCodecID;
-    AVCodecID audioCodecID;
-    int64_t maxBitRate;
-    bool frameRateFixed;
-    bool haveVideo;
-    bool haveAudio;
-    Parameter *params;
+    const char *mDstFilePath;
+    int mWidth;
+    int mHeight;
+    int mFrameRate;
+    int mSampleRate;
+    int mChannels;
+    AVPixelFormat mPixelFormat;
+    AVSampleFormat mSampleFormat;
+    AVCodecID mVideoCodecID;
+    AVCodecID mAudioCodecID;
+    int64_t mMaxBitRate;
+    bool mFrameRateFixed;
+    bool mHaveVideo;
+    bool mHaveAudio;
+    Parameter *mParams;
 
-    int imageCount;
-    int sampleCount;
-    int64_t startPts;
-    int64_t lastPts;
+    int mImageCount;
+    int mSampleCount;
+    int64_t mStartPts;
+    int64_t mLastPts;
 
-    AVFormatContext *formatCtx;
-    AVCodecContext *videoCodecCtx;
-    AVCodecContext *audioCodecCtx;
-    AVStream *videoStream;
-    AVStream *audioStream;
-    AVFrame *sample;
-    uint8_t **sampleBuf;
-    int sampleBufSize;
-    int samplePlanes;
-    AVFrame *picture;
-    AVFrame *tmpPicture;
-    uint8_t *pictureBuf;
-    SwsContext *imgConvertCtx;
-    SwrContext *sampleConvertCtx;
+    AVFormatContext *mFormatCtx;
+    AVCodecContext *mVideoCodecCtx;
+    AVCodecContext *mAudioCodecCtx;
+    AVStream *mVideoStream;
+    AVStream *mAudioStream;
+    AVFrame *mSample;
+    uint8_t **mSampleBuf;
+    int mSampleBufSize;
+    int mSamplePlanes;
+    AVFrame *mPicture;
+    AVFrame *mTmpPicture;
+    uint8_t *mPictureBuf;
+    SwsContext *mImgConvertCtx;
+    SwrContext *mSampleConvertCtx;
 
 private:
     int openOutputFile();

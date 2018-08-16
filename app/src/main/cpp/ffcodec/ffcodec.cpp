@@ -14,6 +14,7 @@
 #include "Encoder.h"
 #include "FrameFilter.h"
 #include "ffheader.h"
+#include "Transcoder.h"
 
 extern "C" {
 #include <libavutil/pixdesc.h>
@@ -80,12 +81,28 @@ struct DecodeParams {
     string dstAudioPath;
 };
 
+struct TranscodeParams {
+    uint64_t start;
+    uint64_t duration;
+    std::string srcFilePath;
+    std::string dstFilePath;
+    std::string videoFilter;
+    std::string audioFilter;
+    uint64_t maxBitRate;
+    int quality;
+    bool reencode;
+
+    jobject callbackObj;
+    jmethodID callbackMethod;
+};
 
 uint64_t getCurrentTimeMs();
 
 void release();
 
 void *decodeThreadFunc(void *arg);
+
+void *transcodeThreadFunc(void *arg);
 
 void *recordThreadCallback(void *arg);
 
@@ -132,6 +149,81 @@ void *decodeThreadFunc(void *arg) {
     delete param;
 
     return (void *) 1;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_steven_avgraphics_module_av_FFCodec__1transcode(JNIEnv *env, jobject instance,
+                                                         jstring srcFile_, jstring dstFile_,
+                                                         jlong start, jlong duration,
+                                                         jstring videoFilter_, jstring audioFilter_,
+                                                         jlong maxBitRate, jint quality,
+                                                         jboolean reencode) {
+    if (start < 0 || duration < 0 || (start > 0 && duration == 0)) {
+        LOGE("invalid argument, start: %lld, duration: %lld", start, duration);
+        return FAILED;
+    }
+
+    const char *srcFile = env->GetStringUTFChars(srcFile_, 0);
+    const char *dstFile = env->GetStringUTFChars(dstFile_, 0);
+    const char *videoFilter = env->GetStringUTFChars(videoFilter_, 0);
+    const char *audioFilter = env->GetStringUTFChars(audioFilter_, 0);
+
+    LOGI("Transocde:\nsrc file: %s\ndst file: %s\nstart: %lld\nduration: %lld", srcFile, dstFile,
+         start, duration);
+
+    pthread_t transcodeThread;
+    TranscodeParams *params = new TranscodeParams;
+    params->srcFilePath = srcFile;
+    params->dstFilePath = dstFile;
+    params->start = (uint64_t) start;
+    params->duration = (uint64_t) duration;
+    params->videoFilter = videoFilter;
+    params->audioFilter = audioFilter;
+    params->maxBitRate = (uint64_t) maxBitRate;
+    params->quality = quality;
+    params->reencode = reencode;
+
+    params->callbackObj = env->NewGlobalRef(instance);
+    jclass clz = env->GetObjectClass(instance);
+    params->callbackMethod = env->GetMethodID(clz, "getTranscodeResultFromNative", "(Z)V");
+    pthread_create(&transcodeThread, nullptr, transcodeThreadFunc, (void *) params);
+
+    env->ReleaseStringUTFChars(srcFile_, srcFile);
+    env->ReleaseStringUTFChars(dstFile_, dstFile);
+    env->ReleaseStringUTFChars(videoFilter_, videoFilter);
+    env->ReleaseStringUTFChars(audioFilter_, audioFilter);
+
+    return SUCCEED;
+}
+
+void *transcodeThreadFunc(void *arg) {
+    TranscodeParams *params = (TranscodeParams *) arg;
+    Transcoder *transcoder = new Transcoder();
+    Transcoder::Options *options = new Transcoder::Options();
+    options->setCutTime(params->start, params->duration);
+    options->setVideoFilter(params->videoFilter.c_str());
+    options->setAudioFilter(params->audioFilter.c_str());
+    options->setReencode(params->reencode);
+    options->setMaxBitRate(params->maxBitRate);
+    options->setQuality(params->quality > 0 ? params->quality : 23);
+    options->addEncodeOptions("preset", "ultrafast");
+    int ret = transcoder->transcode(params->srcFilePath.c_str(), params->dstFilePath.c_str(),
+                                    options);
+
+    JNIEnv *env = nullptr;
+    if (gvm->AttachCurrentThread(&env, nullptr) == 0) {
+        jobject obj = params->callbackObj;
+        jmethodID method = params->callbackMethod;
+        env->CallVoidMethod(obj, method, (jboolean) (ret >= 0));
+        env->DeleteGlobalRef(obj);
+        gvm->DetachCurrentThread();
+    }
+
+    delete params;
+    delete transcoder;
+
+    return (void *) ret;
 }
 
 extern "C"

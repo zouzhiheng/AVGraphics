@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/8/13 0013.
+// Created by zzh on 2018/8/13 0013.
 //
 
 #ifndef AVGRAPHICS_FFCODEC_H

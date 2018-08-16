@@ -22,16 +22,17 @@ public class Utils {
     private static final String AUDIO_OUTPUT_PCM = APP_DIR + "/audio_record.pcm";
     private static final String AUDIO_OUTPUT_WAV = APP_DIR + "/audio_record.wav";
 
-    private static final String HWRECORD_OUTPUT = APP_DIR + "/hwrecord.mp4";
-    private static final String HWDECODE_YUV_OUTPUT = APP_DIR + "/hwdecode.yuv";
-    private static final String HWDECODE_PCM_OUTPUT = APP_DIR + "/hwdecode.pcm";
-    private static final String HWTRANSCODE_OUTPUT = APP_DIR + "/hwtranscode.mp4";
+    private static final String HW_RECORD_OUTPUT = APP_DIR + "/hwrecord.mp4";
+    private static final String HW_DECODE_YUV_OUTPUT = APP_DIR + "/hwdecode.yuv";
+    private static final String HW_DECODE_PCM_OUTPUT = APP_DIR + "/hwdecode.pcm";
+    private static final String HW_TRANSCODE_OUTPUT = APP_DIR + "/hwtranscode.mp4";
 
     private static final String OPENSL_OUTPUT = APP_DIR + "/opensl.pcm";
 
-    private static final String FFRECORD_OUTPUT = APP_DIR + "/ffrecord.mp4";
-    private static final String FFDECODE_YUV_OUTPUT = APP_DIR + "/ffdecode.yuv";
-    private static final String FFDECODE_PCM_OUTPUT = APP_DIR + "/ffdecode.pcm";
+    private static final String FF_RECORD_OUTPUT = APP_DIR + "/ffrecord.mp4";
+    private static final String FF_TRANSCODE_OUTPUT = APP_DIR + "/fftranscode.mp4";
+    private static final String FF_DECODE_YUV_OUTPUT = APP_DIR + "/ffdecode.yuv";
+    private static final String FF_DECODE_PCM_OUTPUT = APP_DIR + "/ffdecode.pcm";
 
     private static Handler sHandler = new Handler(Looper.getMainLooper());
 
@@ -71,31 +72,35 @@ public class Utils {
     }
 
     public static String getHWRecordOutput() {
-        return HWRECORD_OUTPUT;
+        return HW_RECORD_OUTPUT;
     }
 
     public static String getHWDecodeYuvOutput() {
-        return HWDECODE_YUV_OUTPUT;
+        return HW_DECODE_YUV_OUTPUT;
     }
 
     public static String getHWDecodePcmOutput() {
-        return HWDECODE_PCM_OUTPUT;
+        return HW_DECODE_PCM_OUTPUT;
     }
 
     public static String getHWTranscodeOutput() {
-        return HWTRANSCODE_OUTPUT;
+        return HW_TRANSCODE_OUTPUT;
     }
 
     public static String getFFDecodeYuvOutput() {
-        return FFDECODE_YUV_OUTPUT;
+        return FF_DECODE_YUV_OUTPUT;
     }
 
     public static String getFFDecodePcmOutput() {
-        return FFDECODE_PCM_OUTPUT;
+        return FF_DECODE_PCM_OUTPUT;
     }
 
-    public static String getFfrecordOutput() {
-        return FFRECORD_OUTPUT;
+    public static String getFFRecordOutput() {
+        return FF_RECORD_OUTPUT;
+    }
+
+    public static String getFFTranscodeOutput() {
+        return FF_TRANSCODE_OUTPUT;
     }
 
     public static void runOnUiThread(Runnable action) {

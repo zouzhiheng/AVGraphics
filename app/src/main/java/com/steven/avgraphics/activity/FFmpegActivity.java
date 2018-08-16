@@ -18,12 +18,15 @@ import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 import com.steven.avgraphics.view.CameraPreviewView;
 
+import java.io.File;
+
 public class FFmpegActivity extends BaseActivity implements View.OnClickListener,
         Camera.PreviewCallback, CameraPreviewView.PreviewCallback,
         AudioRecorder.AudioRecordCallback {
 
     private CameraPreviewView mCameraPreviewView;
     private Button mBtnDecode;
+    private Button mBtnTranscode;
     private Button mBtnStartRecord;
     private Button mBtnStopRecord;
 
@@ -51,12 +54,14 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     private void findView() {
         mCameraPreviewView = findViewById(R.id.ff_cpv_preview);
         mBtnDecode = findViewById(R.id.ff_btn_decode);
+        mBtnTranscode = findViewById(R.id.ff_btn_transcode);
         mBtnStartRecord = findViewById(R.id.ff_btn_start_record);
         mBtnStopRecord = findViewById(R.id.ff_btn_stop_record);
     }
 
     private void setListener() {
         mBtnDecode.setOnClickListener(this);
+        mBtnTranscode.setOnClickListener(this);
         mBtnStartRecord.setOnClickListener(this);
         mBtnStopRecord.setOnClickListener(this);
         mCameraPreviewView.setPreviewCallback(this);
@@ -74,6 +79,9 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
             case R.id.ff_btn_decode:
                 decode();
                 break;
+            case R.id.ff_btn_transcode:
+                transcode();
+                break;
             case R.id.ff_btn_start_record:
                 startRecord();
                 break;
@@ -84,12 +92,33 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void decode() {
-        FFCodec._decode(Utils.getHWRecordOutput(), Utils.getFFDecodeYuvOutput(),
+        File file = new File(Utils.getFFRecordOutput());
+        if (!file.exists()) {
+            ToastHelper.show(R.string.ff_msg_no_file);
+            return;
+        }
+        FFCodec._decode(Utils.getFFRecordOutput(), Utils.getFFDecodeYuvOutput(),
                 Utils.getFFDecodePcmOutput());
         disableButtons();
         Handler handler = new Handler(Looper.getMainLooper());
         // 假设解码需要 3s
         handler.postDelayed(this::resetButtons, 3000);
+    }
+
+    private void transcode() {
+        File file = new File(Utils.getFFRecordOutput());
+        if (!file.exists()) {
+            ToastHelper.show(R.string.ff_msg_no_file);
+            return;
+        }
+        FFCodec.TranscodeParams params = new FFCodec.TranscodeParams(Utils.getFFRecordOutput(),
+                Utils.getFFTranscodeOutput());
+        params.setReencode(true);
+        FFCodec.transcode(params, succeed -> {
+            Utils.runOnUiThread(this::resetButtons);
+            ToastHelper.showOnUiThread(succeed ? R.string.ff_msg_transcode_succeed : R.string.ff_msg_transcode_failed);
+        });
+        disableButtons();
     }
 
     private void startRecord() {
@@ -99,7 +128,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         mImageWidth = mCameraPreviewView.getImageWidth();
         mImageHeight = mCameraPreviewView.getImageHeight();
 
-        FFCodec.RecordParams params = new FFCodec.RecordParams(Utils.getFfrecordOutput(),
+        FFCodec.RecordParams params = new FFCodec.RecordParams(Utils.getFFRecordOutput(),
                 mImageWidth, mImageHeight, 24, mAudioRecorder.getSampleRate(),
                 FFCodec.PIXEL_FORMAT_NV21, FFCodec.SAMPLE_FORMAT_16BIT,
                 mAudioRecorder.getChannels());
@@ -128,12 +157,14 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
 
     private void disableButtons() {
         mBtnDecode.setEnabled(false);
+        mBtnTranscode.setEnabled(false);
         mBtnStartRecord.setEnabled(false);
         mBtnStopRecord.setEnabled(false);
     }
 
     private void resetButtons() {
         mBtnDecode.setEnabled(true);
+        mBtnTranscode.setEnabled(true);
         mBtnStartRecord.setEnabled(true);
         mBtnStopRecord.setEnabled(false);
     }
@@ -156,7 +187,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         if (mIsReocrding) {
-            FFCodec.recordImage(data,  data.length, mImageWidth, mImageHeight,
+            FFCodec.recordImage(data, data.length, mImageWidth, mImageHeight,
                     FFCodec.PIXEL_FORMAT_NV21);
         }
     }

@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
-@SuppressWarnings("ALL")
 public class FFCodec {
 
     public static final int PIXEL_FORMAT_NONE = 0;
@@ -18,8 +17,22 @@ public class FFCodec {
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private RecordListener mRecordListener;
+    private TranscodeListener mTranscodeListener;
 
     public static native void _decode(String srcFile, String yuvDst, String pcmDst);
+
+    public static boolean transcode(TranscodeParams params, TranscodeListener listener) {
+        return new FFCodec().doTranscode(params, listener);
+    }
+
+    private boolean doTranscode(TranscodeParams params, TranscodeListener listener) {
+        mTranscodeListener = listener;
+        String videoFilter = params.mVideoFilter == null ? "null" : params.mVideoFilter;
+        String audioFilter = params.mAudioFilter == null ? "anull" : params.mAudioFilter;
+        int result = _transcode(params.mSrcFile, params.mDstFile, params.mStart, params.mDuration,
+                videoFilter, audioFilter, params.mMaxBitRate, params.mQuality, params.mIsReencode);
+        return result >= 0;
+    }
 
     public static boolean initRecorder(RecordParams params, RecordListener listener) {
         return new FFCodec().doInitRecorder(params, listener);
@@ -66,12 +79,73 @@ public class FFCodec {
 
     private static native void _stopRecord();
 
+    private native int _transcode(String srcFile, String dstFile, long start, long duration,
+                                  String videoFilter, String audioFilter, long maxBitRate,
+                                  int quality, boolean reencode);
+
+    private void getTranscodeResultFromNative(final boolean succeed) {
+        mHandler.post(() -> mTranscodeListener.onTranscodeCompleted(succeed));
+    }
+
     private void getRecordResultFromNative(final boolean succeed) {
         mHandler.post(() -> mRecordListener.onRecordCompleted(succeed));
     }
 
     public interface RecordListener {
         void onRecordCompleted(boolean succeed);
+    }
+
+    public interface TranscodeListener {
+        void onTranscodeCompleted(boolean succeed);
+    }
+
+    public static class TranscodeParams {
+        private String mSrcFile;
+        private String mDstFile;
+        // start, duration: 微秒(us)
+        private long mStart;
+        private long mDuration;
+        private String mVideoFilter;
+        private String mAudioFilter;
+        // 假如 reencode 为 false，则以下设置无效，底层不会重新编码
+        private long mMaxBitRate;
+        private int mQuality = 23;
+        private boolean mIsReencode = false;
+
+        public TranscodeParams(String srcFile, String dstFile) {
+            mSrcFile = srcFile;
+            mDstFile = dstFile;
+        }
+
+        public void setCutTime(long start, long duration) {
+            mStart = start;
+            mDuration = duration;
+        }
+
+        public void setFilter(String videoFilter, String audioFilter) {
+            mVideoFilter = videoFilter;
+            mAudioFilter = audioFilter;
+        }
+
+        public void setVideoFilter(String videoFilter) {
+            mVideoFilter = videoFilter;
+        }
+
+        public void setAudioFilter(String audioFilter) {
+            mAudioFilter = audioFilter;
+        }
+
+        public void setMaxBitRate(long maxBitRate) {
+            mMaxBitRate = maxBitRate;
+        }
+
+        public void setQuality(int quality) {
+            mQuality = quality;
+        }
+
+        public void setReencode(boolean reencode) {
+            mIsReencode = reencode;
+        }
     }
 
     public static class RecordParams {

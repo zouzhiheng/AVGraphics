@@ -1,5 +1,5 @@
 //
-// Created by Administrator on 2018/3/22 0022.
+// Created by zzh on 2018/3/22 0022.
 //
 
 #include "FrameFilter.h"
@@ -111,7 +111,6 @@ FrameFilter::FrameFilter() {
     afilterGraph = nullptr;
 
     params = nullptr;
-    logEnable = true;
 }
 
 int FrameFilter::init(Parameter *params) {
@@ -150,10 +149,6 @@ int FrameFilter::init(Parameter *params) {
             LOGE("init video failed!");
             return ret;
         }
-    }
-
-    if (logEnable) {
-        LOGI("frame filter init succeed: %s", params->toString().c_str());
     }
 
     return SUCCEED;
@@ -540,13 +535,6 @@ void FrameFilter::reset() {
     }
 }
 
-void FrameFilter::setLogEnable(bool enable) {
-    logEnable = enable;
-}
-
 FrameFilter::~FrameFilter() {
     reset();
-    if (logEnable) {
-        LOGI("FrameFilter released");
-    }
 }

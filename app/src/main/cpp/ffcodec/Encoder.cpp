@@ -98,59 +98,59 @@ std::string Encoder::Parameter::toString() {
 }
 
 int Encoder::init(Parameter *params) {
-    this->params = params;
-    dstFilePath = params->dstFilePath;
-    width = params->width;
-    height = params->height;
-    pixelFormat = params->pixelFormat;
-    frameRate = params->frameRate;
-    sampleFormat = params->sampleFormat;
-    sampleRate = params->sampleRate;
-    channels = params->channels;
-    videoCodecID =
+    this->mParams = params;
+    mDstFilePath = params->dstFilePath;
+    mWidth = params->width;
+    mHeight = params->height;
+    mPixelFormat = params->pixelFormat;
+    mFrameRate = params->frameRate;
+    mSampleFormat = params->sampleFormat;
+    mSampleRate = params->sampleRate;
+    mChannels = params->channels;
+    mVideoCodecID =
             params->videoCodecID == AV_CODEC_ID_NONE ? AV_CODEC_ID_H264 : params->videoCodecID;
-    audioCodecID =
+    mAudioCodecID =
             params->audioCodecID == AV_CODEC_ID_NONE ? AV_CODEC_ID_AAC : params->audioCodecID;
-    maxBitRate = params->maxBitRate;
-    haveVideo = params->haveVideo;
-    haveAudio = params->haveAudio;
-    frameRateFixed = params->frameRateFixed;
+    mMaxBitRate = params->maxBitRate;
+    mHaveVideo = params->haveVideo;
+    mHaveAudio = params->haveAudio;
+    mFrameRateFixed = params->frameRateFixed;
 
-    if (width % 2 == 1) {
-        if (height >= width) {
-            height = (int) (1.0f * (width - 1) / width * height);
-            height = height % 2 == 1 ? height - 1 : height;
+    if (mWidth % 2 == 1) {
+        if (mHeight >= mWidth) {
+            mHeight = (int) (1.0f * (mWidth - 1) / mWidth * mHeight);
+            mHeight = mHeight % 2 == 1 ? mHeight - 1 : mHeight;
         }
-        width--;
+        mWidth--;
     }
 
-    if (height % 2 == 1) {
-        if (width >= height) {
-            width = (int) (1.0f * (height - 1) / height * width);
-            width = width % 2 == 1 ? width - 1 : width;
+    if (mHeight % 2 == 1) {
+        if (mWidth >= mHeight) {
+            mWidth = (int) (1.0f * (mHeight - 1) / mHeight * mWidth);
+            mWidth = mWidth % 2 == 1 ? mWidth - 1 : mWidth;
         }
-        height--;
+        mHeight--;
     }
 
-    formatCtx = nullptr;
-    videoCodecCtx = nullptr;
-    audioCodecCtx = nullptr;
-    videoStream = nullptr;
-    audioStream = nullptr;
-    picture = nullptr;
-    pictureBuf = nullptr;
-    tmpPicture = nullptr;
-    sample = nullptr;
-    sampleBuf = nullptr;
-    imgConvertCtx = nullptr;
-    sampleConvertCtx = nullptr;
+    mFormatCtx = nullptr;
+    mVideoCodecCtx = nullptr;
+    mAudioCodecCtx = nullptr;
+    mVideoStream = nullptr;
+    mAudioStream = nullptr;
+    mPicture = nullptr;
+    mPictureBuf = nullptr;
+    mTmpPicture = nullptr;
+    mSample = nullptr;
+    mSampleBuf = nullptr;
+    mImgConvertCtx = nullptr;
+    mSampleConvertCtx = nullptr;
 
-    imageCount = 0;
-    sampleCount = 0;
-    startPts = 0;
-    lastPts = -1;
-    sampleBufSize = 0;
-    samplePlanes = 0;
+    mImageCount = 0;
+    mSampleCount = 0;
+    mStartPts = 0;
+    mLastPts = -1;
+    mSampleBufSize = 0;
+    mSamplePlanes = 0;
 
     return openOutputFile();
 }
@@ -160,110 +160,110 @@ int Encoder::openOutputFile() {
     av_register_all();
     av_log_set_callback(androidLog);
 
-    avformat_alloc_output_context2(&formatCtx, nullptr, nullptr, dstFilePath);
-    if (!formatCtx) {
+    avformat_alloc_output_context2(&mFormatCtx, nullptr, nullptr, mDstFilePath);
+    if (!mFormatCtx) {
         LOGI("Could not create output context");
         return AVERROR_UNKNOWN;
     }
 
-    LOGI("encoder input params: %s", params->toString().c_str());
+    LOGI("encoder input params: %s", mParams->toString().c_str());
 
-    if (haveVideo && (ret = openCodecCtx(videoCodecID, AVMEDIA_TYPE_VIDEO)) < 0) {
+    if (mHaveVideo && (ret = openCodecCtx(mVideoCodecID, AVMEDIA_TYPE_VIDEO)) < 0) {
         LOGE("Open video encoder context failed: %s", av_err2str(ret));
         release();
         return ret;
     }
 
-    if (haveAudio && (ret = openCodecCtx(audioCodecID, AVMEDIA_TYPE_AUDIO)) < 0) {
+    if (mHaveAudio && (ret = openCodecCtx(mAudioCodecID, AVMEDIA_TYPE_AUDIO)) < 0) {
         LOGE("Open audio encoder context failed: %s", av_err2str(ret));
         release();
         return ret;
     }
 
-    if (haveVideo) {
-        picture = av_frame_alloc();
-        if (!picture) {
+    if (mHaveVideo) {
+        mPicture = av_frame_alloc();
+        if (!mPicture) {
             LOGE("Could not allocate video frame");
             release();
             return FAILED;
         }
-        picture->format = pixelFormat;
-        picture->width = width;
-        picture->height = height;
-        picture->pts = 0;
+        mPicture->format = mPixelFormat;
+        mPicture->width = mWidth;
+        mPicture->height = mHeight;
+        mPicture->pts = 0;
 
-        int size = av_image_get_buffer_size(pixelFormat, width, height, 1);
+        int size = av_image_get_buffer_size(mPixelFormat, mWidth, mHeight, 1);
         if (size < 0) {
             LOGE("image get buffer size error: %s", av_err2str(size));
             release();
             return FAILED;
         }
-        pictureBuf = (uint8_t *) av_malloc((size_t) size);
-        if (!pictureBuf) {
+        mPictureBuf = (uint8_t *) av_malloc((size_t) size);
+        if (!mPictureBuf) {
             LOGE("Could not allocate memory");
             release();
             return FAILED;
         }
-        tmpPicture = av_frame_alloc();
-        if (!tmpPicture) {
+        mTmpPicture = av_frame_alloc();
+        if (!mTmpPicture) {
             LOGE("Could not allocate tmp video frame");
             release();
             return FAILED;
         }
     }
 
-    if (haveAudio) {
-        sample = av_frame_alloc();
-        if (!sample) {
+    if (mHaveAudio) {
+        mSample = av_frame_alloc();
+        if (!mSample) {
             LOGE("Could not allocate audio frame");
             release();
             return FAILED;
         }
-        sample->format = audioCodecCtx->sample_fmt;
-        sample->nb_samples = audioCodecCtx->frame_size;
-        sample->channel_layout = audioCodecCtx->channel_layout;
-        sample->pts = 0;
+        mSample->format = mAudioCodecCtx->sample_fmt;
+        mSample->nb_samples = mAudioCodecCtx->frame_size;
+        mSample->channel_layout = mAudioCodecCtx->channel_layout;
+        mSample->pts = 0;
 
-        samplePlanes = av_sample_fmt_is_planar(audioCodecCtx->sample_fmt) ? audioCodecCtx->channels
+        mSamplePlanes = av_sample_fmt_is_planar(mAudioCodecCtx->sample_fmt) ? mAudioCodecCtx->channels
                                                                           : 1;
-        sampleBufSize = av_samples_get_buffer_size(nullptr, audioCodecCtx->channels,
-                                                   audioCodecCtx->frame_size,
-                                                   audioCodecCtx->sample_fmt, 1) / samplePlanes;
-        sampleBuf = new uint8_t *[samplePlanes];
-        for (int i = 0; i < samplePlanes; i++) {
-            sampleBuf[i] = (uint8_t *) av_malloc((size_t) sampleBufSize);
-            if (sampleBuf[i] == nullptr) {
+        mSampleBufSize = av_samples_get_buffer_size(nullptr, mAudioCodecCtx->channels,
+                                                   mAudioCodecCtx->frame_size,
+                                                   mAudioCodecCtx->sample_fmt, 1) / mSamplePlanes;
+        mSampleBuf = new uint8_t *[mSamplePlanes];
+        for (int i = 0; i < mSamplePlanes; i++) {
+            mSampleBuf[i] = (uint8_t *) av_malloc((size_t) mSampleBufSize);
+            if (mSampleBuf[i] == nullptr) {
                 LOGE("Could not allocate memory");
                 release();
                 return FAILED;
             }
         }
 
-        sampleConvertCtx = swr_alloc_set_opts(sampleConvertCtx,
-                                              audioCodecCtx->channel_layout,
-                                              audioCodecCtx->sample_fmt,
-                                              audioCodecCtx->sample_rate,
-                                              av_get_default_channel_layout(channels),
-                                              sampleFormat, sampleRate, 0, nullptr);
-        if (!sampleConvertCtx) {
+        mSampleConvertCtx = swr_alloc_set_opts(mSampleConvertCtx,
+                                              mAudioCodecCtx->channel_layout,
+                                              mAudioCodecCtx->sample_fmt,
+                                              mAudioCodecCtx->sample_rate,
+                                              av_get_default_channel_layout(mChannels),
+                                              mSampleFormat, mSampleRate, 0, nullptr);
+        if (!mSampleConvertCtx) {
             LOGE("sampleConvertCtx alloc failed, audio record may be failed!");
-        } else if (swr_init(sampleConvertCtx) < 0) {
+        } else if (swr_init(mSampleConvertCtx) < 0) {
             LOGE("sampleConvertCtx init failed, audio record may be failed!");
         }
     }
 
-    av_dump_format(formatCtx, 0, dstFilePath, 1);
+    av_dump_format(mFormatCtx, 0, mDstFilePath, 1);
 
-    if (!(formatCtx->oformat->flags & AVFMT_NOFILE)) {
-        if ((ret = avio_open(&formatCtx->pb, dstFilePath, AVIO_FLAG_WRITE)) < 0) {
-            LOGE("Could not open output file '%s'", dstFilePath);
+    if (!(mFormatCtx->oformat->flags & AVFMT_NOFILE)) {
+        if ((ret = avio_open(&mFormatCtx->pb, mDstFilePath, AVIO_FLAG_WRITE)) < 0) {
+            LOGE("Could not open output file '%s'", mDstFilePath);
             release();
             return ret;
         }
     }
 
     // init muxer, write output file header
-    ret = avformat_write_header(formatCtx, nullptr);
+    ret = avformat_write_header(mFormatCtx, nullptr);
     if (ret < 0) {
         LOGE("Error occurred when opening output file");
         release();
@@ -289,49 +289,49 @@ int Encoder::openCodecCtx(AVCodecID codecID, AVMediaType mediaType) {
         LOGE("Failed to allocate the encoder context");
         return AVERROR(ENOMEM);
     }
-    stream = avformat_new_stream(formatCtx, encoder);
+    stream = avformat_new_stream(mFormatCtx, encoder);
     if (!stream) {
         LOGE("Could not allocate avstream.");
         return FAILED;
     }
 
     if (mediaType == AVMEDIA_TYPE_VIDEO) {
-        codecCtx->width = width;
-        codecCtx->height = height;
-        codecCtx->pix_fmt = pixelFormat;
+        codecCtx->width = mWidth;
+        codecCtx->height = mHeight;
+        codecCtx->pix_fmt = mPixelFormat;
         // 设置较小的 gop_size，提高截图效率
-        codecCtx->gop_size = frameRate;
-        if (frameRateFixed) {
-            codecCtx->time_base = (AVRational) {1, frameRate};
+        codecCtx->gop_size = mFrameRate;
+        if (mFrameRateFixed) {
+            codecCtx->time_base = (AVRational) {1, mFrameRate};
         } else {
             codecCtx->time_base = (AVRational) {1, 1000};
         }
-        if (maxBitRate > 0) {
-            codecCtx->rc_max_rate = maxBitRate;
-            codecCtx->rc_buffer_size = (int) maxBitRate;
+        if (mMaxBitRate > 0) {
+            codecCtx->rc_max_rate = mMaxBitRate;
+            codecCtx->rc_buffer_size = (int) mMaxBitRate;
         }
 
-        map<string, string>::iterator it = params->videoMetadata.begin();
-        for (; it != params->videoMetadata.end(); it++) {
+        map<string, string>::iterator it = mParams->videoMetadata.begin();
+        for (; it != mParams->videoMetadata.end(); it++) {
             av_dict_set(&stream->metadata, (*it).first.c_str(), (*it).second.c_str(), 0);
         }
     } else if (mediaType == AVMEDIA_TYPE_AUDIO) {
-        codecCtx->sample_rate = sampleRate;
-        codecCtx->channels = channels;
-        codecCtx->channel_layout = (uint64_t) av_get_default_channel_layout(channels);
+        codecCtx->sample_rate = mSampleRate;
+        codecCtx->channels = mChannels;
+        codecCtx->channel_layout = (uint64_t) av_get_default_channel_layout(mChannels);
         codecCtx->sample_fmt = encoder->sample_fmts[0];
         codecCtx->time_base = AVRational{1, codecCtx->sample_rate};
     }
     stream->time_base = codecCtx->time_base;
 
     // some formats want stream headers to be separate
-    if (formatCtx->oformat->flags & AVFMT_GLOBALHEADER) {
+    if (mFormatCtx->oformat->flags & AVFMT_GLOBALHEADER) {
         codecCtx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
     AVDictionary *options = nullptr;
-    map<string, string>::iterator it = params->encodeOptions.begin();
-    for (; it != params->encodeOptions.end(); it++) {
+    map<string, string>::iterator it = mParams->encodeOptions.begin();
+    for (; it != mParams->encodeOptions.end(); it++) {
         av_dict_set(&options, (*it).first.c_str(), (*it).second.c_str(), 0);
     }
     ret = avcodec_open2(codecCtx, encoder, &options);
@@ -350,11 +350,11 @@ int Encoder::openCodecCtx(AVCodecID codecID, AVMediaType mediaType) {
     }
 
     if (mediaType == AVMEDIA_TYPE_VIDEO) {
-        videoCodecCtx = codecCtx;
-        videoStream = stream;
+        mVideoCodecCtx = codecCtx;
+        mVideoStream = stream;
     } else if (mediaType == AVMEDIA_TYPE_AUDIO) {
-        audioCodecCtx = codecCtx;
-        audioStream = stream;
+        mAudioCodecCtx = codecCtx;
+        mAudioStream = stream;
     }
 
     return ret;
@@ -372,13 +372,13 @@ int Encoder::encode(AVModel *model, int *gotFrame) {
     *gotFrame = 0;
 
     bool isVideo = model->flag == MODEL_FLAG_VIDEO;
-    AVCodecContext *codecCtx = isVideo ? videoCodecCtx : audioCodecCtx;
-    AVStream *stream = isVideo ? videoStream : audioStream;
-    AVFrame *frame = isVideo ? picture : sample;
+    AVCodecContext *codecCtx = isVideo ? mVideoCodecCtx : mAudioCodecCtx;
+    AVStream *stream = isVideo ? mVideoStream : mAudioStream;
+    AVFrame *frame = isVideo ? mPicture : mSample;
     uint8_t *data = isVideo ? model->image : model->sample;
     const char *type = isVideo ? "video" : "audio";
 
-    if ((isVideo && !haveVideo) || (!isVideo && !haveAudio)) {
+    if ((isVideo && !mHaveVideo) || (!isVideo && !mHaveAudio)) {
         LOGE("%s model cannot write, no corresponding encoder", type);
         return 0;
     }
@@ -415,7 +415,7 @@ int Encoder::encode(AVModel *model, int *gotFrame) {
 
         av_packet_rescale_ts(&packet, codecCtx->time_base, stream->time_base);
         packet.stream_index = stream->index;
-        ret = av_interleaved_write_frame(formatCtx, &packet);
+        ret = av_interleaved_write_frame(mFormatCtx, &packet);
         if (ret < 0) {
             LOGE("Error writing %s frame: %s", type, av_err2str(ret));
             return ret;
@@ -428,26 +428,26 @@ int Encoder::encode(AVModel *model, int *gotFrame) {
 
 int Encoder::fillPicture(AVModel *model) {
     int ret;
-    ret = av_image_fill_arrays(picture->data, picture->linesize, model->image,
+    ret = av_image_fill_arrays(mPicture->data, mPicture->linesize, model->image,
                                getPixelFormat(model->pixelFormat), model->width, model->height, 1);
     if (ret < 0) {
         LOGE("av_image_fill_arrays error: %s", av_err2str(ret));
         return FAILED;
     }
-    if (frameRateFixed) {
-        picture->pts = imageCount++;
+    if (mFrameRateFixed) {
+        mPicture->pts = mImageCount++;
     } else {
-        if (startPts == 0) {
-            picture->pts = 0;
-            startPts = model->pts;
+        if (mStartPts == 0) {
+            mPicture->pts = 0;
+            mStartPts = model->pts;
         } else {
-            picture->pts = model->pts - startPts;
+            mPicture->pts = model->pts - mStartPts;
         }
         // 少数情况下，当前帧的 pts 和上一帧一样，导致 packet 写入文件失败，进而可能导致花屏
-        if (picture->pts == lastPts) {
-            picture->pts += 10;
+        if (mPicture->pts == mLastPts) {
+            mPicture->pts += 10;
         }
-        lastPts = picture->pts;
+        mLastPts = mPicture->pts;
     }
 
     return SUCCEED;
@@ -455,31 +455,31 @@ int Encoder::fillPicture(AVModel *model) {
 
 int Encoder::fillSample(AVModel *model) {
     int ret;
-    if (audioCodecCtx->channels != channels || audioCodecCtx->sample_fmt != sampleFormat ||
-        audioCodecCtx->sample_rate != sampleRate) {
-        ret = swr_convert(sampleConvertCtx, sampleBuf, audioCodecCtx->frame_size,
-                          (const uint8_t **) &model->sample, audioCodecCtx->frame_size);
+    if (mAudioCodecCtx->channels != mChannels || mAudioCodecCtx->sample_fmt != mSampleFormat ||
+        mAudioCodecCtx->sample_rate != mSampleRate) {
+        ret = swr_convert(mSampleConvertCtx, mSampleBuf, mAudioCodecCtx->frame_size,
+                          (const uint8_t **) &model->sample, mAudioCodecCtx->frame_size);
         if (ret <= 0) {
             LOGE("swr_convert error: %s", av_err2str(ret));
             return FAILED;
         }
-        avcodec_fill_audio_frame(sample, channels, audioCodecCtx->sample_fmt, sampleBuf[0],
-                                 sampleBufSize, 0);
-        for (int i = 0; i < samplePlanes; i++) {
-            sample->data[i] = sampleBuf[i];
-            sample->linesize[i] = sampleBufSize;
+        avcodec_fill_audio_frame(mSample, mChannels, mAudioCodecCtx->sample_fmt, mSampleBuf[0],
+                                 mSampleBufSize, 0);
+        for (int i = 0; i < mSamplePlanes; i++) {
+            mSample->data[i] = mSampleBuf[i];
+            mSample->linesize[i] = mSampleBufSize;
         }
     } else {
-        ret = av_samples_fill_arrays(sample->data, sample->linesize, model->sample,
-                                     audioCodecCtx->channels, sample->nb_samples,
-                                     audioCodecCtx->sample_fmt, 1);
+        ret = av_samples_fill_arrays(mSample->data, mSample->linesize, model->sample,
+                                     mAudioCodecCtx->channels, mSample->nb_samples,
+                                     mAudioCodecCtx->sample_fmt, 1);
     }
     if (ret < 0) {
         LOGE("av_samples_fill_arrays error: %s", av_err2str(ret));
         return FAILED;
     }
-    sample->pts = sampleCount;
-    sampleCount += sample->nb_samples;
+    mSample->pts = mSampleCount;
+    mSampleCount += mSample->nb_samples;
 
     return SUCCEED;
 }
@@ -505,70 +505,70 @@ int Encoder::stop() {
         }
     }
     delete model;
-    av_write_trailer(formatCtx);
+    av_write_trailer(mFormatCtx);
     release();
 
     return ret;
 }
 
 void Encoder::release() {
-    if (picture != nullptr) {
-        av_frame_free(&picture);
-        picture = nullptr;
+    if (mPicture != nullptr) {
+        av_frame_free(&mPicture);
+        mPicture = nullptr;
     }
-    if (tmpPicture != nullptr) {
-        av_frame_free(&tmpPicture);
-        tmpPicture = nullptr;
+    if (mTmpPicture != nullptr) {
+        av_frame_free(&mTmpPicture);
+        mTmpPicture = nullptr;
     }
-    if (pictureBuf != nullptr) {
-        av_free(pictureBuf);
-        pictureBuf = nullptr;
+    if (mPictureBuf != nullptr) {
+        av_free(mPictureBuf);
+        mPictureBuf = nullptr;
     }
-    if (sample != nullptr) {
-        av_frame_free(&sample);
-        sample = nullptr;
+    if (mSample != nullptr) {
+        av_frame_free(&mSample);
+        mSample = nullptr;
     }
-    if (sampleBuf != nullptr) {
-        for (int i = 0; i < samplePlanes; i++) {
-            if (sampleBuf[i] != nullptr) {
-                av_free(sampleBuf[i]);
-                sampleBuf[i] = nullptr;
+    if (mSampleBuf != nullptr) {
+        for (int i = 0; i < mSamplePlanes; i++) {
+            if (mSampleBuf[i] != nullptr) {
+                av_free(mSampleBuf[i]);
+                mSampleBuf[i] = nullptr;
             }
         }
-        delete[] sampleBuf;
-        sampleBuf = nullptr;
+        delete[] mSampleBuf;
+        mSampleBuf = nullptr;
     }
-    if (videoCodecCtx != nullptr) {
-        avcodec_free_context(&videoCodecCtx);
-        videoCodecCtx = nullptr;
+    if (mVideoCodecCtx != nullptr) {
+        avcodec_free_context(&mVideoCodecCtx);
+        mVideoCodecCtx = nullptr;
     }
-    if (audioCodecCtx != nullptr) {
-        avcodec_free_context(&audioCodecCtx);
-        audioCodecCtx = nullptr;
+    if (mAudioCodecCtx != nullptr) {
+        avcodec_free_context(&mAudioCodecCtx);
+        mAudioCodecCtx = nullptr;
     }
-    if (formatCtx && !(formatCtx->oformat->flags & AVFMT_NOFILE)) {
-        avio_closep(&formatCtx->pb);
-        avformat_close_input(&formatCtx);
-        formatCtx = nullptr;
+    if (mFormatCtx && !(mFormatCtx->oformat->flags & AVFMT_NOFILE)) {
+        avio_closep(&mFormatCtx->pb);
+        avformat_close_input(&mFormatCtx);
+        mFormatCtx = nullptr;
     }
-    if (imgConvertCtx != nullptr) {
-        sws_freeContext(imgConvertCtx);
-        imgConvertCtx = nullptr;
+    if (mImgConvertCtx != nullptr) {
+        sws_freeContext(mImgConvertCtx);
+        mImgConvertCtx = nullptr;
     }
-    if (sampleConvertCtx != nullptr) {
-        swr_free(&sampleConvertCtx);
-        sampleConvertCtx = nullptr;
+    if (mSampleConvertCtx != nullptr) {
+        swr_free(&mSampleConvertCtx);
+        mSampleConvertCtx = nullptr;
     }
-    if (params != nullptr) {
-        delete params;
-        params = nullptr;
+    if (mParams != nullptr) {
+        delete mParams;
+        mParams = nullptr;
     }
-    if (videoStream != nullptr && videoStream->metadata != nullptr) {
-        av_dict_free(&videoStream->metadata);
-        videoStream->metadata = nullptr;
+    if (mVideoStream != nullptr && mVideoStream->metadata != nullptr) {
+        av_dict_free(&mVideoStream->metadata);
+        mVideoStream->metadata = nullptr;
     }
-    videoStream = nullptr;
-    audioStream = nullptr;
+    mVideoStream = nullptr;
+    mAudioStream = nullptr;
 }
 
 Encoder::~Encoder() {

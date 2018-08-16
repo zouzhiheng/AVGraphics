@@ -1,9 +1,9 @@
 //
-// Created by Administrator on 2018/3/22 0022.
+// Created by zzh on 2018/3/22 0022.
 //
 
-#ifndef VIDEOEDITOR_FRAME_FILTER_H
-#define VIDEOEDITOR_FRAME_FILTER_H
+#ifndef AVGRAPHICS_FRAME_FILTER_H
+#define AVGRAPHICS_FRAME_FILTER_H
 
 #include <string>
 #include "ffheader.h"
@@ -72,7 +72,6 @@ private:
     const char *audioFilter;
 
     Parameter *params;
-    bool logEnable;
 
     AVFilterContext *vbuffersinkCtx;
     AVFilterContext *vbuffersrcCtx;
@@ -101,8 +100,6 @@ public:
     int process(AVModel *model);
 
     void reset();
-
-    void setLogEnable(bool enable);
 };
 
-#endif //VIDEOEDITOR_FRAME_FILTER_H
+#endif //AVGRAPHICS_FRAME_FILTER_H
