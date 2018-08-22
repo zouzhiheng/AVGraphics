@@ -2,7 +2,6 @@ package com.steven.avgraphics.module.av;
 
 
 import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
@@ -24,73 +23,6 @@ public class HWCodec {
 
     public static final String MIME_TYPE_AVC = "video/avc";
     public static final String MIME_TYPE_AAC = "audio/mp4a-latm";
-
-    public static AVInfo getAVInfo(String filePath) {
-        MediaExtractor extractor = new MediaExtractor();
-        try {
-            extractor.setDataSource(filePath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        AVInfo info = new AVInfo();
-        for (int i = 0; i < extractor.getTrackCount(); i++) {
-            MediaFormat format = extractor.getTrackFormat(i);
-            if (getMediaType(format) == MEDIA_TYPE_VIDEO) {
-                info.vBitRate = getFormatInt(format, MediaFormat.KEY_BIT_RATE);
-                info.vDuration = getFormatLong(format, MediaFormat.KEY_DURATION);
-                info.vCodec = getFormatString(format, MediaFormat.KEY_MIME);
-                info.width = getFormatInt(format, MediaFormat.KEY_WIDTH);
-                info.height = getFormatInt(format, MediaFormat.KEY_HEIGHT);
-                info.frameRate = getFormatInt(format, MediaFormat.KEY_FRAME_RATE);
-                int pixelFormat = getFormatInt(format, MediaFormat.KEY_COLOR_FORMAT);
-                if (pixelFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
-                    info.pixelFommat = Format.PIXEL_FORMAT_NV12;
-                } else if (pixelFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) {
-                    info.pixelFommat = Format.PIXEL_FORMAT_YUV420P;
-                }
-            } else if (getMediaType(format) == MEDIA_TYPE_AUDIO) {
-                info.aBitRate = getFormatInt(format, MediaFormat.KEY_BIT_RATE);
-                info.aDuration = getFormatLong(format, MediaFormat.KEY_DURATION);
-                info.aCodec = getFormatString(format, MediaFormat.KEY_MIME);
-                info.channels = getFormatInt(format, MediaFormat.KEY_CHANNEL_COUNT);
-                info.sampleRate = getFormatInt(format, MediaFormat.KEY_SAMPLE_RATE);
-            }
-        }
-
-        return info;
-    }
-
-    private static int getFormatInt(MediaFormat format, String name) {
-        int result;
-        try {
-            result = format.getInteger(name);
-        } catch (Exception e) {
-            result = -1;
-        }
-        return result;
-    }
-
-    private static long getFormatLong(MediaFormat format, String name) {
-        long result;
-        try {
-            result = format.getLong(name);
-        } catch (Exception e) {
-            result = -1;
-        }
-        return result;
-    }
-
-    private static String getFormatString(MediaFormat format, String name) {
-        String result;
-        try {
-            result = format.getString(name);
-        } catch (Exception e) {
-            result = "null";
-        }
-        return result;
-    }
 
     public static int getMediaType(MediaFormat format) {
         String mime = format.getString(MediaFormat.KEY_MIME);

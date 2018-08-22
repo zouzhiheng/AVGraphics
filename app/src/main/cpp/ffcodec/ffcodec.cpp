@@ -136,17 +136,27 @@ Java_com_steven_avgraphics_module_av_FFCodec__1getAVInfo(JNIEnv *env, jclass typ
         return result;
     }
 
+    jfieldID isHaveVideo = env->GetFieldID(clz, "isHaveVideo", "Z");
+    env->SetBooleanField(result, isHaveVideo, (jboolean) info->haveVideo);
+    jfieldID vcodec = env->GetFieldID(clz, "vcodec", "I");
+    int vcodecId = VCODEC_UNKNOWN;
+    if (info->videoCodecID == AV_CODEC_ID_H264) {
+        vcodecId = VCODEC_H264;
+    } else if (info->videoCodecID == AV_CODEC_ID_MPEG4) {
+        vcodecId = VCODEC_MPEG;
+    } else if (info->videoCodecID == AV_CODEC_ID_HEVC) {
+        vcodecId = VCODEC_H265;
+    } else if (info->haveVideo) {
+        vcodecId = VCODEC_OTHER;
+    }
+    env->SetIntField(result, vcodec, vcodecId);
     jfieldID width = env->GetFieldID(clz, "width", "I");
     env->SetIntField(result, width, info->width);
     jfieldID height = env->GetFieldID(clz, "height", "I");
     env->SetIntField(result, height, info->height);
-    jfieldID duration = env->GetFieldID(clz, "vDuration", "J");
-    env->SetLongField(result, duration, info->duration);
-    jfieldID bitrate = env->GetFieldID(clz, "vBitRate", "I");
-    env->SetIntField(result, bitrate, (jint) info->bitRate);
     jfieldID frameRate = env->GetFieldID(clz, "frameRate", "I");
     env->SetIntField(result, frameRate, info->frameRate);
-    jfieldID pixelFormat = env->GetFieldID(clz, "pixelFommat", "I");
+    jfieldID pixelFormat = env->GetFieldID(clz, "pixelFormat", "I");
     int pixelFormatValue = 0;
     if (info->pixelFormat == AV_PIX_FMT_NV12) {
         pixelFormatValue = PIXEL_FORMAT_NV12;
@@ -157,6 +167,18 @@ Java_com_steven_avgraphics_module_av_FFCodec__1getAVInfo(JNIEnv *env, jclass typ
     }
     env->SetIntField(result, pixelFormat, pixelFormatValue);
 
+    jfieldID isHaveAudio = env->GetFieldID(clz, "isHaveAudio", "Z");
+    env->SetBooleanField(result, isHaveAudio, (jboolean) info->haveAudio);
+    jfieldID acodec = env->GetFieldID(clz, "acodec", "I");
+    int acodecId = ACODEC_UNKNOWN;
+    if (info->audioCodecID == AV_CODEC_ID_AAC) {
+        acodecId = ACODEC_AAC;
+    } else if (info->audioCodecID == AV_CODEC_ID_MP3) {
+        acodecId = ACODEC_MP3;
+    } else if (info->haveAudio) {
+        acodecId = ACODEC_OTHER;
+    }
+    env->SetIntField(result, acodec, acodecId);
     jfieldID sampleRate = env->GetFieldID(clz, "sampleRate", "I");
     env->SetIntField(result, sampleRate, info->sampleRate);
     jfieldID channels = env->GetFieldID(clz, "channels", "I");
@@ -171,6 +193,11 @@ Java_com_steven_avgraphics_module_av_FFCodec__1getAVInfo(JNIEnv *env, jclass typ
         sampleFormatValue = SAMPLE_FORMAT_FLOAT;
     }
     env->SetIntField(result, sampleFormat, sampleFormatValue);
+
+    jfieldID bitRate = env->GetFieldID(clz, "bitRate", "I");
+    env->SetIntField(result, bitRate, (jint) info->bitRate);
+    jfieldID duration = env->GetFieldID(clz, "duration", "J");
+    env->SetLongField(result, duration, info->duration);
 
     delete decoder;
     delete info;

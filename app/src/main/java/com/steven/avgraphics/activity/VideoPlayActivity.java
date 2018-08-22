@@ -4,7 +4,6 @@ import android.content.res.AssetManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.media.MediaCodecInfo;
 import android.opengl.Matrix;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -19,7 +18,6 @@ import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.module.av.AVInfo;
 import com.steven.avgraphics.module.av.FFCodec;
-import com.steven.avgraphics.module.av.Format;
 import com.steven.avgraphics.module.av.HWDecoder;
 import com.steven.avgraphics.module.av.OnDecodeListener;
 import com.steven.avgraphics.util.ToastHelper;
@@ -30,9 +28,9 @@ import java.io.File;
 public class VideoPlayActivity extends BaseActivity {
 
     private static final int DEFAULT_FRAME_RATE = 24;
-    private static final int DEFAULT_PIXEL_FORMAT = Format.PIXEL_FORMAT_NV12;
+    private static final int DEFAULT_PIXEL_FORMAT = AVInfo.PIXEL_FORMAT_NV12;
     private static final int DEFAULT_SAMPLE_RATE = 48000;
-    private static final int DEFAULT_SAMPLE_FORMAT = Format.SAMPLE_FORMAT_16BIT;
+    private static final int DEFAULT_SAMPLE_FORMAT = AVInfo.SAMPLE_FORMAT_16BIT;
 
     private SurfaceView mSurfaceView;
     private Button mBtnStart;
@@ -55,10 +53,10 @@ public class VideoPlayActivity extends BaseActivity {
     private int mFrameRate = DEFAULT_FRAME_RATE;
     private int mPixelFormat = DEFAULT_PIXEL_FORMAT;
     private int mSampleRate;
-    private int mSampleFormat;
+    private int mSampleFormat = DEFAULT_SAMPLE_FORMAT;
     private int mChannels;
     private float[] mMatrix = new float[16];
-    private boolean mIsPlaying = false;
+    private volatile boolean mIsPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,14 +85,13 @@ public class VideoPlayActivity extends BaseActivity {
 
     private void showAVInfo() {
         if (mAVInfo != null) {
-            String str = "file: " + mFile.getAbsolutePath() + "\n"
-                    + "width: " + mAVInfo.width + ", height: " + mAVInfo.height + "\n"
-                    + "frame rate: " + mAVInfo.frameRate + ", pixel format: "
-                    + Format.getPixelFormatName(mAVInfo.pixelFommat) + "\n"
-                    + "sample rate: " + mAVInfo.sampleRate + ", channels: " + mAVInfo.channels
-                    + ", sample format: " + Format.getSampleFormatName(mAVInfo.sampleFormat) + "\n"
-                    + "duration: " + mAVInfo.vDuration / 1000 / 1000 + "s";
-            mTvAVInfo.setText(str);
+            double fileSize = (double) mFile.length() / 1024 / 1024;
+            int index = String.valueOf(fileSize).lastIndexOf(".");
+            String fileSizeStr = String.valueOf(fileSize).substring(0, index + 3);
+            String string = "[file path: " + mFile.getAbsolutePath() + "]\n[file size: "
+                    + fileSizeStr + "M]\n" + mAVInfo.toString();
+            Log.i(TAG, "video file info:\n" + string);
+            mTvAVInfo.setText(string);
         }
     }
 
@@ -131,7 +128,7 @@ public class VideoPlayActivity extends BaseActivity {
         setupVideoParams();
         startDecode();
         setupAudioTrack();
-//        _startSL(mSampleRate, DEFAULT_SAMPLE_FORMAT, mChannels);
+//        _startSL(mSampleRate, mSampleFormat, mChannels);
         _startGL(mSurface, mSurfaceWidth, mSurfaceHeight, mImageWidth, mImageHeight, mFrameRate,
                 getAssets());
         startCounDownTimer();
@@ -151,9 +148,9 @@ public class VideoPlayActivity extends BaseActivity {
     private void setupAudioTrack() {
         int channelConfig = mChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO;
         int bufferSize = AudioTrack.getMinBufferSize(mSampleRate, channelConfig,
-                Format.getAudioFormat(mSampleFormat));
+                AudioFormat.ENCODING_PCM_16BIT);
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate, channelConfig,
-                Format.getAudioFormat(mSampleFormat), bufferSize, AudioTrack.MODE_STREAM);
+                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
     }
 
     private void startDecode() {
@@ -163,7 +160,7 @@ public class VideoPlayActivity extends BaseActivity {
     }
 
     private void startCounDownTimer() {
-        mCountDownTimer = new CountDownTimer(mAVInfo.vDuration + 1000, 1000) {
+        mCountDownTimer = new CountDownTimer(mAVInfo.duration + 1000, 1000) {
 
             long mPass = 0;
 
@@ -192,22 +189,23 @@ public class VideoPlayActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mIsPlaying = false;
+        mDecodeListener = null;
+        stop();
+        releaseAudioTrack();
+//        _stopSL();
+        _stopGL();
+    }
+
     private synchronized void releaseAudioTrack() {
         if (mAudioTrack != null) {
             mAudioTrack.stop();
             mAudioTrack.release();
             mAudioTrack = null;
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mDecodeListener = null;
-        stop();
-        releaseAudioTrack();
-//        _stopSL();
-        _stopGL();
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -245,9 +243,9 @@ public class VideoPlayActivity extends BaseActivity {
                 if (mIsPlaying) {
                     mAudioTrack.write(data, 0, data.length);
                     mAudioTrack.play();
+//                    _writeSL(data, data.length);
                 }
             }
-//            _writeSL(data, data.length);
         }
 
         @Override
@@ -255,8 +253,8 @@ public class VideoPlayActivity extends BaseActivity {
             Utils.runOnUiThread(() -> {
                 stop();
                 releaseAudioTrack();
-                _stopGL();
 //                _stopSL();
+                _stopGL();
             });
         }
     }
@@ -269,7 +267,6 @@ public class VideoPlayActivity extends BaseActivity {
 
     private static native void _stopGL();
 
-    // 如果要使用 OpenSL，可以取消下面的注释
 //    private static native void _startSL(int sampleRate, int samleFormat, int channels);
 //
 //    private static native void _writeSL(byte[] data, int length);

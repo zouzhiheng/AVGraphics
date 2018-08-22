@@ -14,9 +14,9 @@ import android.widget.SeekBar;
 
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
+import com.steven.avgraphics.module.av.AVInfo;
 import com.steven.avgraphics.module.av.AudioRecorder;
 import com.steven.avgraphics.module.av.FFCodec;
-import com.steven.avgraphics.module.av.Format;
 import com.steven.avgraphics.util.ToastHelper;
 import com.steven.avgraphics.util.Utils;
 import com.steven.avgraphics.view.CameraPreviewView;
@@ -159,7 +159,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
 
         FFCodec.RecordParams params = new FFCodec.RecordParams(Utils.getFFRecordOutput(),
                 mImageWidth, mImageHeight, 24, mAudioRecorder.getSampleRate(),
-                Format.PIXEL_FORMAT_NV21, Format.SAMPLE_FORMAT_16BIT,
+                AVInfo.PIXEL_FORMAT_NV21, AVInfo.SAMPLE_FORMAT_16BIT,
                 mAudioRecorder.getChannels());
         FFCodec.FilterParams filter = new FFCodec.FilterParams();
         // 由于 OpenGL 和 Android 坐标系的不同，使用美颜时需要倒转 180 度才能得到正确的画面
@@ -222,7 +222,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
     public void onPreviewFrame(byte[] data, Camera camera) {
         if (mIsReocrding && !mCameraPreviewView.isBeautyOpen()) {
             FFCodec.recordImage(data, data.length, mImageWidth, mImageHeight,
-                    Format.PIXEL_FORMAT_NV21);
+                    AVInfo.PIXEL_FORMAT_NV21);
         }
     }
 

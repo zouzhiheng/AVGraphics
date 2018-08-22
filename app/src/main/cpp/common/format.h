@@ -13,6 +13,17 @@ extern "C" {
 #include <libavutil/pixfmt.h>
 };
 
+static const int VCODEC_UNKNOWN = 0;
+static const int VCODEC_H264 = 1;
+static const int VCODEC_MPEG = 2;
+static const int VCODEC_H265 = 3;
+static const int VCODEC_OTHER = 4;
+
+static const int ACODEC_UNKNOWN = 0;
+static const int ACODEC_AAC = 1;
+static const int ACODEC_MP3 = 2;
+static const int ACODEC_OTHER = 3;
+
 static const int PIXEL_FORMAT_NONE = 0;
 static const int PIXEL_FORMAT_NV21 = 1;
 static const int PIXEL_FORMAT_YV12 = 2;
@@ -23,7 +34,7 @@ static const int PIXEL_FORMAT_ABGR = 6;
 
 static const int SAMPLE_FORMAT_8BIT = 8;
 static const int SAMPLE_FORMAT_16BIT = 16;
-static const int SAMPLE_FORMAT_FLOAT = 24;
+static const int SAMPLE_FORMAT_FLOAT = 32;
 
 inline libyuv::FourCC getFourCC(int pixelFormat) {
     if (pixelFormat == PIXEL_FORMAT_NV12) {
