@@ -20,6 +20,7 @@
 #include "YuvRenderer.h"
 #include "AVModel.h"
 #include "format.h"
+#include "CameraEffect.h"
 
 using namespace std;
 
@@ -345,7 +346,7 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1draw(JNIEnv *env, jc
 
     unique_lock<mutex> lock(gMutex);
     if (!glCamera) {
-        LOGE("draw error, fboRenderer is null");
+        LOGE("draw error, glCamera is null");
         return;
     }
     glCamera->draw(matrix);
@@ -364,6 +365,66 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1release(JNIEnv *env,
     }
 }
 
+
+// --- CameraEffectActivity
+
+CameraEffect *cameraEffect = nullptr;
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_steven_avgraphics_activity_gles_CameraEffectActivity__1init(JNIEnv *env, jclass type,
+                                                                     jobject surface, jint width,
+                                                                     jint height,
+                                                                     jbyteArray watermark_,
+                                                                     jbyteArray text_,
+                                                                     jobject manager_) {
+    unique_lock<mutex> lock(gMutex);
+    if (cameraEffect) {
+        cameraEffect->stop();
+        delete cameraEffect;
+    }
+
+    jbyte *watermark = env->GetByteArrayElements(watermark_, NULL);
+    jbyte *text = env->GetByteArrayElements(text_, NULL);
+
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    AAssetManager *manager = AAssetManager_fromJava(env, manager_);
+    cameraEffect = new CameraEffect(window);
+    cameraEffect->setAssetManager(manager);
+    cameraEffect->resize(width, height);
+
+    env->ReleaseByteArrayElements(watermark_, watermark, 0);
+    env->ReleaseByteArrayElements(text_, text, 0);
+
+    return cameraEffect->init();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_CameraEffectActivity__1draw(JNIEnv *env, jclass type,
+                                                                     jfloatArray matrix_) {
+    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
+
+    unique_lock<mutex> lock(gMutex);
+    if (!cameraEffect) {
+        LOGE("draw error, cameraEffect is null");
+        return;
+    }
+    cameraEffect->draw(matrix);
+
+    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_steven_avgraphics_activity_gles_CameraEffectActivity__1release(JNIEnv *env, jclass type) {
+    unique_lock<mutex> lock(gMutex);
+    if (cameraEffect) {
+        cameraEffect->stop();
+        delete cameraEffect;
+        cameraEffect = nullptr;
+    }
+}
 
 // --- CameraPreviewView
 Beauty *beauty = nullptr;

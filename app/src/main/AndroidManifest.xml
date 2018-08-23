@@ -55,6 +55,9 @@
         <activity
             android:name=".activity.FFmpegActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".activity.gles.CameraEffectActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 
 </manifest>

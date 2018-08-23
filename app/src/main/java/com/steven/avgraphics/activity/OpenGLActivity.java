@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.activity.gles.BeautyActivity;
+import com.steven.avgraphics.activity.gles.CameraEffectActivity;
 import com.steven.avgraphics.activity.gles.EGLCircleActivity;
 import com.steven.avgraphics.activity.gles.FboActivity;
 import com.steven.avgraphics.activity.gles.GLCameraActivity;
@@ -35,6 +36,7 @@ public class OpenGLActivity extends BaseActivity {
         findViewById(R.id.opengl_btn_texture).setOnClickListener(v -> startActivity(TextureActivity.class));
         findViewById(R.id.opengl_btn_fbo).setOnClickListener(v -> startActivity(FboActivity.class));
         findViewById(R.id.opengl_btn_glcamera).setOnClickListener(v -> startActivity(GLCameraActivity.class));
+        findViewById(R.id.opengl_btn_camera_effect).setOnClickListener(v -> startActivity(CameraEffectActivity.class));
         findViewById(R.id.opengl_btn_beauty).setOnClickListener(v -> startActivity(BeautyActivity.class));
     }
 
