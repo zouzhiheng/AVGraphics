@@ -11,30 +11,38 @@
 #include "GLDemo.h"
 #include "EGLCore.h"
 
-class CameraEffect : public GLDemo {
+class Watermark : public GLDemo {
 private:
     AAssetManager *mAssetManager;
     ANativeWindow *mWindow;
 
-    GLuint mTextures[3];
-    GLint mCameraTextureLoc;
-    GLint mWatermarkTextureLoc;
-    GLint mTextTextureLoc;
-    GLint mMatrixLoc;
-    GLfloat mMatrix[16];
-
     EGLCore *mEGLCore;
+    GLuint mTextureOes;
+    GLuint mTexture2D;
+
+    GLint mCameraMatrixLoc;
+    GLint mCameraTextureLoc;
+    GLint mWatermarkMatrixLoc;
+    GLint mWatermarkTextureLoc;
+
+    GLint mWatermarkWidth;
+    GLint mWatermarkHeight;
+    uint8_t *mWatermarkPixel;
 
 public:
-    CameraEffect(ANativeWindow *window);
+    Watermark(ANativeWindow *window);
 
-    virtual ~CameraEffect();
+    virtual ~Watermark();
 
     void setAssetManager(AAssetManager *assetManager);
 
+    void setWatermarkSize(GLint width, GLint height);
+
+    void setWatermarkPixel(uint8_t *watermarkPixel, size_t length);
+
     int init();
 
-    void draw(GLfloat *matrix);
+    void draw(GLfloat *cameraMatrix, GLfloat *watermarkMatrix);
 
     void stop();
 };

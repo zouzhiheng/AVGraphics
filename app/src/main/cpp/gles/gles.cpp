@@ -20,7 +20,7 @@
 #include "YuvRenderer.h"
 #include "AVModel.h"
 #include "format.h"
-#include "CameraEffect.h"
+#include "Watermark.h"
 
 using namespace std;
 
@@ -366,63 +366,70 @@ Java_com_steven_avgraphics_activity_gles_GLCameraActivity__1release(JNIEnv *env,
 }
 
 
-// --- CameraEffectActivity
+// --- WatermarkActivity
 
-CameraEffect *cameraEffect = nullptr;
+Watermark *watermark = nullptr;
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_steven_avgraphics_activity_gles_CameraEffectActivity__1init(JNIEnv *env, jclass type,
+Java_com_steven_avgraphics_activity_gles_WatermarkActivity__1init(JNIEnv *env, jclass type,
                                                                      jobject surface, jint width,
                                                                      jint height,
                                                                      jbyteArray watermark_,
+                                                                     jint watermarkLen,
                                                                      jbyteArray text_,
+                                                                     jint textLen,
                                                                      jobject manager_) {
     unique_lock<mutex> lock(gMutex);
-    if (cameraEffect) {
-        cameraEffect->stop();
-        delete cameraEffect;
+    if (watermark) {
+        watermark->stop();
+        delete watermark;
     }
 
-    jbyte *watermark = env->GetByteArrayElements(watermark_, NULL);
+    jbyte *watermarkPixel = env->GetByteArrayElements(watermark_, NULL);
     jbyte *text = env->GetByteArrayElements(text_, NULL);
 
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     AAssetManager *manager = AAssetManager_fromJava(env, manager_);
-    cameraEffect = new CameraEffect(window);
-    cameraEffect->setAssetManager(manager);
-    cameraEffect->resize(width, height);
+    watermark = new Watermark(window);
+    watermark->setAssetManager(manager);
+    watermark->resize(width, height);
+    watermark->setWatermarkSize(96, 96);
+    watermark->setWatermarkPixel((uint8_t *) watermarkPixel, (size_t) watermarkLen);
 
-    env->ReleaseByteArrayElements(watermark_, watermark, 0);
+    env->ReleaseByteArrayElements(watermark_, watermarkPixel, 0);
     env->ReleaseByteArrayElements(text_, text, 0);
 
-    return cameraEffect->init();
+    return watermark->init();
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_CameraEffectActivity__1draw(JNIEnv *env, jclass type,
-                                                                     jfloatArray matrix_) {
-    jfloat *matrix = env->GetFloatArrayElements(matrix_, NULL);
+Java_com_steven_avgraphics_activity_gles_WatermarkActivity__1draw(JNIEnv *env, jclass type,
+                                                                     jfloatArray cameraMatrix_,
+                                                                     jfloatArray watermarkMatrix_) {
+    jfloat *cameraMatrix = env->GetFloatArrayElements(cameraMatrix_, NULL);
+    jfloat *watermarkMatrix = env->GetFloatArrayElements(watermarkMatrix_, NULL);
 
     unique_lock<mutex> lock(gMutex);
-    if (!cameraEffect) {
-        LOGE("draw error, cameraEffect is null");
+    if (!watermark) {
+        LOGE("draw error, watermark is null");
         return;
     }
-    cameraEffect->draw(matrix);
+    watermark->draw(cameraMatrix, watermarkMatrix);
 
-    env->ReleaseFloatArrayElements(matrix_, matrix, 0);
+    env->ReleaseFloatArrayElements(cameraMatrix_, cameraMatrix, 0);
+    env->ReleaseFloatArrayElements(watermarkMatrix_, watermarkMatrix, 0);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_CameraEffectActivity__1release(JNIEnv *env, jclass type) {
+Java_com_steven_avgraphics_activity_gles_WatermarkActivity__1release(JNIEnv *env, jclass type) {
     unique_lock<mutex> lock(gMutex);
-    if (cameraEffect) {
-        cameraEffect->stop();
-        delete cameraEffect;
-        cameraEffect = nullptr;
+    if (watermark) {
+        watermark->stop();
+        delete watermark;
+        watermark = nullptr;
     }
 }
 

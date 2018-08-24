@@ -56,7 +56,7 @@
             android:name=".activity.FFmpegActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
-            android:name=".activity.gles.CameraEffectActivity"
+            android:name=".activity.gles.WatermarkActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 

@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.opengl.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
@@ -29,13 +30,14 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CameraEffectActivity extends BaseActivity {
+public class WatermarkActivity extends BaseActivity {
 
     private static final float ASPECT_RATIO = 16.0f / 9;
 
     private Camera mCamera;
     private SurfaceTexture mSurfaceTexture;
-    private float[] mMatrix = new float[16];
+    private float[] mCameraMatrix = new float[16];
+    private float[] mWatermarkMatrix = new float[16];
     private ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -44,13 +46,16 @@ public class CameraEffectActivity extends BaseActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.activity_camera_effect);
+        setContentView(R.layout.activity_watermark);
         init();
     }
 
     private void init() {
         openCamera();
-        SurfaceView surfaceView = findViewById(R.id.cameff_sv_window);
+        Matrix.setIdentityM(mWatermarkMatrix, 0);
+        Matrix.scaleM(mWatermarkMatrix, 0, 2.5f, 2.5f, 2.5f);
+        Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
+        SurfaceView surfaceView = findViewById(R.id.wtmar_sv_window);
         surfaceView.getHolder().addCallback(new SurfaceCallback());
     }
 
@@ -60,7 +65,7 @@ public class CameraEffectActivity extends BaseActivity {
         }
         mCamera = CameraHelper.openCamera();
         if (mCamera == null) {
-            ToastHelper.show(R.string.cameff_msg_open_camera_failed);
+            ToastHelper.show(R.string.wtmar_msg_open_camera_failed);
             finish();
         }
 
@@ -140,7 +145,8 @@ public class CameraEffectActivity extends BaseActivity {
 
         private void initOpenGL(Surface surface, int width, int height, byte[] watermark, byte[] text) {
             mExecutor.execute(() -> {
-                int textureId = _init(surface, width, height, watermark, text, getAssets());
+                int textureId = _init(surface, width, height, watermark, watermark.length, text,
+                        text.length, getAssets());
                 if (textureId < 0) {
                     Log.e(TAG, "surfaceCreated init OpenGL ES failed!");
                     return;
@@ -160,8 +166,8 @@ public class CameraEffectActivity extends BaseActivity {
             mExecutor.execute(() -> {
                 if (mSurfaceTexture != null) {
                     mSurfaceTexture.updateTexImage(); // 必须运行在 OpenGL 线程环境中
-                    mSurfaceTexture.getTransformMatrix(mMatrix);
-                    _draw(mMatrix);
+                    mSurfaceTexture.getTransformMatrix(mCameraMatrix);
+                    _draw(mCameraMatrix, mWatermarkMatrix);
                 }
             });
         }
@@ -178,10 +184,11 @@ public class CameraEffectActivity extends BaseActivity {
 
     }
 
-    private static native int _init(Surface surface, int width, int height, byte[] watermark,
-                                    byte[] text, AssetManager manager);
+    private static native int _init(Surface surface, int width, int height,
+                                    byte[] watermark, int watermarkLen,
+                                    byte[] text, int textLen, AssetManager manager);
 
-    private static native void _draw(float[] matrix);
+    private static native void _draw(float[] cameraMatrix, float[] watermarkMatrix);
 
     private static native void _release();
 

@@ -77,7 +77,7 @@ add_library( gles
              ${dir_gles}/Texture.cpp
              ${dir_gles}/FboRenderer.cpp
              ${dir_gles}/GLCamera.cpp
-             ${dir_gles}/CameraEffect.cpp
+             ${dir_gles}/Watermark.cpp
              ${dir_gles}/Beauty.cpp
              ${dir_gles}/YuvRenderer.cpp
              ${dir_common}/AVModel.cpp

@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.steven.avgraphics.activity.gles.CameraEffectActivity">
+    tools:context="com.steven.avgraphics.activity.gles.WatermarkActivity">
 
     <SurfaceView
-        android:id="@+id/cameff_sv_window"
+        android:id="@+id/wtmar_sv_window"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
