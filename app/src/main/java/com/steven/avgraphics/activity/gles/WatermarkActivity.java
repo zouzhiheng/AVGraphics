@@ -97,9 +97,10 @@ public class WatermarkActivity extends BaseActivity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-//            makeWatermark();
-            makeWatermark(width / 2, height / 2);
+            makeImageWatermark();
+//            makeTextWatermark(width / 2, height / 2);
             initOpenGL(holder.getSurface(), width, height, mWatermark, mWatermarkWidth, mWatermarkHeight);
+            drawOpenGL();
         }
 
         @Override
@@ -107,7 +108,7 @@ public class WatermarkActivity extends BaseActivity {
             releaseOpenGL();
         }
 
-        private void makeWatermark() {
+        private void makeImageWatermark() {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, options);
@@ -120,12 +121,14 @@ public class WatermarkActivity extends BaseActivity {
             mWatermarkHeight = bitmap.getHeight();
             bitmap.recycle();
 
+            // 为什么调整坐标值后，要么相机预览倒转 180°，要么水印倒转 180°?
+            // 为什么旋转后水印消失？
+            // 为什么放大=缩小？
             Matrix.scaleM(mWatermarkMatrix, 0, 2.5f, 2.5f, 2.5f);
             Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
-            Matrix.rotateM(mWatermarkMatrix, 0, -90, 0.0f, 0.0f, 1.0f);
         }
 
-        private void makeWatermark(int width, int height) {
+        private void makeTextWatermark(int width, int height) {
             Bitmap textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(textBitmap);
             Paint paint = new Paint();
@@ -155,8 +158,8 @@ public class WatermarkActivity extends BaseActivity {
         private void initOpenGL(Surface surface, int width, int height, byte[] watermark,
                                 int watermarkWidth, int watermarkHeight) {
             mExecutor.execute(() -> {
-                int textureId = _init(surface, width, height, watermark, watermark.length, watermarkWidth,
-                        watermarkHeight, getAssets());
+                int textureId = _init(surface, width, height, watermark, watermark.length,
+                        watermarkWidth, watermarkHeight, getAssets());
                 if (textureId < 0) {
                     Log.e(TAG, "surfaceCreated init OpenGL ES failed!");
                     return;

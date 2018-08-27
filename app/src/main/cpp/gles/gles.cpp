@@ -13,7 +13,7 @@
 #include "Square.h"
 #include "Triangle.h"
 #include "Circle.h"
-#include "Texture.h"
+#include "TextureImage.h"
 #include "FboRenderer.h"
 #include "GLCamera.h"
 #include "Beauty.h"
@@ -196,12 +196,12 @@ Java_com_steven_avgraphics_activity_gles_MatrixTransformActivity__1release(JNIEn
 }
 
 
-// --- TextureActivity
-Texture *texture = nullptr;
+// --- TextureImageActivity
+TextureImage *texture = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_TextureActivity__1init(JNIEnv *env, jclass type,
+Java_com_steven_avgraphics_activity_gles_TextureImageActivity__1init(JNIEnv *env, jclass type,
                                                                 jobject surface, jint texWidth,
                                                                 jint texHeight, jbyteArray pixel_,
                                                                 jint pixelDataLen,
@@ -215,7 +215,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1init(JNIEnv *env, jcl
     }
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     AAssetManager *manager = AAssetManager_fromJava(env, assetManager);
-    texture = new Texture(window);
+    texture = new TextureImage(window);
     texture->setTexWidth(texWidth);
     texture->setTexHeight(texHeight);
     texture->setPixel((uint8_t *) pixel, (size_t) pixelDataLen);
@@ -228,7 +228,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1init(JNIEnv *env, jcl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_TextureActivity__1resize(JNIEnv *env, jclass type,
+Java_com_steven_avgraphics_activity_gles_TextureImageActivity__1resize(JNIEnv *env, jclass type,
                                                                   jint width, jint height) {
     unique_lock<mutex> lock(gMutex);
     if (!texture) {
@@ -240,7 +240,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1resize(JNIEnv *env, j
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_TextureActivity__1draw(JNIEnv *env, jclass type,
+Java_com_steven_avgraphics_activity_gles_TextureImageActivity__1draw(JNIEnv *env, jclass type,
                                                                 jfloatArray matrix_,
                                                                 jint filterType,
                                                                 jfloatArray filterColor_) {
@@ -263,7 +263,7 @@ Java_com_steven_avgraphics_activity_gles_TextureActivity__1draw(JNIEnv *env, jcl
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_steven_avgraphics_activity_gles_TextureActivity__1release(JNIEnv *env, jclass type) {
+Java_com_steven_avgraphics_activity_gles_TextureImageActivity__1release(JNIEnv *env, jclass type) {
     unique_lock<mutex> lock(gMutex);
     if (texture) {
         texture->stop();

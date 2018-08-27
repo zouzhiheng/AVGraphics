@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.steven.avgraphics.BaseActivity;
 import com.steven.avgraphics.R;
 import com.steven.avgraphics.activity.gles.BeautyActivity;
+import com.steven.avgraphics.activity.gles.TextureImageActivity;
 import com.steven.avgraphics.activity.gles.WatermarkActivity;
 import com.steven.avgraphics.activity.gles.EGLCircleActivity;
 import com.steven.avgraphics.activity.gles.FboActivity;
@@ -15,7 +16,6 @@ import com.steven.avgraphics.activity.gles.GLCameraActivity;
 import com.steven.avgraphics.activity.gles.JavaTriangleActivity;
 import com.steven.avgraphics.activity.gles.JniTriangleActivity;
 import com.steven.avgraphics.activity.gles.MatrixTransformActivity;
-import com.steven.avgraphics.activity.gles.TextureActivity;
 import com.steven.avgraphics.activity.gles.VaoVboActivity;
 
 public class OpenGLActivity extends BaseActivity {
@@ -33,7 +33,7 @@ public class OpenGLActivity extends BaseActivity {
         findViewById(R.id.opengl_btn_egl_circle).setOnClickListener(v -> startActivity(EGLCircleActivity.class));
         findViewById(R.id.opengl_btn_vao_vbo).setOnClickListener(v -> startActivity(VaoVboActivity.class));
         findViewById(R.id.opengl_btn_matrix_transform).setOnClickListener(v -> startActivity(MatrixTransformActivity.class));
-        findViewById(R.id.opengl_btn_texture).setOnClickListener(v -> startActivity(TextureActivity.class));
+        findViewById(R.id.opengl_btn_texture_image).setOnClickListener(v -> startActivity(TextureImageActivity.class));
         findViewById(R.id.opengl_btn_fbo).setOnClickListener(v -> startActivity(FboActivity.class));
         findViewById(R.id.opengl_btn_glcamera).setOnClickListener(v -> startActivity(GLCameraActivity.class));
         findViewById(R.id.opengl_btn_camera_effect).setOnClickListener(v -> startActivity(WatermarkActivity.class));

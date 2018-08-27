@@ -6,7 +6,7 @@
 #include <string>
 #include <log.h>
 #include <cstring>
-#include "Texture.h"
+#include "TextureImage.h"
 #include "glutil.h"
 
 const static GLfloat VERTICES[] = {
@@ -31,7 +31,7 @@ const static GLint VERTEX_POS_SIZE = 3;
 const static GLint TEX_COORD_SIZE = 2;
 const static GLsizei INDEX_NUMBER = 6;
 
-Texture::Texture(ANativeWindow *window) : EGLDemo(window), mTexId(0), mTexWidth(0), mTexHeight(0),
+TextureImage::TextureImage(ANativeWindow *window) : EGLDemo(window), mTexId(0), mTexWidth(0), mTexHeight(0),
                                           mMatrixLoc(0), mFilterTypeLoc(0), mFilterColorLoc(0),
                                           mSamplerLoc(0), mFilterType(0), mPixel(nullptr),
                                           mAssetManager(nullptr) {
@@ -43,7 +43,7 @@ Texture::Texture(ANativeWindow *window) : EGLDemo(window), mTexId(0), mTexWidth(
     mMatrix[15] = 1;
 }
 
-Texture::~Texture() {
+TextureImage::~TextureImage() {
     if (mPixel) {
         delete mPixel;
         mPixel = nullptr;
@@ -52,23 +52,23 @@ Texture::~Texture() {
     mAssetManager = nullptr;
 }
 
-void Texture::setTexWidth(GLint texWidth) {
+void TextureImage::setTexWidth(GLint texWidth) {
     mTexWidth = texWidth;
 }
 
-void Texture::setTexHeight(GLint texHeight) {
+void TextureImage::setTexHeight(GLint texHeight) {
     mTexHeight = texHeight;
 }
 
-void Texture::setFilterType(GLint filterType) {
+void TextureImage::setFilterType(GLint filterType) {
     mFilterType = filterType;
 }
 
-void Texture::setFilterColor(GLfloat *filterColor) {
+void TextureImage::setFilterColor(GLfloat *filterColor) {
     memcpy(mFilterColor, filterColor, sizeof(mFilterColor));
 }
 
-void Texture::setPixel(uint8_t *pixel, size_t dataLen) {
+void TextureImage::setPixel(uint8_t *pixel, size_t dataLen) {
     if (mPixel) {
         delete mPixel;
     }
@@ -76,17 +76,17 @@ void Texture::setPixel(uint8_t *pixel, size_t dataLen) {
     memcpy(mPixel, pixel, dataLen);
 }
 
-void Texture::setMatrix(GLfloat *matrix) {
+void TextureImage::setMatrix(GLfloat *matrix) {
     memcpy(mMatrix, matrix, sizeof(mMatrix));
 }
 
-void Texture::setAssetManager(AAssetManager *assetManager) {
+void TextureImage::setAssetManager(AAssetManager *assetManager) {
     mAssetManager = assetManager;
 }
 
-bool Texture::doInit() {
-    std::string *vShader = readShaderFromAsset(mAssetManager, "texture.vert");
-    std::string *fShader = readShaderFromAsset(mAssetManager, "texture.frag");
+bool TextureImage::doInit() {
+    std::string *vShader = readShaderFromAsset(mAssetManager, "texture_image.vert");
+    std::string *fShader = readShaderFromAsset(mAssetManager, "texture_image.frag");
 
     mProgram = loadProgram(vShader->c_str(), fShader->c_str());
 
@@ -112,7 +112,7 @@ bool Texture::doInit() {
     return true;
 }
 
-void Texture::doDraw() {
+void TextureImage::doDraw() {
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(mProgram);
@@ -138,6 +138,6 @@ void Texture::doDraw() {
     glDisableVertexAttribArray(ATTRIB_TEX_COORD);
 }
 
-void Texture::doStop() {
+void TextureImage::doStop() {
     glDeleteTextures(1, &mTexId);
 }

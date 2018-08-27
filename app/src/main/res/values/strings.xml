@@ -82,7 +82,7 @@
     <string name="opengl_btn_egl_circle">EGL 搭建环境绘制圆形</string>
     <string name="opengl_btn_vao_vbo">使用 VAO &amp; VBO 特性绘制正方形</string>
     <string name="opengl_btn_matrix_transform">矩阵变换</string>
-    <string name="opengl_btn_texture">使用纹理绘制图片</string>
+    <string name="opengl_btn_texture_image">使用纹理绘制图片</string>
     <string name="opengl_btn_fbo">使用 FBO 绘制四个缓冲区</string>
     <string name="opengl_btn_glcamera">OpenGL 相机预览</string>
     <string name="opengl_btn_camera_effect">添加水印</string>
@@ -106,7 +106,7 @@
     <string name="mxtsf_btn_mvp">MVP 矩阵</string>
 
 
-    <!-- TextureActivity(tex) -->
+    <!-- TextureImageActivity(tex) -->
     <string name="tex_btn_origin">原图</string>
     <string name="tex_btn_gray">黑白</string>
     <string name="tex_btn_blur">模糊</string>

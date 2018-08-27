@@ -10,33 +10,38 @@
 #include "glutil.h"
 
 const static GLfloat VERTICES[] = {
+        -1.0f, -1.0f,
         -1.0f, 1.0f,
         1.0f, 1.0f,
-        -1.0f, -1.0f,
         1.0f, -1.0f
 };
 
 const static GLfloat CAMERA_COORDS[] = {
+        0.0f, 0.0f,
         0.0f, 1.0f,
         1.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f
+        1.0f, 0.0f,
 };
 
-static GLfloat WATERMARK_COORD[] = {
+const static GLfloat WATERMARK_COORD[] = {
+        0.0f, 0.0f,
         0.0f, 1.0f,
         1.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f
+        1.0f, 0.0f,
+};
+
+const static GLushort INDICES[] = {
+        0, 1, 2,
+        0, 2, 3
 };
 
 const static GLuint ATTRIB_POSITION = 0;
 const static GLuint ATTRIB_CAMERA_COORD = 1;
 const static GLuint ATTRIB_WATERMARK_COORD = 2;
-const static GLuint VERTEX_NUM = 4;
 const static GLuint VERTEX_POS_SIZE = 2;
 const static GLuint CAMERA_COORD_SIZE = 2;
 const static GLuint WATERMARK_COORD_SIZE = 2;
+const static GLuint INDEX_NUMBER = 6;
 
 Watermark::Watermark(ANativeWindow *window)
         : mWindow(window), mEGLCore(new EGLCore()), mTextureOes(0), mAssetManager(nullptr),
@@ -118,12 +123,6 @@ int Watermark::init() {
 }
 
 void Watermark::draw(GLfloat *cameraMatrix, GLfloat *watermarkMatrix) {
-    GLint defaultFrameBuffer;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFrameBuffer);
-
-    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-
     glViewport(0, 0, mWidth, mHeight);
     glClear(GL_COLOR_BUFFER_BIT);
     glUseProgram(mProgram);
@@ -150,7 +149,8 @@ void Watermark::draw(GLfloat *cameraMatrix, GLfloat *watermarkMatrix) {
     glVertexAttribPointer(ATTRIB_WATERMARK_COORD, WATERMARK_COORD_SIZE, GL_FLOAT, GL_FALSE, 0,
                           WATERMARK_COORD);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, VERTEX_NUM);
+//    glDrawArrays(GL_TRIANGLE_STRIP, 0, VERTEX_NUM);
+    glDrawElements(GL_TRIANGLES, INDEX_NUMBER, GL_UNSIGNED_SHORT, INDICES);
 
     glDisableVertexAttribArray(ATTRIB_POSITION);
     glDisableVertexAttribArray(ATTRIB_CAMERA_COORD);

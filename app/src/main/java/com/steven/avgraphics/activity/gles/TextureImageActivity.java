@@ -15,7 +15,7 @@ import com.steven.avgraphics.util.Utils;
 
 import java.nio.ByteBuffer;
 
-public class TextureActivity extends BaseActivity {
+public class TextureImageActivity extends BaseActivity {
 
     private Bitmap mBitmap;
     private byte[] mPixel;
@@ -24,7 +24,7 @@ public class TextureActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_texture);
+        setContentView(R.layout.activity_texture_image);
         init();
     }
 

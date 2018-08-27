@@ -8,7 +8,7 @@
 
 #include "EGLDemo.h"
 
-class Texture : public EGLDemo {
+class TextureImage : public EGLDemo {
 private:
     GLuint mTexId;
     GLint mTexWidth;
@@ -33,9 +33,9 @@ private:
     void doStop() override;
 
 public:
-    Texture(ANativeWindow *window);
+    TextureImage(ANativeWindow *window);
 
-    ~Texture() override;
+    ~TextureImage() override;
 
     void setTexWidth(GLint texWidth);
 
