@@ -24,10 +24,10 @@ const static GLfloat CAMERA_COORDS[] = {
 };
 
 const static GLfloat WATERMARK_COORD[] = {
-        0.0f, 0.0f,
         0.0f, 1.0f,
-        1.0f, 1.0f,
+        0.0f, 0.0f,
         1.0f, 0.0f,
+        1.0f, 1.0f,
 };
 
 const static GLushort INDICES[] = {

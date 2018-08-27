@@ -121,11 +121,10 @@ public class WatermarkActivity extends BaseActivity {
             mWatermarkHeight = bitmap.getHeight();
             bitmap.recycle();
 
-            // 为什么调整坐标值后，要么相机预览倒转 180°，要么水印倒转 180°?
+            // 为什么相机纹理和水印纹理坐标的向量方向需要互为 180° 才能得到正确的画面？
             // 为什么旋转后水印消失？
             // 为什么放大=缩小？
             Matrix.scaleM(mWatermarkMatrix, 0, 2.5f, 2.5f, 2.5f);
-            Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
         }
 
         private void makeTextWatermark(int width, int height) {
@@ -152,7 +151,6 @@ public class WatermarkActivity extends BaseActivity {
             textBitmap.recycle();
 
             Matrix.scaleM(mWatermarkMatrix, 0, 2f, 2f, 2f);
-            Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
         }
 
         private void initOpenGL(Surface surface, int width, int height, byte[] watermark,
