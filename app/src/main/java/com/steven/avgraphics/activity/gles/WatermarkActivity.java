@@ -53,8 +53,6 @@ public class WatermarkActivity extends BaseActivity {
     private void init() {
         openCamera();
         Matrix.setIdentityM(mWatermarkMatrix, 0);
-        Matrix.scaleM(mWatermarkMatrix, 0, 2.5f, 2.5f, 2.5f);
-        Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
         SurfaceView surfaceView = findViewById(R.id.wtmar_sv_window);
         surfaceView.getHolder().addCallback(new SurfaceCallback());
     }
@@ -88,6 +86,10 @@ public class WatermarkActivity extends BaseActivity {
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
 
+        private byte[] mWatermark;
+        private int mWatermarkWidth;
+        private int mWatermarkHeight;
+
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
 
@@ -95,9 +97,9 @@ public class WatermarkActivity extends BaseActivity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            byte[] watermark = makeWatermark();
-            byte[] textPixel = makeTextPixel(width / 2, height / 2);
-            initOpenGL(holder.getSurface(), width, height, watermark, textPixel);
+//            makeWatermark();
+            makeWatermark(width / 2, height / 2);
+            initOpenGL(holder.getSurface(), width, height, mWatermark, mWatermarkWidth, mWatermarkHeight);
         }
 
         @Override
@@ -105,7 +107,7 @@ public class WatermarkActivity extends BaseActivity {
             releaseOpenGL();
         }
 
-        private byte[] makeWatermark() {
+        private void makeWatermark() {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, options);
@@ -113,18 +115,22 @@ public class WatermarkActivity extends BaseActivity {
             ByteBuffer buffer = ByteBuffer.allocate(byteCount);
             bitmap.copyPixelsToBuffer(buffer);
             buffer.position(0);
-            byte[] watermark = buffer.array();
+            mWatermark = buffer.array();
+            mWatermarkWidth = bitmap.getWidth();
+            mWatermarkHeight = bitmap.getHeight();
             bitmap.recycle();
 
-            return watermark;
+            Matrix.scaleM(mWatermarkMatrix, 0, 2.5f, 2.5f, 2.5f);
+            Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
+            Matrix.rotateM(mWatermarkMatrix, 0, -90, 0.0f, 0.0f, 1.0f);
         }
 
-        private byte[] makeTextPixel(int width, int height) {
+        private void makeWatermark(int width, int height) {
             Bitmap textBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(textBitmap);
             Paint paint = new Paint();
             paint.setColor(Color.argb(255, 255, 0, 0));
-            paint.setTextSize(14);
+            paint.setTextSize(28);
             paint.setAntiAlias(true);
             paint.setTextAlign(Paint.Align.CENTER);
             Rect rect = new Rect(0, 0, width, height);
@@ -137,16 +143,20 @@ public class WatermarkActivity extends BaseActivity {
             ByteBuffer buffer = ByteBuffer.allocate(capacity);
             textBitmap.copyPixelsToBuffer(buffer);
             buffer.position(0);
-            byte[] textPixel = buffer.array();
+            mWatermark = buffer.array();
+            mWatermarkWidth = textBitmap.getWidth();
+            mWatermarkHeight = textBitmap.getHeight();
             textBitmap.recycle();
 
-            return textPixel;
+            Matrix.scaleM(mWatermarkMatrix, 0, 2f, 2f, 2f);
+            Matrix.translateM(mWatermarkMatrix, 0, 0.0f, -0.5f, 0.0f);
         }
 
-        private void initOpenGL(Surface surface, int width, int height, byte[] watermark, byte[] text) {
+        private void initOpenGL(Surface surface, int width, int height, byte[] watermark,
+                                int watermarkWidth, int watermarkHeight) {
             mExecutor.execute(() -> {
-                int textureId = _init(surface, width, height, watermark, watermark.length, text,
-                        text.length, getAssets());
+                int textureId = _init(surface, width, height, watermark, watermark.length, watermarkWidth,
+                        watermarkHeight, getAssets());
                 if (textureId < 0) {
                     Log.e(TAG, "surfaceCreated init OpenGL ES failed!");
                     return;
@@ -185,8 +195,8 @@ public class WatermarkActivity extends BaseActivity {
     }
 
     private static native int _init(Surface surface, int width, int height,
-                                    byte[] watermark, int watermarkLen,
-                                    byte[] text, int textLen, AssetManager manager);
+                                    byte[] data, int dataLen, int watermarkWidth,
+                                    int watermarkHeight, AssetManager manager);
 
     private static native void _draw(float[] cameraMatrix, float[] watermarkMatrix);
 

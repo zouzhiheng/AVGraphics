@@ -69,12 +69,10 @@ void Watermark::setAssetManager(AAssetManager *assetManager) {
     mAssetManager = assetManager;
 }
 
-void Watermark::setWatermarkSize(GLint width, GLint height) {
+void Watermark::setWatermark(uint8_t *watermarkPixel, size_t length, GLint width,
+                                 GLint height) {
     mWatermarkWidth = width;
     mWatermarkHeight = height;
-}
-
-void Watermark::setWatermarkPixel(uint8_t *watermarkPixel, size_t length) {
     if (!mWatermarkPixel) {
         mWatermarkPixel = new uint8_t[length];
     }
@@ -132,8 +130,6 @@ void Watermark::draw(GLfloat *cameraMatrix, GLfloat *watermarkMatrix) {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureOes);
-    glTexSubImage2D(GL_TEXTURE_EXTERNAL_OES, 0, 0, 0, mWatermarkWidth, mWatermarkHeight, GL_RGBA,
-                    GL_UNSIGNED_BYTE, mWatermarkPixel);
     glUniform1i(mCameraTextureLoc, 0);
 
     glActiveTexture(GL_TEXTURE1);
@@ -166,6 +162,7 @@ void Watermark::draw(GLfloat *cameraMatrix, GLfloat *watermarkMatrix) {
 
 void Watermark::stop() {
     glDeleteTextures(1, &mTextureOes);
+    glDeleteTextures(1, &mTexture2D);
     glDeleteProgram(mProgram);
     mEGLCore->release();
 }

@@ -36,9 +36,7 @@ public:
 
     void setAssetManager(AAssetManager *assetManager);
 
-    void setWatermarkSize(GLint width, GLint height);
-
-    void setWatermarkPixel(uint8_t *watermarkPixel, size_t length);
+    void setWatermark(uint8_t *watermarkPixel, size_t length, GLint width, GLint height);
 
     int init();
 

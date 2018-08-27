@@ -373,32 +373,26 @@ Watermark *watermark = nullptr;
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_steven_avgraphics_activity_gles_WatermarkActivity__1init(JNIEnv *env, jclass type,
-                                                                     jobject surface, jint width,
-                                                                     jint height,
-                                                                     jbyteArray watermark_,
-                                                                     jint watermarkLen,
-                                                                     jbyteArray text_,
-                                                                     jint textLen,
-                                                                     jobject manager_) {
+                                                                  jobject surface, jint width,
+                                                                  jint height, jbyteArray data_,
+                                                                  jint dataLen, jint watermarkWidth,
+                                                                  jint watermarkHeight,
+                                                                  jobject manager_) {
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+
     unique_lock<mutex> lock(gMutex);
     if (watermark) {
         watermark->stop();
         delete watermark;
     }
-
-    jbyte *watermarkPixel = env->GetByteArrayElements(watermark_, NULL);
-    jbyte *text = env->GetByteArrayElements(text_, NULL);
-
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     AAssetManager *manager = AAssetManager_fromJava(env, manager_);
     watermark = new Watermark(window);
     watermark->setAssetManager(manager);
     watermark->resize(width, height);
-    watermark->setWatermarkSize(96, 96);
-    watermark->setWatermarkPixel((uint8_t *) watermarkPixel, (size_t) watermarkLen);
+    watermark->setWatermark((uint8_t *) data, (size_t) dataLen, watermarkWidth, watermarkHeight);
 
-    env->ReleaseByteArrayElements(watermark_, watermarkPixel, 0);
-    env->ReleaseByteArrayElements(text_, text, 0);
+    env->ReleaseByteArrayElements(data_, data, 0);
 
     return watermark->init();
 }
