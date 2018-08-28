@@ -142,7 +142,6 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         }
         FFCodec.TranscodeParams params = new FFCodec.TranscodeParams(Utils.getFFRecordOutput(),
                 Utils.getFFTranscodeOutput());
-        params.setReencode(true);
         FFCodec.transcode(params, succeed -> {
             Utils.runOnUiThread(this::resetButtons);
             ToastHelper.showOnUiThread(succeed ? R.string.ff_msg_transcode_succeed : R.string.ff_msg_transcode_failed);

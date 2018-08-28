@@ -14,13 +14,13 @@ class Transcoder {
 public:
     class Options {
     private:
-        uint64_t start;
-        uint64_t duration;
-        const char *videoFilter;
-        const char *audioFilter;
-        int64_t maxBitRate;
-        bool reencode;
-        std::map<std::string, std::string> encodeOptions;
+        uint64_t mStart;
+        uint64_t mDuration;
+        const char *mVideoFilter;
+        const char *mAudioFilter;
+        int64_t mMaxBitRate;
+        bool mIsReencode;
+        std::map<std::string, std::string> mEncodeOptions;
 
     public:
         Options();
@@ -56,24 +56,24 @@ private:
 
 private:
     Options *options;
-    int64_t videoPts;
-    int64_t audioPts;
-    int64_t audioPtsDelay;
-    int totalFrame;
-    int viStreamIndex; // video in stream index
-    int aoStreamIndex; // audio out stream index
+    int64_t mVideoPts;
+    int64_t mAudioPts;
+    int64_t mAudioPtsDelay;
+    int mTotalFrame;
+    int mVInStreamIndex; // video in stream index
+    int mAOutStreamIndex; // audio out stream index
 
-    AVFormatContext *ifmtCtx;
-    AVFormatContext *ofmtCtx;
-    FilteringContext *filterCtx;
-    StreamContext *streamCtx;
+    AVFormatContext *mInFmtCtx;
+    AVFormatContext *mOutFmtCtx;
+    FilteringContext *mFilterCtx;
+    StreamContext *mStreamCtx;
 
-    AVFrame *tmpFrame;
-    uint8_t *tmpFrameBuf;
-    SwsContext *imgConvertCtx;
+    AVFrame *mTmpFrame;
+    uint8_t *mTmpFrameBuf;
+    SwsContext *mImgConvertCtx;
 
-    AVAudioFifo *audioFifo;
-    SwrContext *sampleConvertCtx;
+    AVAudioFifo *mAudioFifo;
+    SwrContext *mSampleConvertCtx;
 
 private:
     void reset();
