@@ -163,6 +163,7 @@ public class FFmpegActivity extends BaseActivity implements View.OnClickListener
         FFCodec.FilterParams filter = new FFCodec.FilterParams();
         // 由于 OpenGL 和 Android 坐标系的不同，使用美颜时需要倒转 180 度才能得到正确的画面
         filter.setRotate(mCameraPreviewView.isFacingBack() ? 90 : 180);
+        filter.setVideoFilter("drawbox=x=100:y=100:w=100:h=100:color=pink@0.5");
         params.setFilterParams(filter);
         mIsReocrding = FFCodec.initRecorder(params,
                 succeed -> ToastHelper.showOnUiThread(R.string.ff_msg_record_ok));

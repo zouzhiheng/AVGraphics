@@ -5,6 +5,7 @@
 #include "FrameFilter.h"
 #include <string>
 #include <android/log.h>
+#include <format.h>
 #include "result.h"
 
 #define LOG_TAG "ffcodec_filter"
@@ -94,7 +95,8 @@ std::string FrameFilter::Parameter::toString() {
                     "[video filter: %s]\n[sample format in: %s, out: %s], [sample rate in: %d, out: %d], "
                     "[channels in: %d, out: %d]\n[audio filter: %s]\n}",
             mWidth, mHeight, mFrameRate, av_get_pix_fmt_name(mPixelFormat),
-            av_get_pix_fmt_name(mOutPixelFormat), mVideoFilter, av_get_sample_fmt_name(mSampleFormat),
+            av_get_pix_fmt_name(mOutPixelFormat), mVideoFilter,
+            av_get_sample_fmt_name(mSampleFormat),
             av_get_sample_fmt_name(mOutSampleFormat), mSampleRate, mOutSampleRate, mChannels,
             mOutChannels, mAudioFilter);
     std::string str = description;
@@ -365,7 +367,11 @@ int FrameFilter::processImage(AVModel *model) {
     ret = av_image_fill_arrays(srcFrame->data, srcFrame->linesize, model->image, mInPixelFormat,
                                mWidth, mHeight, 1);
     if (ret < 0) {
-        LOGE("av_image_fill_arrays error: %s", av_err2str(ret));
+        LOGE("av_image_fill_arrays error: %s, [%d, %d, %s], [%d, %d, %s], [%d, %d, %s]",
+             av_err2str(ret), srcFrame->width, srcFrame->height,
+             av_get_pix_fmt_name((AVPixelFormat) srcFrame->format), mWidth, mHeight,
+             av_get_pix_fmt_name(mInPixelFormat), model->width, model->height,
+             av_get_pix_fmt_name(getPixelFormat(model->pixelFormat)));
         return ret;
     }
     srcFrame->width = mWidth;
@@ -424,7 +430,7 @@ int FrameFilter::processImage(AVModel *model) {
     model->imageLen = size;
     model->width = filtFrame->width;
     model->height = filtFrame->height;
-    model->pixelFormat = AVPixelFormat(filtFrame->format);
+    model->pixelFormat = pixelFormatToInt(AVPixelFormat(filtFrame->format));
 
     av_frame_free(&srcFrame);
     av_frame_free(&filtFrame);

@@ -431,7 +431,10 @@ int Encoder::fillPicture(AVModel *model) {
     ret = av_image_fill_arrays(mPicture->data, mPicture->linesize, model->image,
                                getPixelFormat(model->pixelFormat), model->width, model->height, 1);
     if (ret < 0) {
-        LOGE("av_image_fill_arrays error: %s", av_err2str(ret));
+        LOGE("av_image_fill_arrays error: %s, [%d, %d, %s], [%d, %d], [%d, %d, %s]",
+             av_err2str(ret), mPicture->width, mPicture->height,
+             av_get_pix_fmt_name((AVPixelFormat) mPicture->format), mWidth, mHeight,
+             model->width, model->height, av_get_pix_fmt_name(getPixelFormat(model->pixelFormat)));
         return FAILED;
     }
     if (mFrameRateFixed) {

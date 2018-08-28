@@ -9,6 +9,7 @@
 #include <libavutil/samplefmt.h>
 #include "Yuv.h"
 #include "AVModel.h"
+
 extern "C" {
 #include <libavutil/pixfmt.h>
 };
@@ -65,6 +66,18 @@ inline AVPixelFormat getPixelFormat(int flag) {
     return pixelFormat;
 }
 
+inline int pixelFormatToInt(AVPixelFormat pixelFormat) {
+    int flag = PIXEL_FORMAT_NONE;
+    if (pixelFormat == AV_PIX_FMT_NV12) {
+        flag = PIXEL_FORMAT_NV12;
+    } else if (pixelFormat == AV_PIX_FMT_NV21) {
+        flag = PIXEL_FORMAT_NV21;
+    } else if (pixelFormat == AV_PIX_FMT_YUV420P) {
+        flag = PIXEL_FORMAT_YUV420P;
+    }
+    return flag;
+}
+
 inline AVSampleFormat getSampleFormat(int flag) {
     AVSampleFormat sampleFormat = AV_SAMPLE_FMT_NONE;
     if (flag == SAMPLE_FORMAT_8BIT) {
@@ -77,6 +90,6 @@ inline AVSampleFormat getSampleFormat(int flag) {
     return sampleFormat;
 }
 
-Yuv* convertToI420(AVModel *model);
+Yuv *convertToI420(AVModel *model);
 
 #endif //AVGRAPHICS_PIXEL_FORMAT_H
