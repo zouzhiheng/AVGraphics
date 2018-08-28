@@ -13,25 +13,25 @@ class FrameFilter {
 public:
     class Parameter {
     private:
-        int width;
-        int height;
-        int frameRate;
-        AVPixelFormat pixelFormat;
-        AVPixelFormat outPixelFormat;
-        const char *videoFilter;
+        int mWidth;
+        int mHeight;
+        int mFrameRate;
+        AVPixelFormat mPixelFormat;
+        AVPixelFormat mOutPixelFormat;
+        const char *mVideoFilter;
 
-        int sampleRate;
-        AVSampleFormat sampleFormat;
-        int channels;
-        int outSampleRate;
-        AVSampleFormat outSampleFormat;
-        int outChannels;
-        const char *audioFilter;
+        int mSampleRate;
+        AVSampleFormat mSampleFormat;
+        int mChannels;
+        int mOutSampleRate;
+        AVSampleFormat mOutSampleFormat;
+        int mOutChannels;
+        const char *mAudioFilter;
 
         static const int FLAG_NONE = 0;
         static const int FLAG_VIDEO = 1;
         static const int FLAG_AUDIO = 2;
-        int flag = 0;
+        int mFlag = 0;
 
     public:
         Parameter();
@@ -56,30 +56,30 @@ public:
     };
 
 private:
-    int width;
-    int height;
-    int frameRate;
-    AVPixelFormat inPixelFormat;
-    AVPixelFormat outPixelFormat;
-    const char *videoFilter;
+    int mWidth;
+    int mHeight;
+    int mFrameRate;
+    AVPixelFormat mInPixelFormat;
+    AVPixelFormat mOutPixelFormat;
+    const char *mVideoFilter;
 
-    int inSampleRate;
-    AVSampleFormat inSampleFormat;
-    int inChannels;
-    int outSampleRate;
-    AVSampleFormat outSampleFormat;
-    int outChannels;
-    const char *audioFilter;
+    int mInSampleRate;
+    AVSampleFormat mInSampleFormat;
+    int mInChannels;
+    int mOutSampleRate;
+    AVSampleFormat mOutSampleFormat;
+    int mOutChannels;
+    const char *mAudioFilter;
 
-    Parameter *params;
+    Parameter *mParams;
 
-    AVFilterContext *vbuffersinkCtx;
-    AVFilterContext *vbuffersrcCtx;
-    AVFilterGraph *vfilterGraph;
+    AVFilterContext *mVBuffersinkCtx;
+    AVFilterContext *mVBuffersrcCtx;
+    AVFilterGraph *mVFfilterGraph;
 
-    AVFilterContext *abuffersinkCtx;
-    AVFilterContext *abuffersrcCtx;
-    AVFilterGraph *afilterGraph;
+    AVFilterContext *mABuffersinkCtx;
+    AVFilterContext *mABbuffersrcCtx;
+    AVFilterGraph *mAFilterGraph;
 
 private:
     int initVideo();

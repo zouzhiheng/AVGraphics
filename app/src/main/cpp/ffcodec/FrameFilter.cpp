@@ -22,69 +22,69 @@ static void androidLog(void *ptr, int level, const char *fmt, va_list vl) {
 }
 
 FrameFilter::Parameter::Parameter() {
-    width = 0;
-    height = 0;
-    frameRate = 0;
-    pixelFormat = AV_PIX_FMT_NONE;
-    outPixelFormat = AV_PIX_FMT_NONE;
-    videoFilter = "null";
+    mWidth = 0;
+    mHeight = 0;
+    mFrameRate = 0;
+    mPixelFormat = AV_PIX_FMT_NONE;
+    mOutPixelFormat = AV_PIX_FMT_NONE;
+    mVideoFilter = "null";
 
-    sampleRate = 0;
-    sampleFormat = AV_SAMPLE_FMT_NONE;
-    channels = 0;
-    outSampleRate = 0;
-    outSampleFormat = AV_SAMPLE_FMT_NONE;
-    outChannels = 0;
-    audioFilter = "anull";
+    mSampleRate = 0;
+    mSampleFormat = AV_SAMPLE_FMT_NONE;
+    mChannels = 0;
+    mOutSampleRate = 0;
+    mOutSampleFormat = AV_SAMPLE_FMT_NONE;
+    mOutChannels = 0;
+    mAudioFilter = "anull";
 
-    flag = FLAG_NONE;
+    mFlag = FLAG_NONE;
 }
 
 void FrameFilter::Parameter::setVideoParams(int width, int height, AVPixelFormat pixelFormat,
                                             int frameRate, const char *videoFilter) {
-    this->width = width;
-    this->height = height;
-    this->frameRate = frameRate;
-    this->pixelFormat = pixelFormat;
-    if (outPixelFormat == AV_PIX_FMT_NONE) {
-        outPixelFormat = pixelFormat;
+    this->mWidth = width;
+    this->mHeight = height;
+    this->mFrameRate = frameRate;
+    this->mPixelFormat = pixelFormat;
+    if (mOutPixelFormat == AV_PIX_FMT_NONE) {
+        mOutPixelFormat = pixelFormat;
     }
-    this->videoFilter = videoFilter == nullptr ? "null" : videoFilter;
-    flag |= FLAG_VIDEO;
+    this->mVideoFilter = videoFilter == nullptr ? "null" : videoFilter;
+    mFlag |= FLAG_VIDEO;
 }
 
 void FrameFilter::Parameter::setAudioParams(int sampleRate, AVSampleFormat sampleFormat,
                                             int channels, const char *audioFilter) {
-    this->sampleRate = sampleRate;
-    this->sampleFormat = sampleFormat;
-    this->channels = channels;
-    if (outChannels == 0) {
-        outChannels = channels;
+    this->mSampleRate = sampleRate;
+    this->mSampleFormat = sampleFormat;
+    this->mChannels = channels;
+    if (mOutChannels == 0) {
+        mOutChannels = channels;
     }
-    if (outSampleFormat == AV_SAMPLE_FMT_NONE) {
-        outSampleFormat = sampleFormat;
+    if (mOutSampleFormat == AV_SAMPLE_FMT_NONE) {
+        mOutSampleFormat = sampleFormat;
     }
-    if (outSampleRate == 0) {
-        outSampleRate = sampleRate;
+    if (mOutSampleRate == 0) {
+        mOutSampleRate = sampleRate;
     }
-    this->audioFilter = audioFilter == nullptr ? "anull" : audioFilter;
-    flag |= FLAG_AUDIO;
+    this->mAudioFilter = audioFilter == nullptr ? "anull" : audioFilter;
+    mFlag |= FLAG_AUDIO;
 }
 
 void FrameFilter::Parameter::setOutputPixelFormat(AVPixelFormat outPixelFormat) {
-    this->outPixelFormat = outPixelFormat;
+    this->mOutPixelFormat = outPixelFormat;
 }
 
 void FrameFilter::Parameter::setOutputSampleFormat(AVSampleFormat outSampleFormat) {
-    this->outSampleFormat = outSampleFormat;
+    this->mOutSampleFormat = outSampleFormat;
 }
 
 void FrameFilter::Parameter::setOutputSampleRate(int outSampleRate) {
-    this->outSampleRate = outSampleRate;
+    this->mOutSampleRate = outSampleRate;
 }
 
 void FrameFilter::Parameter::setOutputChannels(int outChannels) {
-    this->outChannels = outChannels;
+    this->mOutChannels = outChannels;
 }
 
 std::string FrameFilter::Parameter::toString() {
@@ -93,49 +93,49 @@ std::string FrameFilter::Parameter::toString() {
             "{\n[width: %d], [height: %d], [frame rate: %d], [pixel format in: %s, out: %s]\n"
                     "[video filter: %s]\n[sample format in: %s, out: %s], [sample rate in: %d, out: %d], "
                     "[channels in: %d, out: %d]\n[audio filter: %s]\n}",
-            width, height, frameRate, av_get_pix_fmt_name(pixelFormat),
-            av_get_pix_fmt_name(outPixelFormat), videoFilter, av_get_sample_fmt_name(sampleFormat),
-            av_get_sample_fmt_name(outSampleFormat), sampleRate, outSampleRate, channels,
-            outChannels, audioFilter);
+            mWidth, mHeight, mFrameRate, av_get_pix_fmt_name(mPixelFormat),
+            av_get_pix_fmt_name(mOutPixelFormat), mVideoFilter, av_get_sample_fmt_name(mSampleFormat),
+            av_get_sample_fmt_name(mOutSampleFormat), mSampleRate, mOutSampleRate, mChannels,
+            mOutChannels, mAudioFilter);
     std::string str = description;
     return str;
 }
 
 FrameFilter::FrameFilter() {
-    vbuffersrcCtx = nullptr;
-    vbuffersinkCtx = nullptr;
-    vfilterGraph = nullptr;
+    mVBuffersrcCtx = nullptr;
+    mVBuffersinkCtx = nullptr;
+    mVFfilterGraph = nullptr;
 
-    abuffersrcCtx = nullptr;
-    abuffersinkCtx = nullptr;
-    afilterGraph = nullptr;
+    mABbuffersrcCtx = nullptr;
+    mABuffersinkCtx = nullptr;
+    mAFilterGraph = nullptr;
 
-    params = nullptr;
+    mParams = nullptr;
 }
 
 int FrameFilter::init(Parameter *params) {
-    width = params->width;
-    height = params->height;
-    inPixelFormat = params->pixelFormat;
-    outPixelFormat = params->outPixelFormat;
-    frameRate = params->frameRate;
-    videoFilter = params->videoFilter;
+    mWidth = params->mWidth;
+    mHeight = params->mHeight;
+    mInPixelFormat = params->mPixelFormat;
+    mOutPixelFormat = params->mOutPixelFormat;
+    mFrameRate = params->mFrameRate;
+    mVideoFilter = params->mVideoFilter;
 
-    inSampleRate = params->sampleRate;
-    inSampleFormat = params->sampleFormat;
-    inChannels = params->channels;
-    outSampleRate = params->outSampleRate;
-    outSampleFormat = params->outSampleFormat;
-    outChannels = params->outChannels;
-    audioFilter = params->audioFilter;
+    mInSampleRate = params->mSampleRate;
+    mInSampleFormat = params->mSampleFormat;
+    mInChannels = params->mChannels;
+    mOutSampleRate = params->mOutSampleRate;
+    mOutSampleFormat = params->mOutSampleFormat;
+    mOutChannels = params->mOutChannels;
+    mAudioFilter = params->mAudioFilter;
 
-    this->params = params;
+    this->mParams = params;
 
     av_register_all();
     avfilter_register_all();
     av_log_set_callback(androidLog);
 
-    if (params->flag & params->FLAG_VIDEO) {
+    if (params->mFlag & params->FLAG_VIDEO) {
         int ret = initVideo();
         if (ret < 0) {
             LOGE("init video failed!");
@@ -143,7 +143,7 @@ int FrameFilter::init(Parameter *params) {
         }
     }
 
-    if (params->flag & params->FLAG_AUDIO) {
+    if (params->mFlag & params->FLAG_AUDIO) {
         int ret = initAudio();
         if (ret < 0) {
             LOGE("init video failed!");
@@ -156,7 +156,7 @@ int FrameFilter::init(Parameter *params) {
 
 int FrameFilter::initVideo() {
     int ret = 0;
-    AVRational timebase = av_inv_q(av_d2q(frameRate, 1000000));
+    AVRational timebase = av_inv_q(av_d2q(mFrameRate, 1000000));
     AVRational ratio = av_d2q(1, 255);
 
     char args[512];
@@ -164,9 +164,9 @@ int FrameFilter::initVideo() {
     AVFilter *buffersink = nullptr;
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs = avfilter_inout_alloc();
-    vfilterGraph = avfilter_graph_alloc();
+    mVFfilterGraph = avfilter_graph_alloc();
 
-    if (!outputs || !inputs || !vfilterGraph) {
+    if (!outputs || !inputs || !mVFfilterGraph) {
         LOGE("Error allocate video filter object");
         goto end;
     }
@@ -182,26 +182,26 @@ int FrameFilter::initVideo() {
     // Buffer video frames, and make them available to the filter chain.
     snprintf(args, sizeof(args),
              "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
-             width, height, inPixelFormat, timebase.num, timebase.den, ratio.num,
+             mWidth, mHeight, mInPixelFormat, timebase.num, timebase.den, ratio.num,
              ratio.den);
 
-    ret = avfilter_graph_create_filter(&vbuffersrcCtx, buffersrc, "in",
-                                       args, nullptr, vfilterGraph);
+    ret = avfilter_graph_create_filter(&mVBuffersrcCtx, buffersrc, "in",
+                                       args, nullptr, mVFfilterGraph);
     if (ret < 0) {
         LOGE("Cannot create video buffer source");
         goto end;
     }
 
-    ret = avfilter_graph_create_filter(&vbuffersinkCtx, buffersink, "out",
-                                       nullptr, nullptr, vfilterGraph);
+    ret = avfilter_graph_create_filter(&mVBuffersinkCtx, buffersink, "out",
+                                       nullptr, nullptr, mVFfilterGraph);
     if (ret < 0) {
         LOGE("Cannot create video buffer sink");
         goto end;
     }
 
     // 用于转换 pixel format
-    ret = av_opt_set_bin(vbuffersinkCtx, "pix_fmts",
-                         (uint8_t *) &outPixelFormat, sizeof(outPixelFormat),
+    ret = av_opt_set_bin(mVBuffersinkCtx, "pix_fmts",
+                         (uint8_t *) &mOutPixelFormat, sizeof(mOutPixelFormat),
                          AV_OPT_SEARCH_CHILDREN);
     if (ret < 0) {
         LOGE("Cannot set output pixel format");
@@ -210,12 +210,12 @@ int FrameFilter::initVideo() {
 
     // Endpoints for the filter graph.
     outputs->name = av_strdup("in");
-    outputs->filter_ctx = vbuffersrcCtx;
+    outputs->filter_ctx = mVBuffersrcCtx;
     outputs->pad_idx = 0;
     outputs->next = nullptr;
 
     inputs->name = av_strdup("out");
-    inputs->filter_ctx = vbuffersinkCtx;
+    inputs->filter_ctx = mVBuffersinkCtx;
     inputs->pad_idx = 0;
     inputs->next = nullptr;
 
@@ -224,11 +224,11 @@ int FrameFilter::initVideo() {
         goto end;
     }
 
-    if ((ret = avfilter_graph_parse_ptr(vfilterGraph, videoFilter,
+    if ((ret = avfilter_graph_parse_ptr(mVFfilterGraph, mVideoFilter,
                                         &inputs, &outputs, nullptr)) < 0)
         goto end;
 
-    if ((ret = avfilter_graph_config(vfilterGraph, nullptr)) < 0)
+    if ((ret = avfilter_graph_config(mVFfilterGraph, nullptr)) < 0)
         goto end;
 
     end:
@@ -240,17 +240,17 @@ int FrameFilter::initVideo() {
 
 int FrameFilter::initAudio() {
     int ret = 0;
-    AVRational timebase = av_inv_q(av_d2q(inSampleRate, 1000000));
+    AVRational timebase = av_inv_q(av_d2q(mInSampleRate, 1000000));
 
     char args[512];
     AVFilter *buffersrc = nullptr;
     AVFilter *buffersink = nullptr;
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs = avfilter_inout_alloc();
-    afilterGraph = avfilter_graph_alloc();
-    int64_t outChannelLayout = av_get_default_channel_layout(outChannels);
+    mAFilterGraph = avfilter_graph_alloc();
+    int64_t outChannelLayout = av_get_default_channel_layout(mOutChannels);
 
-    if (!outputs || !inputs || !afilterGraph) {
+    if (!outputs || !inputs || !mAFilterGraph) {
         LOGE("Error allocate audio filter object");
         goto end;
     }
@@ -266,27 +266,27 @@ int FrameFilter::initAudio() {
     // Buffer video frames, and make them available to the filter chain.
     snprintf(args, sizeof(args),
              "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=%lld",
-             timebase.num, timebase.den, inSampleRate, av_get_sample_fmt_name(inSampleFormat),
-             av_get_default_channel_layout(inChannels));
+             timebase.num, timebase.den, mInSampleRate, av_get_sample_fmt_name(mInSampleFormat),
+             av_get_default_channel_layout(mInChannels));
 
-    ret = avfilter_graph_create_filter(&abuffersrcCtx, buffersrc, "in",
-                                       args, nullptr, afilterGraph);
+    ret = avfilter_graph_create_filter(&mABbuffersrcCtx, buffersrc, "in",
+                                       args, nullptr, mAFilterGraph);
     if (ret < 0) {
         LOGE("Cannot create audio buffer source");
         goto end;
     }
 
-    ret = avfilter_graph_create_filter(&abuffersinkCtx, buffersink, "out",
-                                       nullptr, nullptr, afilterGraph);
+    ret = avfilter_graph_create_filter(&mABuffersinkCtx, buffersink, "out",
+                                       nullptr, nullptr, mAFilterGraph);
     if (ret < 0) {
         LOGE("Cannot create audio buffer sink");
         goto end;
     }
 
     // 转换属性
-    if (outSampleFormat != AV_SAMPLE_FMT_NONE) {
-        ret = av_opt_set_bin(abuffersinkCtx, "sample_fmts", (uint8_t *) &outSampleFormat,
-                             sizeof(outSampleFormat),
+    if (mOutSampleFormat != AV_SAMPLE_FMT_NONE) {
+        ret = av_opt_set_bin(mABuffersinkCtx, "sample_fmts", (uint8_t *) &mOutSampleFormat,
+                             sizeof(mOutSampleFormat),
                              AV_OPT_SEARCH_CHILDREN);
         if (ret < 0) {
             LOGE("Cannot set output sample format");
@@ -294,15 +294,15 @@ int FrameFilter::initAudio() {
         }
     }
 
-    ret = av_opt_set_bin(abuffersinkCtx, "channel_layouts", (uint8_t *) &outChannelLayout,
+    ret = av_opt_set_bin(mABuffersinkCtx, "channel_layouts", (uint8_t *) &outChannelLayout,
                          sizeof(outChannelLayout), AV_OPT_SEARCH_CHILDREN);
     if (ret < 0) {
         LOGE("Cannot set output channel layout");
         goto end;
     }
 
-    ret = av_opt_set_bin(abuffersinkCtx, "sample_rates", (uint8_t *) &outSampleRate,
-                         sizeof(outSampleRate), AV_OPT_SEARCH_CHILDREN);
+    ret = av_opt_set_bin(mABuffersinkCtx, "sample_rates", (uint8_t *) &mOutSampleRate,
+                         sizeof(mOutSampleRate), AV_OPT_SEARCH_CHILDREN);
     if (ret < 0) {
         LOGE("Cannot set output sample rate");
         goto end;
@@ -310,12 +310,12 @@ int FrameFilter::initAudio() {
 
     // Endpoints for the filter graph.
     outputs->name = av_strdup("in");
-    outputs->filter_ctx = abuffersrcCtx;
+    outputs->filter_ctx = mABbuffersrcCtx;
     outputs->pad_idx = 0;
     outputs->next = nullptr;
 
     inputs->name = av_strdup("out");
-    inputs->filter_ctx = abuffersinkCtx;
+    inputs->filter_ctx = mABuffersinkCtx;
     inputs->pad_idx = 0;
     inputs->next = nullptr;
 
@@ -324,11 +324,11 @@ int FrameFilter::initAudio() {
         goto end;
     }
 
-    if ((ret = avfilter_graph_parse_ptr(afilterGraph, audioFilter,
+    if ((ret = avfilter_graph_parse_ptr(mAFilterGraph, mAudioFilter,
                                         &inputs, &outputs, nullptr)) < 0)
         goto end;
 
-    if ((ret = avfilter_graph_config(afilterGraph, nullptr)) < 0)
+    if ((ret = avfilter_graph_config(mAFilterGraph, nullptr)) < 0)
         goto end;
 
     end:
@@ -350,7 +350,7 @@ int FrameFilter::process(AVModel *model) {
 }
 
 int FrameFilter::processImage(AVModel *model) {
-    if (!(params->flag & params->FLAG_VIDEO)) {
+    if (!(mParams->mFlag & mParams->FLAG_VIDEO)) {
         LOGE("audio filter doest not init!");
         return FAILED;
     }
@@ -362,17 +362,17 @@ int FrameFilter::processImage(AVModel *model) {
         return FAILED;
     }
 
-    ret = av_image_fill_arrays(srcFrame->data, srcFrame->linesize, model->image, inPixelFormat,
-                               width, height, 1);
+    ret = av_image_fill_arrays(srcFrame->data, srcFrame->linesize, model->image, mInPixelFormat,
+                               mWidth, mHeight, 1);
     if (ret < 0) {
         LOGE("av_image_fill_arrays error: %s", av_err2str(ret));
         return ret;
     }
-    srcFrame->width = width;
-    srcFrame->height = height;
-    srcFrame->format = inPixelFormat;
+    srcFrame->width = mWidth;
+    srcFrame->height = mHeight;
+    srcFrame->format = mInPixelFormat;
 
-    ret = av_buffersrc_add_frame_flags(vbuffersrcCtx, srcFrame, 0);
+    ret = av_buffersrc_add_frame_flags(mVBuffersrcCtx, srcFrame, 0);
     if (ret < 0) {
         LOGE("Error while feeding the video filtergraph: %s", av_err2str(ret));
         av_frame_free(&srcFrame);
@@ -386,7 +386,7 @@ int FrameFilter::processImage(AVModel *model) {
         return FAILED;
     }
 
-    ret = av_buffersink_get_frame(vbuffersinkCtx, filtFrame);
+    ret = av_buffersink_get_frame(mVBuffersinkCtx, filtFrame);
     if (ret < 0) {
         LOGE("Error filt frame: %s", av_err2str(ret));
         av_frame_free(&srcFrame);
@@ -433,7 +433,7 @@ int FrameFilter::processImage(AVModel *model) {
 }
 
 int FrameFilter::processSample(AVModel *model) {
-    if (!(params->flag & params->FLAG_AUDIO)) {
+    if (!(mParams->mFlag & mParams->FLAG_AUDIO)) {
         LOGE("audio filter doest not init!");
         return FAILED;
     }
@@ -445,21 +445,21 @@ int FrameFilter::processSample(AVModel *model) {
         return FAILED;
     }
 
-    ret = av_samples_fill_arrays(srcFrame->data, srcFrame->linesize, model->sample, inChannels,
-                                 DEFAULT_SAMPLE_SIZE, inSampleFormat, 1);
+    ret = av_samples_fill_arrays(srcFrame->data, srcFrame->linesize, model->sample, mInChannels,
+                                 DEFAULT_SAMPLE_SIZE, mInSampleFormat, 1);
     if (ret < 0) {
         LOGE("av_samples_fill_arrays error: %s", av_err2str(ret));
         av_frame_free(&srcFrame);
         return ret;
     }
     // src frame 的参数和 buffersrcCtx 的参数必须相同
-    srcFrame->sample_rate = inSampleRate;
-    srcFrame->channel_layout = (uint64_t) av_get_default_channel_layout(inChannels);
-    srcFrame->channels = inChannels;
-    srcFrame->format = inSampleFormat;
+    srcFrame->sample_rate = mInSampleRate;
+    srcFrame->channel_layout = (uint64_t) av_get_default_channel_layout(mInChannels);
+    srcFrame->channels = mInChannels;
+    srcFrame->format = mInSampleFormat;
     srcFrame->nb_samples = DEFAULT_SAMPLE_SIZE;
 
-    ret = av_buffersrc_add_frame_flags(abuffersrcCtx, srcFrame, 0);
+    ret = av_buffersrc_add_frame_flags(mABbuffersrcCtx, srcFrame, 0);
     if (ret < 0) {
         LOGE("Error while feeding the audio filtergraph: %s", av_err2str(ret));
         av_frame_free(&srcFrame);
@@ -473,7 +473,7 @@ int FrameFilter::processSample(AVModel *model) {
         return FAILED;
     }
 
-    ret = av_buffersink_get_frame(abuffersinkCtx, filtFrame);
+    ret = av_buffersink_get_frame(mABuffersinkCtx, filtFrame);
     if (ret < 0) {
         LOGE("Error filt frame: %s", av_err2str(ret));
         av_frame_free(&srcFrame);
@@ -517,21 +517,21 @@ int FrameFilter::processSample(AVModel *model) {
 }
 
 void FrameFilter::reset() {
-    vbuffersrcCtx = nullptr;
-    vbuffersinkCtx = nullptr;
-    if (vfilterGraph != nullptr) {
-        avfilter_graph_free(&vfilterGraph);
-        vfilterGraph = nullptr;
+    mVBuffersrcCtx = nullptr;
+    mVBuffersinkCtx = nullptr;
+    if (mVFfilterGraph != nullptr) {
+        avfilter_graph_free(&mVFfilterGraph);
+        mVFfilterGraph = nullptr;
     }
-    abuffersrcCtx = nullptr;
-    abuffersinkCtx = nullptr;
-    if (afilterGraph != nullptr) {
-        avfilter_graph_free(&afilterGraph);
-        afilterGraph = nullptr;
+    mABbuffersrcCtx = nullptr;
+    mABuffersinkCtx = nullptr;
+    if (mAFilterGraph != nullptr) {
+        avfilter_graph_free(&mAFilterGraph);
+        mAFilterGraph = nullptr;
     }
-    if (params != nullptr) {
-        delete params;
-        params = nullptr;
+    if (mParams != nullptr) {
+        delete mParams;
+        mParams = nullptr;
     }
 }
 
