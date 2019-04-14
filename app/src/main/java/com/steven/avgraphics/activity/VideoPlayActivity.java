@@ -84,6 +84,10 @@ public class VideoPlayActivity extends BaseActivity {
     }
 
     private void showAVInfo() {
+        if (!mFile.exists()) {
+            ToastHelper.show(R.string.ff_msg_no_file);
+            return;
+        }
         if (mAVInfo != null) {
             double fileSize = (double) mFile.length() / 1024 / 1024;
             int index = String.valueOf(fileSize).lastIndexOf(".");
